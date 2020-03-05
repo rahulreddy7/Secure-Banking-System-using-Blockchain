@@ -10,10 +10,11 @@ import io.sbs.dao.AccountsDAO;
 @RequestMapping(value = "/acc")
 public class AccountsController {
 
-	AccountsDAO account = new AccountsDAO();
+	AccountsDAO accounts = new AccountsDAO();
 	
-	@RequestMapping(value = "/alldata/", method = RequestMethod.GET)
-	public String getname() {
-		return account.getAll();
+	@RequestMapping(value = "/alldata", method = RequestMethod.GET)
+	public String getAll() {
+		System.out.println("Listing sample data");
+		return accounts.getdata();
 	}
 }

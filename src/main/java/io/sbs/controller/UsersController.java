@@ -12,7 +12,7 @@ public class UsersController {
 	
 	UsersDAO users = new UsersDAO();
 	
-	@RequestMapping(value = "/alldata/", method = RequestMethod.GET)
+	@RequestMapping(value = "/getdata", method = RequestMethod.GET)
 	public String getname() {
 		return users.getAll();
 	}
