@@ -11,10 +11,11 @@ Instance type: t2.micro
 Private IPs: 172.31.42.7
 Private DNS: ip-172-31-42-7.us-east-2.compute.internal
 
-To connect, use the following SSH:
-ssh -i soft-sec.pem ubuntu@18.222.64.16 //soft-sec.pem file is in the codebe home directory
+To SSH INTO AWS:
+ssh -i soft-sec.pem ubuntu@18.222.64.16 
+//soft-sec.pem file is in the codebe home directory
 
-To directly log into the mongodb instance running on AWS:
+To directly log into the MONGODB instance running on AWS:
 mongo -u admin -p myadminpassword 18.222.64.16/admin
 
 To run java code:
