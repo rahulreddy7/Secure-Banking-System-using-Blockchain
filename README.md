@@ -29,12 +29,12 @@ Test sample APIs:
 Response should be status 200.
 
 MongoDB Structure:
-> show dbs
+$ show dbs
 admin   0.000GB
 config  0.000GB
 local   0.000GB
 mydb    0.000GB
-> use mydb
+$ use mydb
 switched to db mydb
-> db.getCollectionNames()
+$ db.getCollectionNames()
 [ "Accounts", "Transactions", "Users", "employee", "workflow" ]
