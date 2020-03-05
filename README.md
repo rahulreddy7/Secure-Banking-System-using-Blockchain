@@ -22,3 +22,19 @@ To run java code:
 1) Clone the repo
 2) Import project into eclipse as "Existing Maven Projects"
 3) Right click to "Run As" -> Spring Boot App/Java Application
+
+Test sample APIs:
+1) GET API - URL: localhost:8081/acc/alldata
+2) GET API - URL: localhost:8081/users/getdata
+Response should be status 200.
+
+MongoDB Structure:
+> show dbs
+admin   0.000GB
+config  0.000GB
+local   0.000GB
+mydb    0.000GB
+> use mydb
+switched to db mydb
+> db.getCollectionNames()
+[ "Accounts", "Transactions", "Users", "employee", "workflow" ]
