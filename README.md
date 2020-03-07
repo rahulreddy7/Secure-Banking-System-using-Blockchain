@@ -12,6 +12,7 @@ Private IPs: 172.31.42.7
 Private DNS: ip-172-31-42-7.us-east-2.compute.internal
 
 To SSH INTO AWS:
+chmod 400 soft-sec.pem
 ssh -i soft-sec.pem ubuntu@18.222.64.16 
 //soft-sec.pem file is in the codebe home directory
 
