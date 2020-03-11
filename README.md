@@ -3,21 +3,21 @@
 spring boot application
 
 Amazon EC2 Instance: 
-Instance ID: i-0f70444a54c1fee3b
-Public DNS (IPv4): ec2-18-222-64-16.us-east-2.compute.amazonaws.com
-Instance state: running
-IPv4 Public IP: 18.222.64.16
-Instance type: t2.micro
-Private IPs: 172.31.42.7
-Private DNS: ip-172-31-42-7.us-east-2.compute.internal
+Instance ID: i-0f70444a54c1fee3b <br />
+Public DNS (IPv4): ec2-18-222-64-16.us-east-2.compute.amazonaws.com <br />
+Instance state: running <br />
+IPv4 Public IP: 18.222.64.16 <br />
+Instance type: t2.micro <br />
+Private IPs: 172.31.42.7 <br />
+Private DNS: ip-172-31-42-7.us-east-2.compute.internal <br />
 
-To SSH INTO AWS:
-chmod 400 soft-sec.pem
-ssh -i soft-sec.pem ubuntu@18.222.64.16 
-//soft-sec.pem file is in the codebe home directory
+To SSH INTO AWS:<br />
+chmod 400 soft-sec.pem<br />
+ssh -i soft-sec.pem ubuntu@18.222.64.16 <br />
+//soft-sec.pem file is in the codebe home directory<br />
 
-To directly log into the MONGODB instance running on AWS:
-mongo -u admin -p myadminpassword 18.222.64.16/admin
+To directly log into the MONGODB instance running on AWS:<br />
+mongo -u admin -p myadminpassword 18.222.64.16/admin<br />
 
 To run java code:
 1) Clone the repo
