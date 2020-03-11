@@ -2,7 +2,7 @@
 
 spring boot application
 
-Amazon EWS Instance: 
+Amazon EC2 Instance: 
 Instance ID: i-0f70444a54c1fee3b
 Public DNS (IPv4): ec2-18-222-64-16.us-east-2.compute.amazonaws.com
 Instance state: running
