@@ -1,5 +1,5 @@
 package io.sbs.model;
 
-public class Users {
+public class User {
 
 }
