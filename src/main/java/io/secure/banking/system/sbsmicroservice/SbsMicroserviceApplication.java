@@ -14,7 +14,6 @@ import org.springframework.data.mongodb.repository.config.EnableMongoRepositorie
 public class SbsMicroserviceApplication {
 
 	public static void main(String[] args) {
-		System.out.println("version: " + SpringVersion.getVersion());
 		SpringApplication.run(SbsMicroserviceApplication.class, args);
 	}
 
