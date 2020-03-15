@@ -1,0 +1,56 @@
+db.user.insert(
+   {
+      name: "Dev Sharma", 
+      userid: "dev204",
+      email: "devanshs212@gmail.com",
+      role: "customer",
+      type: "savings",
+      phone: 4805129624
+   }
+)
+
+db.user.insert(
+   {
+      name: "John Oliver", 
+      userid: "joliver91",
+      email: "jolholiver@gmail.com",
+      role: "customer",
+      phone: 4128972674
+   }
+)
+
+db.user.find(ObjectId("5e6d68785d00c14c90d8a5f7"))
+
+db.account.insert([
+{
+	userid: "dev204",
+	balance: 12020,
+	type: "savings"
+},
+{
+	userid: "dev204",
+	balance: 400,
+	type: "checking"
+}])
+
+db.account.insert([
+{
+	userid: "joliver91",
+	balance: 728121,
+	type: "savings"
+},
+{
+	userid: "joliver91",
+	balance: 12002,
+	type: "checking"
+}])
+
+db.user.update({'name':'John Oliver'},{$set:{'address':'331 Bev Hills CA'}})
+db.user.update({'name':'Dev Sharma'},{$set:{'address':'123 ASU AZ'}})
+
+db.account.update({'userid':'dev204', 'type': 'savings'},{$set:{'account_num':'82738967'}})
+db.account.update({'userid':'dev204', 'type': 'checking'},{$set:{'account_num':'82738967'}})
+
+db.account.update({'userid':'joliver91', 'type': 'savings'},{$set:{'account_num':'82738967'}})
+db.account.update({'userid':'joliver91', 'type': 'checking'},{$set:{'account_num':'82738967'}})
+
