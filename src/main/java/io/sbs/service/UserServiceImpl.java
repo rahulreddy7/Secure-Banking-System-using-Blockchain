@@ -1,25 +1,26 @@
 package io.sbs.service;
 
 import static com.mongodb.client.model.Filters.eq;
+import io.sbs.model.Account;
+import io.sbs.model.User;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import org.bson.Document;
+import org.springframework.stereotype.Service;
 
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoClients;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 
-import io.sbs.model.Account;
-import io.sbs.model.User;
 
-
+@Service
 public class UserServiceImpl implements UserService {
 	
-	MongoClient mongoClient = MongoClients.create("mongodb://admin:myadminpassword@18.222.64.16:27017");
-	MongoDatabase database = mongoClient.getDatabase("mydb");
+	final MongoClient mongoClient = MongoClients.create("mongodb://admin:myadminpassword@18.222.64.16:27017");
+	final MongoDatabase database = mongoClient.getDatabase("mydb");
 	
 	@Override
 	public List<Account> getUserAccountDetails(String userid) {
