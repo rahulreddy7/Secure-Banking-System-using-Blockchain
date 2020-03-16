@@ -39,3 +39,10 @@ mydb    0.000GB
 switched to db mydb
 3) $ db.getCollectionNames()
 [ "Accounts", "Transactions", "Users", "employee", "workflow" ]
+
+
+
+
+Work distibution:
+Branch- nchen19-patch-1 
+Authors : Nanqiao Chen, Anay Paul
