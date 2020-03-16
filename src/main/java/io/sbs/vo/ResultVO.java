@@ -6,6 +6,7 @@ import java.io.Serializable;
 
 /**
  * @date 2020-03-16
+ * Author : Nanqiao Chen ,Anay Paul
  */
 public class ResultVO<T> implements Serializable {
 
