@@ -65,27 +65,23 @@ public class UserServiceImpl implements UserService {
 		user.setAddress(myDoc.get("address").toString());
 		return user;
 	}
-
+	/*Author : Nanqiao Chen, Anay Paul*/
 	@Override
 	public void register(UserDTO userDTO) {
-
 		mongoTemplate.save(userDTO, "user");
 	}
 
+	/*Author : Nanqiao Chen, Anay Paul*/
 	@Override
 	public UserDTO login(UserDTO userDTO) {
-
 		Query query = new Query(Criteria.where("username"));
 		UserDTO dto = mongoTemplate.findOne(Query.query(Criteria.where("username").is(userDTO.getUsername())), UserDTO.class, "user");
 		if (dto == null) {
 			throw new BusinessException("the account doesn't register！");
 		}
-
 		if (!dto.getPassword().equals(userDTO.getPassword())) {
 			throw new BusinessException("password is wrong！");
 		}
-
-
 		userDTO.setPassword(null);
 		return userDTO;
 	}
