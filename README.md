@@ -43,6 +43,6 @@ switched to db mydb
 
 
 
-Work distibution:
-Branch- nchen19-patch-1 
-Authors : Nanqiao Chen, Anay Paul
+Work distibution:<br />
+Branch- nchen19-patch-1 <br />
+Authors : Nanqiao Chen, Anay Paul<br />
