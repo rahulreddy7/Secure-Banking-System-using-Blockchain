@@ -26,7 +26,7 @@
 				<exclusion>
 					<artifactId>logback-classic</artifactId>
 					<groupId>ch.qos.logback</groupId>
-				</exclusion>
+		   		</exclusion>
 				<exclusion>
 					<artifactId>spring-boot-starter-logging</artifactId>
 					<groupId>org.springframework.boot</groupId>

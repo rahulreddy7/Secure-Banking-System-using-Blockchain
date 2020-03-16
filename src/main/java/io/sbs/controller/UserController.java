@@ -1,25 +1,25 @@
 package io.sbs.controller;
 
-import java.util.ArrayList;
-import java.util.List;
-
+import io.sbs.dto.UserDTO;
+import io.sbs.model.Account;
+import io.sbs.model.User;
+import io.sbs.service.UserService;
+import io.sbs.vo.ResultVO;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
-import io.sbs.model.Account;
-import io.sbs.model.User;
-import io.sbs.service.UserServiceImpl;
+import java.util.ArrayList;
+import java.util.List;
 
 @RestController
 @RequestMapping(value = "/users")
 public class UserController {
-	
-	UserServiceImpl userService = new UserServiceImpl();
+
+	@Autowired
+	private UserService userService;
 
 	@RequestMapping(value = "/homePageDetails", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<?> getAccountDetails(@RequestParam(name="userid", defaultValue = "joliver91") String userid) {
@@ -48,6 +48,18 @@ public class UserController {
 		} catch (Exception e) {
 			return new ResponseEntity<>(e.toString(), HttpStatus.BAD_REQUEST);
 		}
+	}
+
+	@PostMapping("register")
+	public ResultVO register(@RequestBody UserDTO userDTO) {
+		userService.register(userDTO);
+		return ResultVO.createSuccess();
+	}
+
+	@PostMapping("login")
+	public ResultVO login(@RequestBody UserDTO userDTO) {
+		UserDTO userdto = userService.login(userDTO);
+		return ResultVO.createSuccess(userdto);
 	}
 
 }

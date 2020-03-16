@@ -1,25 +1,36 @@
 package io.sbs.service;
 
-import static com.mongodb.client.model.Filters.eq;
-
-import java.util.ArrayList;
-import java.util.List;
-
-import org.bson.Document;
-
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoClients;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
-
+import io.sbs.dto.UserDTO;
+import io.sbs.exception.BusinessException;
 import io.sbs.model.Account;
 import io.sbs.model.User;
+import org.bson.Document;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
+import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.data.mongodb.core.query.Query;
+import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+import java.util.List;
 
+import static com.mongodb.client.model.Filters.eq;
+
+@Service
 public class UserServiceImpl implements UserService {
 	
 	MongoClient mongoClient = MongoClients.create("mongodb://admin:myadminpassword@18.222.64.16:27017");
 	MongoDatabase database = mongoClient.getDatabase("mydb");
+
+	@Autowired
+	private MongoTemplate mongoTemplate;
+
+	private static ApplicationContext applicationContext;
 	
 	@Override
 	public List<Account> getUserAccountDetails(String userid) {
@@ -53,6 +64,30 @@ public class UserServiceImpl implements UserService {
 		user.setEmailString(myDoc.get("email").toString());
 		user.setAddress(myDoc.get("address").toString());
 		return user;
+	}
+
+	@Override
+	public void register(UserDTO userDTO) {
+
+		mongoTemplate.save(userDTO, "user");
+	}
+
+	@Override
+	public UserDTO login(UserDTO userDTO) {
+
+		Query query = new Query(Criteria.where("username"));
+		UserDTO dto = mongoTemplate.findOne(Query.query(Criteria.where("username").is(userDTO.getUsername())), UserDTO.class, "user");
+		if (dto == null) {
+			throw new BusinessException("the account doesn't register！");
+		}
+
+		if (!dto.getPassword().equals(userDTO.getPassword())) {
+			throw new BusinessException("password is wrong！");
+		}
+
+
+		userDTO.setPassword(null);
+		return userDTO;
 	}
 
 }
