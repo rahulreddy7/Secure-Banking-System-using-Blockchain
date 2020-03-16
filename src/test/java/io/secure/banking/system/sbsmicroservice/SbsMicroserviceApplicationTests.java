@@ -8,6 +8,7 @@ class SbsMicroserviceApplicationTests {
 
 	@Test
 	void contextLoads() {
+
 	}
 
 }
