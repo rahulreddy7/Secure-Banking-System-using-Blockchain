@@ -5,6 +5,14 @@ import io.sbs.model.Account;
 import io.sbs.model.User;
 import io.sbs.service.UserService;
 import io.sbs.vo.ResultVO;
+
+import io.sbs.exception.RecordNotFoundException;
+import io.sbs.model.Account;
+import io.sbs.model.User;
+import io.sbs.repository.UserRepository;
+import io.sbs.service.UserServiceImpl;
+
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -13,6 +21,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
 import java.util.List;
+
 
 @RestController
 @RequestMapping(value = "/users")
@@ -50,6 +59,7 @@ public class UserController {
 		}
 	}
 
+
 	@PostMapping("register")
 	public ResultVO register(@RequestBody UserDTO userDTO) {
 		userService.register(userDTO);
@@ -61,5 +71,20 @@ public class UserController {
 		UserDTO userdto = userService.login(userDTO);
 		return ResultVO.createSuccess(userdto);
 	}
+
+
+	// @Autowired
+	// UserRepository userRepository;
+
+	// UsersRepository users = new UsersRepository();
+	//
+	// @RequestMapping(value = "/getdata", method = RequestMethod.GET)
+	// public User getname() {
+	// 	// Test exception
+	// 	// return "TEst";
+	// 	// TESTING Sample code
+	// 	return userRepository.findById("testid").orElseThrow(
+	// 			() -> new RecordNotFoundException("Employee id does no exist"));
+	// }
 
 }
