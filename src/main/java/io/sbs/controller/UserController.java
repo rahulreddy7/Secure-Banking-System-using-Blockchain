@@ -61,11 +61,36 @@ public class UserController {
 
 
 	@PostMapping("register")
+	/*
+	 * Sample payload
+	 * 			{
+  				"uid":"testuserid",
+  				"username":"johnm",
+  				"password":"doe",
+  				"sex":1,
+  				"name":"testname"
+				}
+	 * 
+	 *
+	 * Function registers the user and saves into user collection
+	 * 
+	 * **/
 	public ResultVO register(@RequestBody UserDTO userDTO) {
 		userService.register(userDTO);
 		return ResultVO.createSuccess();
 	}
 
+	/*
+	 * Sample payload
+	 * 			{
+  				"username":"johnm",
+  				"password":"doe",
+				}
+	 * 
+	 *
+	 * Function registers the user and saves into user collection
+	 * 
+	 * **/
 	@PostMapping("login")
 	public ResultVO login(@RequestBody UserDTO userDTO) {
 		UserDTO userdto = userService.login(userDTO);
