@@ -75,9 +75,10 @@ public class UserController {
 	 * Function registers the user and saves into user collection
 	 * 
 	 * **/
+	@ResponseStatus(HttpStatus.CREATED)
 	public ResultVO register(@RequestBody UserDTO userDTO) {
 		userService.register(userDTO);
-		return ResultVO.createSuccess();
+		return ResultVO.createSuccess(userDTO);
 	}
 
 	/*
