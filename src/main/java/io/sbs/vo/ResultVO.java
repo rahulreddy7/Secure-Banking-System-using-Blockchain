@@ -40,7 +40,10 @@ public class ResultVO<T> implements Serializable {
     public static ResultVO createError(String msg) {
         return new ResultVO(null, ResultStatus.ERROR.getCode(), msg);
     }
-
+    
+    public static <T> ResultVO createMsg(T data){
+    	return new ResultVO(data, ResultStatus.AlreadyLoggedIn.getCode(), ResultStatus.AlreadyLoggedIn.getMsg());
+    }
     public T getData() {
         return data;
     }
