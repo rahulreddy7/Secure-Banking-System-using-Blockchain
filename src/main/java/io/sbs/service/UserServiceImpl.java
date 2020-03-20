@@ -83,6 +83,8 @@ public class UserServiceImpl implements UserService {
 		mongoTemplate.save(userDTO, "user");
 		AuthenticationProfileDTO authenticationProfileDTO = new AuthenticationProfileDTO();
 		authenticationProfileDTO.setPassword(hashedPassword);
+		authenticationProfileDTO.setUid(userDTO.getUid());
+		authenticationProfileDTO.setUsername(userDTO.getUsername());
 		mongoTemplate.save(authenticationProfileDTO, "authenticationProfile");
 	}
 
