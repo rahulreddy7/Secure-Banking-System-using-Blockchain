@@ -16,5 +16,5 @@ public interface UserService {
 
 	UserDTO login(UserDTO userDTO);
 	
-	public UserDTO updateDetails(String userId, UserDTO user);
+	public UserDTO updateDetails( UserDTO user);
 }

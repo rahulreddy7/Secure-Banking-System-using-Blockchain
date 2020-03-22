@@ -1,5 +1,6 @@
 package io.sbs.controller;
 
+
 import io.sbs.dto.UserDTO;
 import io.sbs.model.Account;
 import io.sbs.model.User;
@@ -7,8 +8,6 @@ import io.sbs.service.UserService;
 import io.sbs.vo.ResultVO;
 
 import io.sbs.exception.RecordNotFoundException;
-import io.sbs.model.Account;
-import io.sbs.model.User;
 import io.sbs.repository.UserRepository;
 import io.sbs.service.UserServiceImpl;
 
@@ -29,12 +28,14 @@ public class UserController {
 
 	@Autowired
 	private UserService userService;
+	
+	
 
 	@RequestMapping(value = "/homePageDetails", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
-	public ResponseEntity<?> getAccountDetails(@RequestParam(name="userid", defaultValue = "joliver91") String userid) {
+	public ResponseEntity<?> getAccountDetails(@RequestParam(name="userid", defaultValue = "joliver91") String username) {
 		try {
 			List<Account> acc_list = new ArrayList<Account>();
-			acc_list = userService.getUserAccountDetails(userid);
+			acc_list = userService.getUserAccountDetails(username);
 			if (acc_list.size() > 0) 
 				return new ResponseEntity<>(acc_list, HttpStatus.OK);
 			else
@@ -47,11 +48,11 @@ public class UserController {
 	}
 	
 	@RequestMapping(value = "/getUserInfo", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
-	public ResponseEntity<?> getUserDetails(@RequestParam(name="userid", defaultValue = "joliver91") String userid) {
+	public ResponseEntity<?> getUserDetails(@RequestParam(name="username", defaultValue = "joliver91") String username) {
 
 		try {
 			User user = new User();
-			user = userService.getUserInfo(userid);
+			user = userService.getUserInfo(username);
 			return new ResponseEntity<>(user, HttpStatus.OK);
 
 		} catch (Exception e) {
@@ -97,13 +98,31 @@ public class UserController {
 		UserDTO userdto = userService.login(userDTO);
 		return ResultVO.createSuccess(userdto);
 	}
-
 	
-	@PostMapping("updateDetails/{userId}")
-	public ResultVO updateDetails(@PathVariable String userId, @RequestBody UserDTO userDTO) {
-		UserDTO userObj = userService.updateDetails(userId, userDTO);
+	/*
+	 * Sample payload
+	 * 			{
+  				"username":"johnm",
+  				"address":"doe",
+  				"email":"doe11@gmail.com"
+				}
+	 * 
+	 *
+	 * Function registers the user and saves into user collection
+	 * 
+	 * **/
+	
+	@PostMapping("updateDetails")
+	public ResultVO updateDetails( @RequestBody UserDTO userDTO) {
+		UserDTO userObj = userService.updateDetails(userDTO);
 		return ResultVO.createSuccess(userObj);
 	}
+	
+//	@PostMapping("appt")
+//	public ResultVO addAppointments(@RequestBody AppointmentDTO appointmentDTO) {
+//		AppointmentDTO appointmentdto = appointmentService.createAppointments(appointmentDTO);
+//		return ResultVO.createSuccess(appointmentdto);
+//	}
 
 	// @Autowired
 	// UserRepository userRepository;

@@ -63,9 +63,9 @@ public class UserServiceImpl implements UserService {
 	}
 
 	@Override
-	public User getUserInfo(String userid) {
+	public User getUserInfo(String username) {
 		MongoCollection<Document> collection = database.getCollection("user");
-		Document myDoc = collection.find(eq("userid", userid)).first();
+		Document myDoc = collection.find(eq("username", username)).first();
 		User user = new User();
 		user.setName(myDoc.get("name").toString());
 		user.setEmailString(myDoc.get("email").toString());
@@ -75,7 +75,7 @@ public class UserServiceImpl implements UserService {
 	
 	@Override
 	public void register(UserDTO userDTO) {
-		UserDTO dto = mongoTemplate.findOne(Query.query(Criteria.where("uid").is(userDTO.getUid())), UserDTO.class, "user");
+		UserDTO dto = mongoTemplate.findOne(Query.query(Criteria.where("username").is(userDTO.getUsername())), UserDTO.class, "user");
 		if (dto != null) {
 			throw new ValidationException("the user already exists");
 		}
@@ -85,7 +85,6 @@ public class UserServiceImpl implements UserService {
 		mongoTemplate.save(userDTO, "user");
 		AuthenticationProfileDTO authenticationProfileDTO = new AuthenticationProfileDTO();
 		authenticationProfileDTO.setPassword(hashedPassword);
-		authenticationProfileDTO.setUid(userDTO.getUid());
 		authenticationProfileDTO.setUsername(userDTO.getUsername());
 		mongoTemplate.save(authenticationProfileDTO, "authenticationProfile");
 	}
@@ -102,7 +101,8 @@ public class UserServiceImpl implements UserService {
 			throw new BusinessException("password is wrong！");
 		}
 //		EmailService es = new EmailService();
-//		if(!es.send_mail(dto.getEmailString())) {
+//		String subject = "One Time Password (OTP) for Login"
+//		if(!es.send_mail(dto.getEmailString(), dto.getUsername(), subject)) {
 //			throw new BusinessException("Error in sending the email！");
 //		}
 		dto.setPassword(null);
@@ -110,17 +110,17 @@ public class UserServiceImpl implements UserService {
 	}
 	
 	@Override
-	public UserDTO updateDetails(String userId, UserDTO user) {
+	public UserDTO updateDetails( UserDTO user) {
 
 		Update update = new Update();
 		if(user.getAddress()!=null) {
 			update.set("address", user.getAddress());
 		}
-		if(user.getEmailString()!=null) {
-			update.set("emailString", user.getEmailString());
+		if(user.getEmail()!=null) {
+			update.set("email", user.getEmail());
 		}
 		
-		UpdateResult userObj = mongoTemplate.updateFirst(Query.query(Criteria.where("_id").is(userId)), update, User.class, "user");
+		UpdateResult userObj = mongoTemplate.updateFirst(Query.query(Criteria.where("username").is(user.getUsername())), update, User.class, "user");
 		if (userObj == null) {
 			throw new BusinessException("cannot be updated！");
 		}
