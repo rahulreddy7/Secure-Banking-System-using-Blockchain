@@ -1,0 +1,47 @@
+1) localhost:8081/users/getUserInfo/?userid=dev204 
+- GET API
+- returns details of the user
+- expected output: 
+{
+    "name": "Dev Sharma",
+    "emailString": "devanshs212@gmail.com",
+    "address": "123 ASU AZ",
+    "username": null,
+    "password": null
+}
+
+2) localhost:8081/users/homePageDetails?userid=dev204 
+- GET API
+- return details for home page
+- expected output: 
+[
+    {
+        "acc_type": "savings",
+        "acc_holder_name": "Dev Sharma",
+        "acc_balance": 12020.0,
+        "user_id": "dev204",
+        "account_number": 8.2738967E7
+    },
+    {
+        "acc_type": "checking",
+        "acc_holder_name": "Dev Sharma",
+        "acc_balance": 400.0,
+        "user_id": "dev204",
+        "account_number": 8.2738967E7
+    }
+]
+
+3) localhost:8081/users/otp_check - POST API
+Body:
+{
+	"userID":"dev204",
+	"otp": "160029"
+}
+- verifies the OTP from database
+- expected output:
+OTP Verification Successful!
+
+4) localhost:8081/users/forgotPass?userid=dev204 - GET API
+- sends OTP to email of the user
+- expected output: 
+OTP Successfully sent!
