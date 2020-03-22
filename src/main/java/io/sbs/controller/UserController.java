@@ -126,7 +126,8 @@ public class UserController {
 		} catch (Exception e) {
 			return new ResponseEntity<>(e.toString(), HttpStatus.BAD_REQUEST);
 		}
-		
+	}
+
 	@GetMapping("logout")
 	public  ResultVO logout(HttpServletRequest request) {
 		String token = request.getHeader(SecurityConstants.HEADER_STRING);
