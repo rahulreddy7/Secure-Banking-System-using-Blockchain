@@ -22,7 +22,6 @@ public class JWTAuthorizationFilter extends
 	
 	public JWTAuthorizationFilter(AuthenticationManager authenticationManager) {
 		super(authenticationManager);
-		// TODO Auto-generated constructor stub
 	}
 	
 

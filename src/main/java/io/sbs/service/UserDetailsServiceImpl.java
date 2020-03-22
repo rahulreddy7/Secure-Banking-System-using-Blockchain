@@ -3,6 +3,9 @@ package io.sbs.service;
 import io.sbs.dto.UserDTO;
 //import io.sbs.model.User;
 
+import io.sbs.model.ApplicationUser;
+import io.sbs.repository.ApplicationUserRepository;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
@@ -21,12 +24,8 @@ import static java.util.Collections.emptyList;
 
 @Service
 public class UserDetailsServiceImpl implements UserDetailsService {
-	// private ApplicationUserRepository applicationUserRepository;
-
-	// public UserDetailsServiceImpl(ApplicationUserRepository
-	// applicationUserRepository) {
-	// this.applicationUserRepository = applicationUserRepository;
-	// }
+	@Autowired
+	private ApplicationUserRepository applicationUserRepository;
 
 	final MongoClient mongoClient = MongoClients
 			.create("mongodb://admin:myadminpassword@18.222.64.16:27017");
@@ -39,24 +38,19 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 	public UserDetails loadUserByUsername(String username)
 			throws UsernameNotFoundException {
 		// BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+		//TODO Later Check for mongo repository method
+//		ApplicationUser applicationUser = applicationUserRepository.findByUsername(username);
+//		if (applicationUser == null) {
+//            throw new UsernameNotFoundException(username);
+//        }
+//        return new User(applicationUser.getUsername(), applicationUser.getPassword(), emptyList());
 		Query query = new Query(Criteria.where("username"));
 		UserDTO dto = mongoTemplate.findOne(
 				Query.query(Criteria.where("username").is(username)),
 				UserDTO.class, "user");
 		if (dto == null) {
 			throw new UsernameNotFoundException(username);
-			// throw new BusinessException("the account doesn't register！");
 		}
-		// if (!passwordEncoder.matches(userDTO.getPassword(),
-		// dto.getPassword())) {
-		// throw new BusinessException("password is wrong！");
-		// }
-
-		// ApplicationUser applicationUser = applicationUserRepository
-		// .findByUsername(username);
-		// if (applicationUser == null) {
-		// throw new UsernameNotFoundException(username);
-		// }
 		return new User(dto.getUsername(), dto.getPassword(), emptyList());
 	}
 }

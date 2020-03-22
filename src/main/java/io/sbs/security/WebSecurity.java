@@ -20,7 +20,6 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 @EnableWebSecurity
 public class WebSecurity extends WebSecurityConfigurerAdapter {
 
-	// @Autowired
 	private UserDetailsServiceImpl userDetailsService;
 
 	@Autowired
@@ -28,7 +27,6 @@ public class WebSecurity extends WebSecurityConfigurerAdapter {
 
 	public WebSecurity(UserDetailsServiceImpl userDetailsService) {
 		this.userDetailsService = userDetailsService;
-		//this.bCryptPasswordEncoder = bCryptPasswordEncoder;
 	}
 
 	@Override
@@ -60,15 +58,6 @@ public class WebSecurity extends WebSecurityConfigurerAdapter {
 				.sessionManagement()
 				.sessionCreationPolicy(SessionCreationPolicy.STATELESS);
 	}
-
-	// @Bean
-	// CorsConfigurationSource corsConfigurationSource() {
-	// final UrlBasedCorsConfigurationSource source = new
-	// UrlBasedCorsConfigurationSource();
-	// source.registerCorsConfiguration("/**", new
-	// CorsConfiguration().applyPermitDefaultValues());
-	// return source;
-	// }
 
 	@Bean
 	CorsConfigurationSource corsConfigurationSource() {
