@@ -2,6 +2,9 @@ package io.sbs.service;
 
 import java.util.List;
 
+import javax.mail.MessagingException;
+import javax.mail.internet.AddressException;
+
 import io.sbs.dto.UserDTO;
 import io.sbs.model.Account;
 import io.sbs.model.User;
@@ -15,4 +18,8 @@ public interface UserService {
     void register(UserDTO userDTO);
 
 	UserDTO login(UserDTO userDTO);
+
+	public boolean checkAndMatchOTP(String userid, String otp);
+
+	public boolean forgotPasswordOTP(String userid);
 }
