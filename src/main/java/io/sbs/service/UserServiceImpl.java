@@ -19,6 +19,10 @@ import com.mongodb.client.MongoClients;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 
+import io.sbs.dto.UserDTO;
+import io.sbs.exception.BusinessException;
+import io.sbs.model.Account;
+import io.sbs.model.User;
 import io.sbs.dto.AuthenticationProfileDTO;
 import io.sbs.dto.UserDTO;
 import io.sbs.exception.BusinessException;
@@ -31,6 +35,7 @@ public class UserServiceImpl implements UserService {
 	
 	MongoClient mongoClient = MongoClients.create("mongodb://admin:myadminpassword@18.222.64.16:27017");
 	MongoDatabase database = mongoClient.getDatabase("mydb");
+
 
 	@Autowired
 	private MongoTemplate mongoTemplate;
@@ -103,5 +108,30 @@ public class UserServiceImpl implements UserService {
 	}
 	
 	
+
+	@Override
+	public boolean checkAndMatchOTP(String userid, String otp) {
+		MongoCollection<Document> collection = database.getCollection("loginOTP");
+		Document myDoc = collection.find(eq("userID", userid)).first();
+		String otp_db = myDoc.get("otp").toString();
+		if (otp_db.equals(otp)) {
+			collection.updateOne(eq("userID", userid), new Document("$set", new Document("verified", true)));
+			return true;
+		}
+		return false;
+	}
+
+	@Override
+	public boolean forgotPasswordOTP(String userid) {
+		
+		MongoCollection<Document> collection = database.getCollection("user");
+		Document myDoc = collection.find(eq("userid", userid)).first();
+		String email = myDoc.get("email").toString();
+		if (email.isEmpty()) return false;
+		EmailService es = new EmailService();
+		String subject = "SBS Bank Password Reset OTP";
+		es.send_email(userid, email, subject);
+		return true;
+	}
 
 }

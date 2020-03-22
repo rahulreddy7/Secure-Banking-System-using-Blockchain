@@ -2,6 +2,8 @@ package io.sbs.controller;
 
 import io.sbs.dto.UserDTO;
 import io.sbs.model.Account;
+import io.sbs.model.LoginOTP;
+import io.sbs.model.User;
 import io.sbs.model.ApplicationUser;
 import io.sbs.security.SecurityConstants;
 import io.sbs.service.UserService;
@@ -46,9 +48,7 @@ public class UserController {
 			if (acc_list.size() > 0)
 				return new ResponseEntity<>(acc_list, HttpStatus.OK);
 			else
-				return new ResponseEntity<>("No Records Found!",
-						HttpStatus.NO_CONTENT);
-
+				return new ResponseEntity<>("No Records Found!", HttpStatus.NO_CONTENT);		
 		} catch (Exception e) {
 			return new ResponseEntity<>(e.toString(), HttpStatus.BAD_REQUEST);
 		}
@@ -98,7 +98,35 @@ public class UserController {
 		UserDTO userdto = userService.login(userDTO);
 		return ResultVO.createSuccess(userDTO);
 	}
+	
+	//needs user name, otp to be checked
+	@PostMapping(path= "/otp_check", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+	public ResponseEntity<?> checkOTP(@RequestBody LoginOTP login_otp) {
+		try {
+			boolean otp_match = userService.checkAndMatchOTP(login_otp.getUserid(),login_otp.getOtp());
+			if (otp_match)
+				return new ResponseEntity<>("OTP Verification Successful!", HttpStatus.OK);
+			else
+				return new ResponseEntity<>("OTP Not Verified.", HttpStatus.BAD_REQUEST);
+		} catch (Exception e) {
+			e.printStackTrace();
+			return new ResponseEntity<>(e.toString(), HttpStatus.BAD_REQUEST);
+		}
+	}
+	
+	@RequestMapping(value = "/forgotPass", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+	public ResponseEntity<?> sendOTPEmail(@RequestParam(name="userid", defaultValue = "joliver91") String userid){
+		try {
+			System.out.println(userid);
+			if (userService.forgotPasswordOTP(userid))
+				return new ResponseEntity<>("OTP Successfully sent!", HttpStatus.OK);
+			else
+				return new ResponseEntity<>("Error looking up linked email.", HttpStatus.BAD_REQUEST);
 
+		} catch (Exception e) {
+			return new ResponseEntity<>(e.toString(), HttpStatus.BAD_REQUEST);
+		}
+		
 	@GetMapping("logout")
 	public  ResultVO logout(HttpServletRequest request) {
 		String token = request.getHeader(SecurityConstants.HEADER_STRING);
@@ -108,4 +136,5 @@ public class UserController {
                     .getSubject();
 		return ResultVO.createMsg(user);
 	}
+
 }
