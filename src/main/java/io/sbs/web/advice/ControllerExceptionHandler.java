@@ -5,6 +5,7 @@
 package io.sbs.web.advice;
 
 import io.sbs.exception.BusinessException;
+import io.sbs.exception.ValidationException;
 import io.sbs.vo.ResultVO;
 
 import org.springframework.http.HttpStatus;
@@ -30,6 +31,12 @@ public class ControllerExceptionHandler {
     @ExceptionHandler(Exception.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ResultVO catchException(Exception e) {
+        //logger.error("operation failed：", e);
+        return ResultVO.createError(e.getMessage());
+    }
+    @ExceptionHandler(ValidationException.class)
+    @ResponseStatus(HttpStatus.UNPROCESSABLE_ENTITY)
+    public ResultVO catchValidationException(Exception e) {
         //logger.error("operation failed：", e);
         return ResultVO.createError(e.getMessage());
     }

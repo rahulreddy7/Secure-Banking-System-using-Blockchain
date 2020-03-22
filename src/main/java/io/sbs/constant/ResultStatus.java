@@ -6,7 +6,8 @@ package io.sbs.constant;
  */
 public enum ResultStatus {
 
-    SUCCESS("0000", "oporation success"), ERROR("9999", "oporation failed");
+    SUCCESS("0000", "oporation success"), ERROR("9999", "oporation failed"),
+    LoggedOut("1111","Logged Out");
     private String code;
     private String msg;
 
