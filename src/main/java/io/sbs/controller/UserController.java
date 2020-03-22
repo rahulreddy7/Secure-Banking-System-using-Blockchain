@@ -3,6 +3,7 @@ package io.sbs.controller;
 import io.sbs.dto.UserDTO;
 import io.sbs.model.Account;
 import io.sbs.model.ApplicationUser;
+import io.sbs.security.SecurityConstants;
 import io.sbs.service.LoginService;
 import io.sbs.service.UserService;
 import io.sbs.vo.ResultVO;
@@ -10,6 +11,7 @@ import io.sbs.vo.ResultVO;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,6 +26,10 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+
+import com.auth0.jwt.JWT;
+import com.auth0.jwt.algorithms.Algorithm;
+import com.auth0.jwt.impl.JWTParser;
 
 @RestController
 @RequestMapping(value = "/users")
@@ -98,19 +104,12 @@ public class UserController {
 	}
 
 	@GetMapping("logout")
-	public String logout(HttpSession session) {
-		try {
-			if (session.getAttribute("User") != null
-					&& (session.getAttribute("User") instanceof UserDTO)) {
-				loginService
-						.removeUser(((UserDTO) session.getAttribute("User"))
-								.getUsername());
-				session.setAttribute("User", null);
-				session.invalidate();
-			}
-			return "redirect:/login";
-		} catch (Exception e) {
-			return e.toString();
-		}
+	public  ResultVO logout(HttpServletRequest request) {
+		String token = request.getHeader(SecurityConstants.HEADER_STRING);
+        String  user = JWT.require(Algorithm.HMAC512(SecurityConstants.SECRET.getBytes()))
+                    .build()
+                    .verify(token.replace(SecurityConstants.TOKEN_PREFIX, ""))
+                    .getSubject();
+		return ResultVO.createMsg(user);
 	}
 }
