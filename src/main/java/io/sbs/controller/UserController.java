@@ -41,7 +41,7 @@ public class UserController {
 
 	@RequestMapping(value = "/homePageDetails", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<?> getAccountDetails(
-			@RequestParam(name = "userid", defaultValue = "joliver91") String userid) {
+			@RequestParam(name = "username", defaultValue = "joliver91") String userid) {
 		try {
 			List<Account> acc_list = new ArrayList<Account>();
 			acc_list = userService.getUserAccountDetails(userid);
@@ -56,7 +56,7 @@ public class UserController {
 
 	@RequestMapping(value = "/getUserInfo", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<?> getUserDetails(
-			@RequestParam(name = "userid", defaultValue = "joliver91") String userid) {
+			@RequestParam(name = "username", defaultValue = "joliver91") String userid) {
 
 		try {
 			ApplicationUser user = new ApplicationUser();
@@ -115,7 +115,7 @@ public class UserController {
 	}
 	
 	@RequestMapping(value = "/forgotPass", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
-	public ResponseEntity<?> sendOTPEmail(@RequestParam(name="userid", defaultValue = "joliver91") String userid){
+	public ResponseEntity<?> sendOTPEmail(@RequestParam(name="username", defaultValue = "joliver91") String userid){
 		try {
 			System.out.println(userid);
 			if (userService.forgotPasswordOTP(userid))
