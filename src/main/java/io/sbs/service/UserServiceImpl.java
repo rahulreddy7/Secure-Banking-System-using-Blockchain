@@ -11,6 +11,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.mongodb.client.MongoClient;
@@ -22,6 +23,12 @@ import io.sbs.dto.UserDTO;
 import io.sbs.exception.BusinessException;
 import io.sbs.model.Account;
 import io.sbs.model.User;
+import io.sbs.dto.AuthenticationProfileDTO;
+import io.sbs.dto.UserDTO;
+import io.sbs.exception.BusinessException;
+import io.sbs.exception.ValidationException;
+import io.sbs.model.Account;
+import io.sbs.model.ApplicationUser;
 
 @Service
 public class UserServiceImpl implements UserService {
@@ -59,35 +66,48 @@ public class UserServiceImpl implements UserService {
 	}
 
 	@Override
-	public User getUserInfo(String userid) {
+	public ApplicationUser getUserInfo(String userid) {
 		MongoCollection<Document> collection = database.getCollection("user");
 		Document myDoc = collection.find(eq("userid", userid)).first();
-		User user = new User();
+		ApplicationUser user = new ApplicationUser();
 		user.setName(myDoc.get("name").toString());
 		user.setEmailString(myDoc.get("email").toString());
 		user.setAddress(myDoc.get("address").toString());
 		return user;
 	}
-	/*Author : Nanqiao Chen, Anay Paul*/
+	
 	@Override
 	public void register(UserDTO userDTO) {
+		UserDTO dto = mongoTemplate.findOne(Query.query(Criteria.where("uid").is(userDTO.getUid())), UserDTO.class, "user");
+		if (dto != null) {
+			throw new ValidationException("the user already exists");
+		}
+		BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+		String hashedPassword = passwordEncoder.encode(userDTO.getPassword());
+		userDTO.setPassword(hashedPassword);
 		mongoTemplate.save(userDTO, "user");
+		AuthenticationProfileDTO authenticationProfileDTO = new AuthenticationProfileDTO();
+		authenticationProfileDTO.setPassword(hashedPassword);
+		mongoTemplate.save(authenticationProfileDTO, "authenticationProfile");
 	}
 
-	/*Author : Nanqiao Chen, Anay Paul*/
+	
 	@Override
 	public UserDTO login(UserDTO userDTO) {
+		BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 		Query query = new Query(Criteria.where("username"));
 		UserDTO dto = mongoTemplate.findOne(Query.query(Criteria.where("username").is(userDTO.getUsername())), UserDTO.class, "user");
 		if (dto == null) {
 			throw new BusinessException("the account doesn't register！");
 		}
-		if (!dto.getPassword().equals(userDTO.getPassword())) {
+		if (!passwordEncoder.matches(userDTO.getPassword(), dto.getPassword())) {
 			throw new BusinessException("password is wrong！");
 		}
-		userDTO.setPassword(null);
-		return userDTO;
+		dto.setPassword(null);
+		return dto;
 	}
+	
+	
 
 	@Override
 	public boolean checkAndMatchOTP(String userid, String otp) {

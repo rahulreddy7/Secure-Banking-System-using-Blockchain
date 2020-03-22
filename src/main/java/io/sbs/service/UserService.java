@@ -7,13 +7,13 @@ import javax.mail.internet.AddressException;
 
 import io.sbs.dto.UserDTO;
 import io.sbs.model.Account;
-import io.sbs.model.User;
+import io.sbs.model.ApplicationUser;
 
 public interface UserService {
 
 	public List<Account> getUserAccountDetails(String userid);
 
-	public User getUserInfo(String userid);
+	public ApplicationUser getUserInfo(String userid);
 
     void register(UserDTO userDTO);
 
