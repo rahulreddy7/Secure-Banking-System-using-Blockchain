@@ -4,7 +4,6 @@ import io.sbs.dto.UserDTO;
 import io.sbs.model.Account;
 import io.sbs.model.ApplicationUser;
 import io.sbs.security.SecurityConstants;
-import io.sbs.service.LoginService;
 import io.sbs.service.UserService;
 import io.sbs.vo.ResultVO;
 
@@ -37,9 +36,6 @@ public class UserController {
 
 	@Autowired
 	private UserService userService;
-
-	@Autowired
-	private LoginService loginService;
 
 	@RequestMapping(value = "/homePageDetails", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<?> getAccountDetails(
