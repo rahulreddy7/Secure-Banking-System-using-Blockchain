@@ -15,6 +15,9 @@ public class UserDTO implements Serializable {
     private Integer sex; // 1 man 0 woman
     private String username;
     private String password;
+    private String emailString;
+	private String address;
+
 
     public String getUid() {
         return uid;
@@ -55,4 +58,17 @@ public class UserDTO implements Serializable {
     public void setPassword(String password) {
         this.password = password;
     }
+    
+	public String getEmailString() {
+		return emailString;
+	}
+	public void setEmailString(String emailString) {
+		this.emailString = emailString;
+	}
+	public String getAddress() {
+		return address;
+	}
+	public void setAddress(String address) {
+		this.address = address;
+	}
 }

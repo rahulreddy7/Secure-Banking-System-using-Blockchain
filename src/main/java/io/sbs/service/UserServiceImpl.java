@@ -92,7 +92,6 @@ public class UserServiceImpl implements UserService {
 	@Override
 	public UserDTO login(UserDTO userDTO) {
 		BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
-		Query query = new Query(Criteria.where("username"));
 		UserDTO dto = mongoTemplate.findOne(Query.query(Criteria.where("username").is(userDTO.getUsername())), UserDTO.class, "user");
 		if (dto == null) {
 			throw new BusinessException("the account doesn't register！");
@@ -100,6 +99,10 @@ public class UserServiceImpl implements UserService {
 		if (!passwordEncoder.matches(userDTO.getPassword(), dto.getPassword())) {
 			throw new BusinessException("password is wrong！");
 		}
+//		EmailService es = new EmailService();
+//		if(!es.send_mail(dto.getEmailString())) {
+//			throw new BusinessException("Error in sending the email！");
+//		}
 		dto.setPassword(null);
 		return dto;
 	}
