@@ -98,6 +98,12 @@ public class UserController {
 		return ResultVO.createSuccess(userdto);
 	}
 
+	
+	@PostMapping("updateDetails/{userId}")
+	public ResultVO updateDetails(@PathVariable String userId, @RequestBody UserDTO userDTO) {
+		UserDTO userObj = userService.updateDetails(userId, userDTO);
+		return ResultVO.createSuccess(userObj);
+	}
 
 	// @Autowired
 	// UserRepository userRepository;

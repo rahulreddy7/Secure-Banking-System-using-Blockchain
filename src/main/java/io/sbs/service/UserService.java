@@ -15,4 +15,6 @@ public interface UserService {
     void register(UserDTO userDTO);
 
 	UserDTO login(UserDTO userDTO);
+	
+	public UserDTO updateDetails(String userId, UserDTO user);
 }
