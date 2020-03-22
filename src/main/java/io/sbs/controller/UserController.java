@@ -3,14 +3,14 @@ package io.sbs.controller;
 import io.sbs.dto.AuthenticationDTO;
 import io.sbs.dto.UserDTO;
 import io.sbs.model.Account;
-import io.sbs.model.User;
+import io.sbs.model.ApplicationUser;
 import io.sbs.service.LoginService;
 import io.sbs.service.UserService;
 import io.sbs.vo.ResultVO;
 
 import io.sbs.exception.RecordNotFoundException;
 import io.sbs.model.Account;
-import io.sbs.model.User;
+import io.sbs.model.ApplicationUser;
 import io.sbs.repository.UserRepository;
 import io.sbs.service.UserServiceImpl;
 
@@ -58,7 +58,7 @@ public class UserController {
 	public ResponseEntity<?> getUserDetails(@RequestParam(name="userid", defaultValue = "joliver91") String userid) {
 
 		try {
-			User user = new User();
+			ApplicationUser user = new ApplicationUser();
 			user = userService.getUserInfo(userid);
 			return new ResponseEntity<>(user, HttpStatus.OK);
 
@@ -100,24 +100,49 @@ public class UserController {
 	 * Function registers the user and saves into user collection
 	 * 
 	 * **/
+//	@PostMapping("login")
+//	public ResultVO login(@RequestBody UserDTO userDTO, HttpSession session) {
+//		System.out.println("TEST login");
+//		UserDTO userdto=(UserDTO) session.getAttribute("User");
+//		if(userdto==null) {
+//			userdto = userService.login(userDTO);
+//			session.setAttribute("User",(UserDTO)userdto);
+//			loginService.addUser(userdto.getUsername());
+//			return ResultVO.createSuccess(userdto);
+//		}else {
+//			if(loginService.loggedInUsers.contains(userdto.getUsername())){
+//				return ResultVO.createMsg(userdto);
+//			}else {
+//				return ResultVO.createSuccess(userdto);
+//			}
+//		}
+////		UserDTO userdto = userService.login(userDTO);
+////		return ResultVO.createSuccess(userdto);
+//	}
+	
 	@PostMapping("login")
-	public ResultVO login(@RequestBody UserDTO userDTO, HttpSession session) {
-		UserDTO userdto=(UserDTO) session.getAttribute("User");
-		if(userdto==null) {
-			userdto = userService.login(userDTO);
-			session.setAttribute("User",(UserDTO)userdto);
-			loginService.addUser(userdto.getUsername());
-			return ResultVO.createSuccess(userdto);
-		}else {
-			if(loginService.loggedInUsers.contains(userdto.getUsername())){
-				return ResultVO.createMsg(userdto);
-			}else {
-				return ResultVO.createSuccess(userdto);
-			}
+	public ResultVO login(@RequestBody UserDTO userDTO) {
+//		System.out.println("TEST login");
+//		UserDTO userdto=(UserDTO) session.getAttribute("User");
+//		if(userdto==null) {
+		UserDTO userdto = userService.login(userDTO);
+//			session.setAttribute("User",(UserDTO)userdto);
+		//loginService.addUser(userDTO.getUsername());
+		return ResultVO.createSuccess(userDTO);
+//		}else {
+//			if(loginService.loggedInUsers.contains(userdto.getUsername())){
+//				return ResultVO.createMsg(userdto);
+//			}else {
+//				return ResultVO.createSuccess(userdto);
+//			}
 		}
 //		UserDTO userdto = userService.login(userDTO);
 //		return ResultVO.createSuccess(userdto);
-	}
+
+	
+	
+	
+	
 	
 	@GetMapping("logout")
 	public String logout(HttpSession session) {

@@ -24,7 +24,7 @@ import io.sbs.dto.UserDTO;
 import io.sbs.exception.BusinessException;
 import io.sbs.exception.ValidationException;
 import io.sbs.model.Account;
-import io.sbs.model.User;
+import io.sbs.model.ApplicationUser;
 
 @Service
 public class UserServiceImpl implements UserService {
@@ -61,10 +61,10 @@ public class UserServiceImpl implements UserService {
 	}
 
 	@Override
-	public User getUserInfo(String userid) {
+	public ApplicationUser getUserInfo(String userid) {
 		MongoCollection<Document> collection = database.getCollection("user");
 		Document myDoc = collection.find(eq("userid", userid)).first();
-		User user = new User();
+		ApplicationUser user = new ApplicationUser();
 		user.setName(myDoc.get("name").toString());
 		user.setEmailString(myDoc.get("email").toString());
 		user.setAddress(myDoc.get("address").toString());
@@ -101,5 +101,7 @@ public class UserServiceImpl implements UserService {
 		dto.setPassword(null);
 		return dto;
 	}
+	
+	
 
 }
