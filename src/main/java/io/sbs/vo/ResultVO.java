@@ -41,8 +41,8 @@ public class ResultVO<T> implements Serializable {
         return new ResultVO(null, ResultStatus.ERROR.getCode(), msg);
     }
     
-    public static <T> ResultVO createMsg(T data){
-    	return new ResultVO(data, ResultStatus.AlreadyLoggedIn.getCode(), ResultStatus.AlreadyLoggedIn.getMsg());
+    public static <T> ResultVO createMsg(String data){
+    	return new ResultVO(data,ResultStatus.LoggedOut.getMsg());
     }
     public T getData() {
         return data;
