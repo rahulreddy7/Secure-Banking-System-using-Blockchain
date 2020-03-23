@@ -43,13 +43,13 @@ public class UserServiceImpl implements UserService {
 	private static ApplicationContext applicationContext;
 	
 	@Override
-	public List<Account> getUserAccountDetails(String userid) {
+	public List<Account> getUserAccountDetails(String username) {
 
 	    MongoCollection<Document> collection = database.getCollection("user");
-	    Document myDoc = collection.find(eq("username", userid)).first();
+	    Document myDoc = collection.find(eq("username", username)).first();
 	    
 	    MongoCollection<Document> collection_acc = database.getCollection("account");
-	    List<Document> cursor_accounts = collection_acc.find(eq("userid", userid)).into(new ArrayList<Document>());
+	    List<Document> cursor_accounts = collection_acc.find(eq("username", username)).into(new ArrayList<Document>());
 	      
 		List<Account> acc_list = new ArrayList<Account>();
 	    for (Document account : cursor_accounts) {
@@ -58,7 +58,7 @@ public class UserServiceImpl implements UserService {
 	        a.setAccount_number(Double.parseDouble(account.get("account_num").toString()));
 	        a.setAcc_type(account.get("type").toString());
 	        a.setAcc_balance(Double.parseDouble(account.get("balance").toString()));
-	        a.setUser_id(userid);
+	        a.setUsername(username);
 	        acc_list.add(a);
 	    }
 
@@ -66,9 +66,9 @@ public class UserServiceImpl implements UserService {
 	}
 
 	@Override
-	public ApplicationUser getUserInfo(String userid) {
+	public ApplicationUser getUserInfo(String username) {
 		MongoCollection<Document> collection = database.getCollection("user");
-		Document myDoc = collection.find(eq("username", userid)).first();
+		Document myDoc = collection.find(eq("username", username)).first();
 		ApplicationUser user = new ApplicationUser();
 		user.setName(myDoc.get("name").toString());
 		user.setEmailString(myDoc.get("email").toString());
