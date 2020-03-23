@@ -106,11 +106,11 @@ public class UserServiceImpl implements UserService {
 		if (!passwordEncoder.matches(userDTO.getPassword(), dto.getPassword())) {
 			throw new BusinessException("password is wrong！");
 		}
-//		EmailService es = new EmailService();
-//		String subject = "One Time Password (OTP) for Login"
-//		if(!es.send_mail(dto.getEmailString(), dto.getUsername(), subject)) {
-//			throw new BusinessException("Error in sending the email！");
-//		}
+		EmailService es = new EmailService();
+		String subject = "One Time Password (OTP) for Login";
+		if(!es.send_email(dto.getUsername(), dto.getEmail(), subject)) {
+			throw new BusinessException("Error in sending the email！");
+		}
 		dto.setPassword(null);
 		return dto;
 	}
