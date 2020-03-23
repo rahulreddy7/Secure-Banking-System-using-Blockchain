@@ -49,10 +49,10 @@ public class UserController {
 	@RequestMapping(value = "/homePageDetails", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
 
 	public ResponseEntity<?> getAccountDetails(
-			@RequestParam(name = "username", defaultValue = "joliver91") String userid) {
+			@RequestParam(name = "username", defaultValue = "joliver91") String username) {
 		try {
 			List<Account> acc_list = new ArrayList<Account>();
-			acc_list = userService.getUserAccountDetails(userid);
+			acc_list = userService.getUserAccountDetails(username);
 			if (acc_list.size() > 0)
 				return new ResponseEntity<>(acc_list, HttpStatus.OK);
 			else
@@ -63,12 +63,11 @@ public class UserController {
 	}
 
 	@RequestMapping(value = "/getUserInfo", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
-
-	public ResponseEntity<?> getUserDetails(@RequestParam(name = "username", defaultValue = "joliver91") String userid) {
+	public ResponseEntity<?> getUserDetails(@RequestParam(name = "username", defaultValue = "joliver91") String username) {
 
 		try {
 			ApplicationUser user = new ApplicationUser();
-			user = userService.getUserInfo(userid);
+			user = userService.getUserInfo(username);
 			return new ResponseEntity<>(user, HttpStatus.OK);
 
 		} catch (Exception e) {

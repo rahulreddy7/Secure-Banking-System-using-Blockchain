@@ -8,7 +8,7 @@ public class Account {
 	private String acc_type;
 	private String acc_holder_name;
     private double acc_balance;
-    private String user_id;
+    private String username;
     private double account_number;
 	
     public double getAccount_number() {
@@ -35,11 +35,12 @@ public class Account {
 	public void setAcc_balance(double acc_balance) {
 		this.acc_balance = acc_balance;
 	}
-	public String getUser_id() {
-		return user_id;
+	public String getUsername() {
+		return username;
 	}
-	public void setUser_id(String user_id) {
-		this.user_id = user_id;
+	public void setUsername(String username) {
+		this.username = username;
 	}
+
 
 }
