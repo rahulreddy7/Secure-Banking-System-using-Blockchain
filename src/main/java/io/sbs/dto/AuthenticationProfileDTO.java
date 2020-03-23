@@ -5,17 +5,10 @@ import java.io.Serializable;
 import org.springframework.data.annotation.Id;
 
 public class AuthenticationProfileDTO implements Serializable {
-	@Id
-	private String uid;
-
-	public String getUid() {
-		return uid;
-	}
-
-	public void setUid(String uid) {
-		this.uid = uid;
-	}
-
+	
+	private String username;
+	private String password;
+	
 	public String getUsername() {
 		return username;
 	}
@@ -31,8 +24,6 @@ public class AuthenticationProfileDTO implements Serializable {
 	public void setPassword(String password) {
 		this.password = password;
 	}
-
-	private String username;
-	private String password;
+	
 
 }

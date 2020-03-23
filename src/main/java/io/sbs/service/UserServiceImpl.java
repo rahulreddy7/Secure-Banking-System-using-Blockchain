@@ -11,6 +11,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
+import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -18,6 +19,7 @@ import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoClients;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
+import com.mongodb.client.result.UpdateResult;
 
 import io.sbs.dto.UserDTO;
 import io.sbs.exception.BusinessException;
@@ -78,7 +80,7 @@ public class UserServiceImpl implements UserService {
 	
 	@Override
 	public void register(UserDTO userDTO) {
-		UserDTO dto = mongoTemplate.findOne(Query.query(Criteria.where("uid").is(userDTO.getUid())), UserDTO.class, "user");
+		UserDTO dto = mongoTemplate.findOne(Query.query(Criteria.where("username").is(userDTO.getUsername())), UserDTO.class, "user");
 		if (dto != null) {
 			throw new ValidationException("the user already exists");
 		}
@@ -88,6 +90,7 @@ public class UserServiceImpl implements UserService {
 		mongoTemplate.save(userDTO, "user");
 		AuthenticationProfileDTO authenticationProfileDTO = new AuthenticationProfileDTO();
 		authenticationProfileDTO.setPassword(hashedPassword);
+		authenticationProfileDTO.setUsername(userDTO.getUsername());
 		mongoTemplate.save(authenticationProfileDTO, "authenticationProfile");
 	}
 
@@ -95,7 +98,6 @@ public class UserServiceImpl implements UserService {
 	@Override
 	public UserDTO login(UserDTO userDTO) {
 		BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
-		Query query = new Query(Criteria.where("username"));
 		UserDTO dto = mongoTemplate.findOne(Query.query(Criteria.where("username").is(userDTO.getUsername())), UserDTO.class, "user");
 		if (dto == null) {
 			throw new BusinessException("the account doesn't register！");
@@ -103,10 +105,33 @@ public class UserServiceImpl implements UserService {
 		if (!passwordEncoder.matches(userDTO.getPassword(), dto.getPassword())) {
 			throw new BusinessException("password is wrong！");
 		}
+		EmailService es = new EmailService();
+		String subject = "One Time Password (OTP) for Login";
+		if(!es.send_email(dto.getUsername(), dto.getEmail(), subject)) {
+			throw new BusinessException("Error in sending the email！");
+		}
 		dto.setPassword(null);
 		return dto;
 	}
 	
+
+	@Override
+	public UserDTO updateDetails( UserDTO user) {
+
+		Update update = new Update();
+		if(user.getAddress()!=null) {
+			update.set("address", user.getAddress());
+		}
+		if(user.getEmail()!=null) {
+			update.set("email", user.getEmail());
+		}
+		
+		UpdateResult userObj = mongoTemplate.updateFirst(Query.query(Criteria.where("username").is(user.getUsername())), update, User.class, "user");
+		if (userObj == null) {
+			throw new BusinessException("cannot be updated！");
+		}
+		return user;
+	}
 	
 
 	@Override

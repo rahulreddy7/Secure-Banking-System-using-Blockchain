@@ -1,5 +1,6 @@
 package io.sbs.controller;
 
+
 import io.sbs.dto.UserDTO;
 import io.sbs.model.Account;
 import io.sbs.model.LoginOTP;
@@ -9,8 +10,12 @@ import io.sbs.security.SecurityConstants;
 import io.sbs.service.UserService;
 import io.sbs.vo.ResultVO;
 
+import io.sbs.exception.RecordNotFoundException;
+import io.sbs.service.UserServiceImpl;
+
 import java.util.ArrayList;
 import java.util.List;
+
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
@@ -38,8 +43,11 @@ public class UserController {
 
 	@Autowired
 	private UserService userService;
+	
+	
 
 	@RequestMapping(value = "/homePageDetails", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+
 	public ResponseEntity<?> getAccountDetails(
 			@RequestParam(name = "username", defaultValue = "joliver91") String username) {
 		try {
@@ -55,8 +63,7 @@ public class UserController {
 	}
 
 	@RequestMapping(value = "/getUserInfo", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
-	public ResponseEntity<?> getUserDetails(
-			@RequestParam(name = "username", defaultValue = "joliver91") String username) {
+	public ResponseEntity<?> getUserDetails(@RequestParam(name = "username", defaultValue = "joliver91") String username) {
 
 		try {
 			ApplicationUser user = new ApplicationUser();
@@ -68,7 +75,6 @@ public class UserController {
 		}
 	}
 
-	@PostMapping("register")
 	/*
 	 * Sample payload { "uid":"testuserid", "username":"johnm",
 	 * "password":"doe", "sex":1, "name":"testname" }
@@ -78,6 +84,7 @@ public class UserController {
 	 * 
 	 * *
 	 */
+	@PostMapping("register")
 	@ResponseStatus(HttpStatus.CREATED)
 	public ResultVO register(@RequestBody UserDTO userDTO) {
 		userService.register(userDTO);
@@ -99,6 +106,32 @@ public class UserController {
 		return ResultVO.createSuccess(userDTO);
 	}
 	
+
+	/*
+	 * Sample payload
+	 * 			{
+  				"username":"johnm",
+  				"address":"doe",
+  				"email":"doe11@gmail.com"
+				}
+	 * 
+	 *
+	 * Function updates the user details and updates them into user collection
+	 * 
+	 * **/
+	
+	@PostMapping("updateDetails")
+	public ResultVO updateDetails( @RequestBody UserDTO userDTO) {
+		UserDTO userObj = userService.updateDetails(userDTO);
+		return ResultVO.createSuccess(userObj);
+	}
+	
+//	@PostMapping("appt")
+//	public ResultVO addAppointments(@RequestBody AppointmentDTO appointmentDTO) {
+//		AppointmentDTO appointmentdto = appointmentService.createAppointments(appointmentDTO);
+//		return ResultVO.createSuccess(appointmentdto);
+//	}
+
 	//needs user name, otp to be checked
 	@PostMapping(path= "/otp_check", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<?> checkOTP(@RequestBody LoginOTP login_otp) {
@@ -127,6 +160,7 @@ public class UserController {
 			return new ResponseEntity<>(e.toString(), HttpStatus.BAD_REQUEST);
 		}
 	}
+
 
 	@GetMapping("logout")
 	public  ResultVO logout(HttpServletRequest request) {

@@ -9,20 +9,14 @@ import java.io.Serializable;
  */
 public class UserDTO implements Serializable {
 
-    @Id
-    private String uid;
+   
     private String name;
     private Integer sex; // 1 man 0 woman
     private String username;
     private String password;
+    private String email;
+	private String address;
 
-    public String getUid() {
-        return uid;
-    }
-
-    public void setUid(String uid) {
-        this.uid = uid;
-    }
 
     public String getName() {
         return name;
@@ -55,4 +49,17 @@ public class UserDTO implements Serializable {
     public void setPassword(String password) {
         this.password = password;
     }
+    
+	public String getEmail() {
+		return email;
+	}
+	public void setEmail(String emailString) {
+		this.email = emailString;
+	}
+	public String getAddress() {
+		return address;
+	}
+	public void setAddress(String address) {
+		this.address = address;
+	}
 }

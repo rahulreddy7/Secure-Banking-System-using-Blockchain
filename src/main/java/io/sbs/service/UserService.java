@@ -19,7 +19,12 @@ public interface UserService {
 
 	UserDTO login(UserDTO userDTO);
 
+	
+	public UserDTO updateDetails( UserDTO user);
+
+
 	public boolean checkAndMatchOTP(String userid, String otp);
 
 	public boolean forgotPasswordOTP(String userid);
+
 }

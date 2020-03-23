@@ -45,3 +45,36 @@ OTP Verification Successful!
 - sends OTP to email of the user
 - expected output: 
 OTP Successfully sent!
+
+5)localhost:8081/users/updateDetails - POST API
+
+Body:
+	{
+	"username":"johnm",
+	"address":"doe",
+	"email":"doe11@gmail.com"
+	}
+	 
+Function updates the user details and updates them into user collection
+	 
+6). localhost:8081/users/register - POST API
+Body:
+{
+	"username":"Aviral111",
+	"password":"Vila",
+	"email":"allo@gmail.com",
+	"sex":1
+}
+Function creates the user in user collection and stores username and password in authenticationProfile collection
+
+7) localhost:8081/users/login POST API
+Body:
+{
+	"username":"Aviral111",
+	"password":"Vila",
+	"email":"allo@gmail.com",
+	"sex":1
+}
+Function validates the user in user collection
+
+	 
