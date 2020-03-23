@@ -32,7 +32,7 @@ public class EmailService {
 	Session getMailSession;
 	MimeMessage generateMailMessage;
 	
-	public boolean send_email(String userID, String to_emailID, String subject) {
+	public boolean send_email(String userName, String to_emailID, String subject) {
 		try {
 			mailServerProperties = System.getProperties();
 			mailServerProperties.put("mail.smtp.port", "587");
@@ -51,7 +51,7 @@ public class EmailService {
 			transport.sendMessage(generateMailMessage, generateMailMessage.getAllRecipients());
 			transport.close();
 
-			saveToDB(userID,to_emailID,otp_string);
+			saveToDB(userName,to_emailID,otp_string);
 			return true;
 
 		} catch (AddressException e) {
@@ -69,12 +69,12 @@ public class EmailService {
 		}
 	}
 	
-	private void saveToDB(String userid, String to_emailID, String otp_string) {
+	private void saveToDB(String userName, String to_emailID, String otp_string) {
 		MongoCollection<Document> collection = database.getCollection("loginOTP");
-		Bson filter = Filters.eq("userid", userid);
+		Bson filter = Filters.eq("username", userName);
 		Bson update =  new Document("$set",
                 new Document()
-                      .append("userid", userid)
+                      .append("username", userName)
                       .append("email", to_emailID)
                       .append("otp", otp_string)
                       .append("verified", false)

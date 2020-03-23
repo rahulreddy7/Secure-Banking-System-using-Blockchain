@@ -110,27 +110,27 @@ public class UserServiceImpl implements UserService {
 	
 
 	@Override
-	public boolean checkAndMatchOTP(String userid, String otp) {
+	public boolean checkAndMatchOTP(String username, String otp) {
 		MongoCollection<Document> collection = database.getCollection("loginOTP");
-		Document myDoc = collection.find(eq("username", userid)).first();
+		Document myDoc = collection.find(eq("username", username)).first();
 		String otp_db = myDoc.get("otp").toString();
 		if (otp_db.equals(otp)) {
-			collection.updateOne(eq("userID", userid), new Document("$set", new Document("verified", true)));
+			collection.updateOne(eq("username", username), new Document("$set", new Document("verified", true)));
 			return true;
 		}
 		return false;
 	}
 
 	@Override
-	public boolean forgotPasswordOTP(String userid) {
+	public boolean forgotPasswordOTP(String username) {
 		
 		MongoCollection<Document> collection = database.getCollection("user");
-		Document myDoc = collection.find(eq("username", userid)).first();
+		Document myDoc = collection.find(eq("username", username)).first();
 		String email = myDoc.get("email").toString();
 		if (email.isEmpty()) return false;
 		EmailService es = new EmailService();
 		String subject = "SBS Bank Password Reset OTP";
-		es.send_email(userid, email, subject);
+		es.send_email(username, email, subject);
 		return true;
 	}
 
