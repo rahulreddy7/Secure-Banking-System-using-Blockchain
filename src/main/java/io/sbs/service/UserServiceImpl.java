@@ -21,18 +21,23 @@ import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.result.UpdateResult;
 
+import io.sbs.dto.UserDTO;
+import io.sbs.exception.BusinessException;
+import io.sbs.model.Account;
+import io.sbs.model.User;
 import io.sbs.dto.AuthenticationProfileDTO;
 import io.sbs.dto.UserDTO;
 import io.sbs.exception.BusinessException;
 import io.sbs.exception.ValidationException;
 import io.sbs.model.Account;
-import io.sbs.model.User;
+import io.sbs.model.ApplicationUser;
 
 @Service
 public class UserServiceImpl implements UserService {
 	
 	MongoClient mongoClient = MongoClients.create("mongodb://admin:myadminpassword@18.222.64.16:27017");
 	MongoDatabase database = mongoClient.getDatabase("mydb");
+
 
 	@Autowired
 	private MongoTemplate mongoTemplate;
@@ -43,7 +48,7 @@ public class UserServiceImpl implements UserService {
 	public List<Account> getUserAccountDetails(String userid) {
 
 	    MongoCollection<Document> collection = database.getCollection("user");
-	    Document myDoc = collection.find(eq("userid", userid)).first();
+	    Document myDoc = collection.find(eq("username", userid)).first();
 	    
 	    MongoCollection<Document> collection_acc = database.getCollection("account");
 	    List<Document> cursor_accounts = collection_acc.find(eq("userid", userid)).into(new ArrayList<Document>());
@@ -63,10 +68,11 @@ public class UserServiceImpl implements UserService {
 	}
 
 	@Override
-	public User getUserInfo(String username) {
+
+	public ApplicationUser getUserInfo(String userid) {
 		MongoCollection<Document> collection = database.getCollection("user");
-		Document myDoc = collection.find(eq("username", username)).first();
-		User user = new User();
+		Document myDoc = collection.find(eq("username", userid)).first();
+		ApplicationUser user = new ApplicationUser();
 		user.setName(myDoc.get("name").toString());
 		user.setEmailString(myDoc.get("email").toString());
 		user.setAddress(myDoc.get("address").toString());
@@ -109,6 +115,7 @@ public class UserServiceImpl implements UserService {
 		return dto;
 	}
 	
+
 	@Override
 	public UserDTO updateDetails( UserDTO user) {
 
@@ -125,6 +132,32 @@ public class UserServiceImpl implements UserService {
 			throw new BusinessException("cannot be updated！");
 		}
 		return user;
+	}
+	
+
+	@Override
+	public boolean checkAndMatchOTP(String username, String otp) {
+		MongoCollection<Document> collection = database.getCollection("loginOTP");
+		Document myDoc = collection.find(eq("username", username)).first();
+		String otp_db = myDoc.get("otp").toString();
+		if (otp_db.equals(otp)) {
+			collection.updateOne(eq("username", username), new Document("$set", new Document("verified", true)));
+			return true;
+		}
+		return false;
+	}
+
+	@Override
+	public boolean forgotPasswordOTP(String username) {
+		
+		MongoCollection<Document> collection = database.getCollection("user");
+		Document myDoc = collection.find(eq("username", username)).first();
+		String email = myDoc.get("email").toString();
+		if (email.isEmpty()) return false;
+		EmailService es = new EmailService();
+		String subject = "SBS Bank Password Reset OTP";
+		es.send_email(username, email, subject);
+		return true;
 	}
 
 }
