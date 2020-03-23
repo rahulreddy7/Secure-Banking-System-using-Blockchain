@@ -41,7 +41,7 @@ public class UserController {
 
 	@RequestMapping(value = "/homePageDetails", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<?> getAccountDetails(
-			@RequestParam(name = "userid", defaultValue = "joliver91") String userid) {
+			@RequestParam(name = "username", defaultValue = "joliver91") String userid) {
 		try {
 			List<Account> acc_list = new ArrayList<Account>();
 			acc_list = userService.getUserAccountDetails(userid);
@@ -56,7 +56,7 @@ public class UserController {
 
 	@RequestMapping(value = "/getUserInfo", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<?> getUserDetails(
-			@RequestParam(name = "userid", defaultValue = "joliver91") String userid) {
+			@RequestParam(name = "username", defaultValue = "joliver91") String userid) {
 
 		try {
 			ApplicationUser user = new ApplicationUser();
@@ -103,7 +103,7 @@ public class UserController {
 	@PostMapping(path= "/otp_check", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<?> checkOTP(@RequestBody LoginOTP login_otp) {
 		try {
-			boolean otp_match = userService.checkAndMatchOTP(login_otp.getUserid(),login_otp.getOtp());
+			boolean otp_match = userService.checkAndMatchOTP(login_otp.getUsername(),login_otp.getOtp());
 			if (otp_match)
 				return new ResponseEntity<>("OTP Verification Successful!", HttpStatus.OK);
 			else
@@ -115,10 +115,10 @@ public class UserController {
 	}
 	
 	@RequestMapping(value = "/forgotPass", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
-	public ResponseEntity<?> sendOTPEmail(@RequestParam(name="userid", defaultValue = "joliver91") String userid){
+	public ResponseEntity<?> sendOTPEmail(@RequestParam(name="username", defaultValue = "joliver91") String username){
 		try {
-			System.out.println(userid);
-			if (userService.forgotPasswordOTP(userid))
+			System.out.println(username);
+			if (userService.forgotPasswordOTP(username))
 				return new ResponseEntity<>("OTP Successfully sent!", HttpStatus.OK);
 			else
 				return new ResponseEntity<>("Error looking up linked email.", HttpStatus.BAD_REQUEST);
@@ -126,7 +126,8 @@ public class UserController {
 		} catch (Exception e) {
 			return new ResponseEntity<>(e.toString(), HttpStatus.BAD_REQUEST);
 		}
-		
+	}
+
 	@GetMapping("logout")
 	public  ResultVO logout(HttpServletRequest request) {
 		String token = request.getHeader(SecurityConstants.HEADER_STRING);

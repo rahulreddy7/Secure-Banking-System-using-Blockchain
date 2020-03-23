@@ -6,21 +6,14 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 
 public class LoginOTP {
 
-	private String userid;
+	private String username;
 	private String email;
 	private String otp;
 	private boolean verified;
 //	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss.SSSZ")
 	private Date date;
 
-	public String getUserid() {
-		return userid;
-	}
-
-	public void setUserid(String userid) {
-		this.userid = userid;
-	}
-
+	
 	public String getOtp() {
 		return otp;
 	}
@@ -51,6 +44,14 @@ public class LoginOTP {
 
 	public void setEmail(String email) {
 		this.email = email;
+	}
+
+	public String getUsername() {
+		return username;
+	}
+
+	public void setUsername(String username) {
+		this.username = username;
 	}
 
 }

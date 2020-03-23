@@ -1,4 +1,4 @@
-1) localhost:8081/users/getUserInfo/?userid=dev204 
+1) localhost:8081/users/getUserInfo/?username=dev204 
 - GET API
 - returns details of the user
 - expected output: 
@@ -10,7 +10,7 @@
     "password": null
 }
 
-2) localhost:8081/users/homePageDetails?userid=dev204 
+2) localhost:8081/users/homePageDetails?username=dev204 
 - GET API
 - return details for home page
 - expected output: 
@@ -34,14 +34,14 @@
 3) localhost:8081/users/otp_check - POST API
 Body:
 {
-	"userID":"dev204",
-	"otp": "160029"
+	"username":"dev204",
+	"otp": "460653"
 }
 - verifies the OTP from database
 - expected output:
 OTP Verification Successful!
 
-4) localhost:8081/users/forgotPass?userid=dev204 - GET API
+4) localhost:8081/users/forgotPass?username=dev204 - GET API
 - sends OTP to email of the user
 - expected output: 
 OTP Successfully sent!
