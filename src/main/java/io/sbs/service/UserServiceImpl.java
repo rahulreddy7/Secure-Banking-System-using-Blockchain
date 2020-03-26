@@ -5,6 +5,7 @@ import static com.mongodb.client.model.Filters.eq;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Random;
 
 import org.bson.Document;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -95,6 +96,9 @@ public class UserServiceImpl implements UserService {
 		BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 		String hashedPassword = passwordEncoder.encode(userDTO.getPassword());
 		userDTO.setPassword(hashedPassword);
+		Random rnd = new Random();
+		double account_number = 10000000 + rnd.nextInt(90000000);
+		userDTO.setAccount_number(account_number);
 		WorkflowDTO workDTO=new WorkflowDTO();
 		workDTO.setType(env.getProperty("type.register"));
 		List<UserDTO> details=new ArrayList<UserDTO>();
