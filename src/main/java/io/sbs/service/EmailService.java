@@ -15,6 +15,7 @@ import javax.mail.internet.MimeMessage;
 
 import org.bson.Document;
 import org.bson.conversions.Bson;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoClients;
@@ -72,6 +73,8 @@ public class EmailService {
 	private void saveToDB(String userName, String to_emailID, String otp_string) {
 		MongoCollection<Document> collection = database.getCollection("loginOTP");
 		Bson filter = Filters.eq("username", userName);
+		BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+		otp_string=passwordEncoder.encode(otp_string);
 		Bson update =  new Document("$set",
                 new Document()
                       .append("username", userName)
