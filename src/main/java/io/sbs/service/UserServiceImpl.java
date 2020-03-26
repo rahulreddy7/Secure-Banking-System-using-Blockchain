@@ -3,11 +3,13 @@ package io.sbs.service;
 import static com.mongodb.client.model.Filters.eq;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import org.bson.Document;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
+import org.springframework.core.env.Environment;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
@@ -15,13 +17,17 @@ import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import com.mongodb.BasicDBObject;
+import com.mongodb.DBObject;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoClients;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.result.UpdateResult;
+import com.mongodb.util.JSON;
 
 import io.sbs.dto.UserDTO;
+import io.sbs.dto.WorkflowDTO;
 import io.sbs.exception.BusinessException;
 import io.sbs.model.Account;
 import io.sbs.model.User;
@@ -41,7 +47,9 @@ public class UserServiceImpl implements UserService {
 
 	@Autowired
 	private MongoTemplate mongoTemplate;
-
+	
+	@Autowired
+	private Environment env;
 	private static ApplicationContext applicationContext;
 	
 	@Override
@@ -87,11 +95,16 @@ public class UserServiceImpl implements UserService {
 		BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 		String hashedPassword = passwordEncoder.encode(userDTO.getPassword());
 		userDTO.setPassword(hashedPassword);
-		mongoTemplate.save(userDTO, "user");
-		AuthenticationProfileDTO authenticationProfileDTO = new AuthenticationProfileDTO();
-		authenticationProfileDTO.setPassword(hashedPassword);
-		authenticationProfileDTO.setUsername(userDTO.getUsername());
-		mongoTemplate.save(authenticationProfileDTO, "authenticationProfile");
+		WorkflowDTO workDTO=new WorkflowDTO();
+		workDTO.setType(env.getProperty("type.register"));
+		List<UserDTO> details=new ArrayList<UserDTO>();
+		details.add(userDTO);
+		workDTO.setDetails(details);
+		mongoTemplate.save(workDTO, "workflow");
+//		AuthenticationProfileDTO authenticationProfileDTO = new AuthenticationProfileDTO();
+//		authenticationProfileDTO.setPassword(hashedPassword);
+//		authenticationProfileDTO.setUsername(userDTO.getUsername());
+//		mongoTemplate.save(authenticationProfileDTO, "authenticationProfile");
 	}
 
 	
