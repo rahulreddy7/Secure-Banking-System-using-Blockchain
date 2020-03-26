@@ -16,6 +16,7 @@ public class UserDTO implements Serializable {
     private String password;
     private String email;
 	private String address;
+	private String newpassword;
 
 
     public String getName() {
@@ -61,5 +62,13 @@ public class UserDTO implements Serializable {
 	}
 	public void setAddress(String address) {
 		this.address = address;
+	}
+
+	public String getNewpassword() {
+		return newpassword;
+	}
+
+	public void setNewpassword(String newpassword) {
+		this.newpassword = newpassword;
 	}
 }
