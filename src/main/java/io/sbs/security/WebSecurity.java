@@ -46,7 +46,7 @@ public class WebSecurity extends WebSecurityConfigurerAdapter {
 	@Override
 	protected void configure(AuthenticationManagerBuilder auth) throws Exception {
 		// TODO Auto-generated method stub
-		auth.userDetailsService(otpService);
+		auth.userDetailsService(otpService).passwordEncoder(bCryptPasswordEncoder);
 	}
 		
 
@@ -58,7 +58,7 @@ public class WebSecurity extends WebSecurityConfigurerAdapter {
 				.disable()
 				.authorizeRequests()
 				.antMatchers(HttpMethod.POST, SecurityConstants.SIGN_UP_URL,
-						SecurityConstants.LOGIN_URL,SecurityConstants.OTP_URL)
+						SecurityConstants.LOGIN_URL,SecurityConstants.OTP_URL,SecurityConstants.Forgot_Pass)
 				.permitAll()
 				.anyRequest()
 				.authenticated()
