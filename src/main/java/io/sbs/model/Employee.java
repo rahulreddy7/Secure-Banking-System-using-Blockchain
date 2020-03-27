@@ -4,7 +4,6 @@ import javax.validation.constraints.NotEmpty;
 
 public class Employee {
 
-	@NotEmpty
 	private String username;
 	@NotEmpty
 	private String employee_password;

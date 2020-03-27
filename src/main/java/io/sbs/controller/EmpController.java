@@ -1,5 +1,6 @@
 package io.sbs.controller;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,9 +12,12 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.auth0.jwt.JWT;
+import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.JWTVerificationException;
 
 import io.sbs.model.Employee;
+import io.sbs.security.SecurityConstants;
 import io.sbs.service.EmpService;
 
 @RestController
@@ -24,11 +28,14 @@ public class EmpController {
 	private EmpService empService;
 	
 	@PostMapping(path= "/viewEmp", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-	public ResponseEntity<?> viewEmp(@RequestBody Employee employee){
+	public ResponseEntity<?> viewEmp(HttpServletRequest request){
 		try {
-			if (employee.getUsername() == null)
-				return new ResponseEntity<>("No username found.", HttpStatus.BAD_REQUEST);
-			return empService.viewEmpService(employee);
+			String token = request.getHeader(SecurityConstants.HEADER_STRING);
+	        String  username = JWT.require(Algorithm.HMAC512(SecurityConstants.SECRET.getBytes()))
+	                    .build()
+	                    .verify(token.replace(SecurityConstants.TOKEN_PREFIX, ""))
+	                    .getSubject();
+			return empService.viewEmpService(username);
 		} catch (JWTVerificationException e) {
 			e.printStackTrace();
 			return new ResponseEntity<>(e.toString(), HttpStatus.UNAUTHORIZED);
@@ -39,9 +46,14 @@ public class EmpController {
 	}
 	
 	@PostMapping(path= "/addEmp", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-	public ResponseEntity<?> addEmp(@Valid @RequestBody Employee employee){
+	public ResponseEntity<?> addEmp(HttpServletRequest request, @Valid @RequestBody Employee employee){
 		try {
-			return empService.addNewEmpService(employee);
+			String token = request.getHeader(SecurityConstants.HEADER_STRING);
+	        String  username = JWT.require(Algorithm.HMAC512(SecurityConstants.SECRET.getBytes()))
+	                    .build()
+	                    .verify(token.replace(SecurityConstants.TOKEN_PREFIX, ""))
+	                    .getSubject();
+			return empService.addNewEmpService(employee, username);
 		} catch (JWTVerificationException e) {
 			e.printStackTrace();
 			return new ResponseEntity<>(e.toString(), HttpStatus.UNAUTHORIZED);
@@ -52,11 +64,14 @@ public class EmpController {
 	}
 	
 	@PostMapping(path= "/modifyEmp", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-	public ResponseEntity<?> modifyEmp(@RequestBody Employee employee){
+	public ResponseEntity<?> modifyEmp(HttpServletRequest request, @RequestBody Employee employee){
 		try {
-			if (employee.getUsername() == null)
-				return new ResponseEntity<>("No username found.", HttpStatus.BAD_REQUEST);
-			return empService.modifyEmpService(employee);
+			String token = request.getHeader(SecurityConstants.HEADER_STRING);
+	        String  username = JWT.require(Algorithm.HMAC512(SecurityConstants.SECRET.getBytes()))
+	                    .build()
+	                    .verify(token.replace(SecurityConstants.TOKEN_PREFIX, ""))
+	                    .getSubject();
+			return empService.modifyEmpService(employee, username);
 		} catch (JWTVerificationException e) {
 			e.printStackTrace();
 			return new ResponseEntity<>(e.toString(), HttpStatus.UNAUTHORIZED);
@@ -66,11 +81,15 @@ public class EmpController {
 		}
 	}
 	@PostMapping(path= "/deleteEmp", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-	public ResponseEntity<?> deleteEmp(@RequestBody Employee employee){
+	public ResponseEntity<?> deleteEmp(HttpServletRequest request, @RequestBody Employee employee){
 		try {
-			if (employee.getUsername() == null)
-				return new ResponseEntity<>("No username found.", HttpStatus.BAD_REQUEST);
-			return empService.deleteEmpService(employee);
+			String token = request.getHeader(SecurityConstants.HEADER_STRING);
+	        String  username = JWT.require(Algorithm.HMAC512(SecurityConstants.SECRET.getBytes()))
+	                    .build()
+	                    .verify(token.replace(SecurityConstants.TOKEN_PREFIX, ""))
+	                    .getSubject();
+			if (employee.getUsername() != null) username = employee.getUsername();
+			return empService.deleteEmpService(employee, username);
 		} catch (JWTVerificationException e) {
 			e.printStackTrace();
 			return new ResponseEntity<>(e.toString(), HttpStatus.UNAUTHORIZED);
