@@ -31,4 +31,6 @@ public interface UserService {
 
 	public ResponseEntity<?> generateChequeService(String username, Account acc);
 
+	public ResponseEntity<?> debitAmountService(String username, Account acc);
+
 }

@@ -210,7 +210,7 @@ public class UserServiceImpl implements UserService {
 		myDoc = collection.find(eq("username", username)).first();
 		if (myDoc == null)
 			return new ResponseEntity<>("No username found. ", HttpStatus.OK);
-		System.out.println(acc.getAccount_number());
+
 		myDoc = collection.find(eq("account_number", acc.getAccount_number())).first();
 		if (myDoc == null)
 			return new ResponseEntity<>("No account found. ", HttpStatus.OK);
@@ -220,6 +220,23 @@ public class UserServiceImpl implements UserService {
 		collection.updateOne(eq("account_number", acc.getAccount_number()), new Document("$set", new Document("acc_balance", balance)));
 		es.send_email_cheque_success(email, "Cashier Cheque Issued", acc.getAmount_to_deduct());
 		return new ResponseEntity<>("Successfully issued new cheque ", HttpStatus.OK);
+	}
+
+	@Override
+	public ResponseEntity<?> debitAmountService(String username, Account acc) {
+		MongoCollection<Document> collection = database.getCollection("account");
+		Document myDoc = collection.find(eq("username", username)).first();
+		if (myDoc == null)
+			return new ResponseEntity<>("No username found. ", HttpStatus.OK);
+
+		myDoc = collection.find(eq("account_number", acc.getAccount_number())).first();
+		if (myDoc == null)
+			return new ResponseEntity<>("No account found. ", HttpStatus.OK);
+		
+		double balance = myDoc.getDouble("acc_balance");
+		balance = balance - acc.getAmount_to_deduct();
+		collection.updateOne(eq("account_number", acc.getAccount_number()), new Document("$set", new Document("acc_balance", balance)));
+		return new ResponseEntity<>("Amount successfully debited from account. ", HttpStatus.OK);
 	}
 
 }

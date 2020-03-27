@@ -205,7 +205,7 @@ public class UserController {
 					.verify(token.replace(SecurityConstants.TOKEN_PREFIX, "")).getSubject();
 			return userService.addAcc(username, acc);
 		} catch (Exception e) {
-			return new ResponseEntity<>(e.toString(), HttpStatus.OK);
+			return new ResponseEntity<>(e.toString(), HttpStatus.BAD_REQUEST);
 		}
 	
 	}
@@ -222,9 +222,26 @@ public class UserController {
 				return new ResponseEntity<>("No account number found.", HttpStatus.BAD_REQUEST);
 			return userService.generateChequeService(username, acc);
 		} catch (Exception e) {
-			return new ResponseEntity<>(e.toString(), HttpStatus.OK);
+			return new ResponseEntity<>(e.toString(), HttpStatus.BAD_REQUEST);
 		}
 	
+	}
+	
+
+	@PostMapping(path= "/debitAmount", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+	public ResponseEntity<?> debitAmt(HttpServletRequest request, @RequestBody Account acc){
+		try {
+			String token = request.getHeader(SecurityConstants.HEADER_STRING);
+			String username = JWT.require(Algorithm.HMAC512(SecurityConstants.SECRET.getBytes())).build()
+					.verify(token.replace(SecurityConstants.TOKEN_PREFIX, "")).getSubject();
+			if (Double.isNaN(acc.getAmount_to_deduct()) || acc.getAmount_to_deduct() <= 0)
+				return new ResponseEntity<>("No amount found in request.", HttpStatus.BAD_REQUEST);
+			if (acc.getAccount_number() == null || acc.getAccount_number().isEmpty())
+				return new ResponseEntity<>("No account number found.", HttpStatus.BAD_REQUEST);
+			return userService.debitAmountService(username, acc);
+		} catch (Exception e) {
+			return new ResponseEntity<>(e.toString(), HttpStatus.BAD_REQUEST);
+		}
 	}
 
 }
