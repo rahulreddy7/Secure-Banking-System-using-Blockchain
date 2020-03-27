@@ -7,11 +7,19 @@ import java.util.Map;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBObject;
 
+import io.sbs.constant.UserType;
 import io.sbs.model.Account;
 
 public class WorkflowDTO implements Serializable{
 	private String type;
 	private List<?> details;
+	private UserType role;
+	public UserType getRole() {
+		return role;
+	}
+	public void setRole(UserType role) {
+		this.role = role;
+	}
 	public String getType() {
 		return type;
 	}

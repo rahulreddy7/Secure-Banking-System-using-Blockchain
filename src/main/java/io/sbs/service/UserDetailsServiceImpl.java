@@ -4,6 +4,7 @@ import io.sbs.dto.UserDTO;
 //import io.sbs.model.User;
 
 import io.sbs.model.ApplicationUser;
+import io.sbs.model.LoginOTP;
 import io.sbs.repository.ApplicationUserRepository;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,6 +35,27 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 	@Autowired
 	private MongoTemplate mongoTemplate;
 
+//	@Override
+//	public UserDetails loadUserByUsername(String username)
+//			throws UsernameNotFoundException {
+//		// BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+//		//TODO Later Check for mongo repository method
+////		ApplicationUser applicationUser = applicationUserRepository.findByUsername(username);
+////		if (applicationUser == null) {
+////            throw new UsernameNotFoundException(username);
+////        }
+////        return new User(applicationUser.getUsername(), applicationUser.getPassword(), emptyList());
+//		Query query = new Query(Criteria.where("username"));
+//		UserDTO dto = mongoTemplate.findOne(
+//				Query.query(Criteria.where("username").is(username)),
+//				UserDTO.class, "user");
+//		if (dto == null) {
+//			throw new UsernameNotFoundException(username);
+//		}
+//		return new User(dto.getUsername(), dto.getPassword(), emptyList());
+//	}
+	
+	
 	@Override
 	public UserDetails loadUserByUsername(String username)
 			throws UsernameNotFoundException {
@@ -45,12 +67,25 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 //        }
 //        return new User(applicationUser.getUsername(), applicationUser.getPassword(), emptyList());
 		Query query = new Query(Criteria.where("username"));
-		UserDTO dto = mongoTemplate.findOne(
+		LoginOTP dto = mongoTemplate.findOne(
 				Query.query(Criteria.where("username").is(username)),
-				UserDTO.class, "user");
+				LoginOTP.class, "user");
 		if (dto == null) {
 			throw new UsernameNotFoundException(username);
 		}
-		return new User(dto.getUsername(), dto.getPassword(), emptyList());
+		return new User(dto.getUsername(), dto.getOtp(), emptyList());
 	}
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
 }

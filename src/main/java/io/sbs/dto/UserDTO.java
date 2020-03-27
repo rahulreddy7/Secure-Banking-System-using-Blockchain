@@ -2,6 +2,8 @@ package io.sbs.dto;
 
 import org.springframework.data.annotation.Id;
 
+import io.sbs.constant.UserType;
+
 import java.io.Serializable;
 
 /**
@@ -16,17 +18,17 @@ public class UserDTO implements Serializable {
     private String password;
     private String email;
 	private String address;
-	private String role;
+	private UserType role;
 	private String acc_type;
     private double acc_balance;
     private double account_number;
 
 
-	public String getRole() {
+	public UserType getRole() {
 		return role;
 	}
 
-	public void setRole(String role) {
+	public void setRole(UserType role) {
 		this.role = role;
 	}
 

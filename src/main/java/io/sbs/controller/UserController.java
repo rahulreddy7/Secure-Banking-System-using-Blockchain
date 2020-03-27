@@ -1,6 +1,7 @@
 package io.sbs.controller;
 
 
+import io.sbs.constant.UserType;
 import io.sbs.dto.UserDTO;
 import io.sbs.dto.WorkflowDTO;
 import io.sbs.model.Account;
@@ -93,7 +94,7 @@ public class UserController {
 		userService.register(userDTO);
 		return ResultVO.createSuccess(userDTO);
 	}
-
+	
 
 	/*
 	 * Sample payload { "username":"johnm", "password":"doe", }
@@ -126,8 +127,22 @@ public class UserController {
 	
 	@PostMapping("updateDetails")
 	public ResultVO updateDetails( @RequestBody UserDTO userDTO) {
-		UserDTO userObj = userService.updateDetails(userDTO);
+		UserDTO userObj = userService.updateUserInfo(userDTO);
 		return ResultVO.createSuccess(userObj);
+	}
+	@PostMapping("approve")
+	public ResultVO approve( @RequestBody WorkflowDTO workflowDTO) {
+		WorkflowDTO workflowObj = new WorkflowDTO();
+		if(workflowDTO.getType().equals("New_User")) {
+			workflowObj = userService.createUser(workflowDTO);
+		}	
+		else if(workflowDTO.getType().equals("update_details") && workflowDTO.getRole()==UserType.Tier2) {
+			workflowObj = userService.updateDetails(workflowDTO);
+		}
+			
+//		else if(workflowDTO.getType()=="appointment")
+//			workflowObj = appointmentService.createAppointments(workflowDTO);
+		return ResultVO.createSuccess(workflowObj);
 	}
 	
 //	@PostMapping("appt")
