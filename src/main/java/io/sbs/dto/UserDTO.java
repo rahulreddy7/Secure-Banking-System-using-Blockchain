@@ -18,6 +18,7 @@ public class UserDTO implements Serializable {
     private String password;
     private String email;
 	private String address;
+
 	private UserType role;
 	private String acc_type;
     private double acc_balance;
@@ -39,6 +40,9 @@ public class UserDTO implements Serializable {
 	public void setAcc_type(String acc_type) {
 		this.acc_type = acc_type;
 	}
+
+	private String newpassword;
+
 
 	public double getAcc_balance() {
 		return acc_balance;
@@ -99,5 +103,13 @@ public class UserDTO implements Serializable {
 	}
 	public void setAddress(String address) {
 		this.address = address;
+	}
+
+	public String getNewpassword() {
+		return newpassword;
+	}
+
+	public void setNewpassword(String newpassword) {
+		this.newpassword = newpassword;
 	}
 }
