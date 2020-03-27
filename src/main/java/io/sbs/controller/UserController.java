@@ -45,6 +45,7 @@ public class UserController {
 	                    .build()
 	                    .verify(token.replace(SecurityConstants.TOKEN_PREFIX, ""))
 	                    .getSubject();
+
 			List<Account> acc_list = new ArrayList<Account>();
 			acc_list = userService.getUserAccountDetails(username);
 			if (acc_list.size() > 0)
@@ -140,11 +141,15 @@ public class UserController {
 //		return ResultVO.createSuccess(appointmentdto);
 //	}
 
-	//needs user name, otp to be checked
 	@PostMapping(path= "/otp_check", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-	public ResponseEntity<?> checkOTP(@RequestBody LoginOTP login_otp) {
+	public ResponseEntity<?> checkOTP(HttpServletRequest request, @RequestBody LoginOTP login_otp) {
 		try {
-			boolean otp_match = userService.checkAndMatchOTP(login_otp.getUsername(),login_otp.getOtp());
+			String token = request.getHeader(SecurityConstants.HEADER_STRING);
+	        String  username = JWT.require(Algorithm.HMAC512(SecurityConstants.SECRET.getBytes()))
+	                    .build()
+	                    .verify(token.replace(SecurityConstants.TOKEN_PREFIX, ""))
+	                    .getSubject();
+			boolean otp_match = userService.checkAndMatchOTP(username,login_otp.getOtp());
 			if (otp_match)
 				return new ResponseEntity<>("OTP Verification Successful!", HttpStatus.OK);
 			else

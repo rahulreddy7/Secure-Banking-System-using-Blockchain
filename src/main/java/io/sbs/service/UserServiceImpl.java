@@ -54,9 +54,9 @@ public class UserServiceImpl implements UserService {
 	    for (Document account : cursor_accounts) {
 	    	Account a = new Account();
 	    	a.setAcc_holder_name(myDoc.get("name").toString());
-	        a.setAccount_number(account.get("account_num").toString());
-	        a.setAcc_type(account.get("type").toString());
-	        a.setAcc_balance(Double.parseDouble(account.get("balance").toString()));
+	        a.setAccount_number(account.get("account_number").toString());
+	        a.setAcc_type(account.get("acc_type").toString());
+	        a.setAcc_balance(Double.parseDouble(account.get("acc_balance").toString()));
 	        a.setUsername(username);
 	        acc_list.add(a);
 	    }
