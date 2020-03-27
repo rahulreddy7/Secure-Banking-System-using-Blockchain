@@ -116,12 +116,11 @@ public class AccountServiceImpl implements AccountService {
 		for (Document account : cursor_accounts) {
 			Account a = new Account();
 			a.setAcc_holder_name(user.get("name").toString());
-			a.setAccount_number(Double.parseDouble(account.get("account_num")
-					.toString()));
+			a.setAccount_number(account.get("account_num").toString());
 			a.setAcc_type(account.get("type").toString());
 			a.setAcc_balance(Double.parseDouble(account.get("balance")
 					.toString()));
-			a.setUser_id(userId);
+			a.setUsername(account.get("username").toString());
 			accounts.add(a);
 		}
 

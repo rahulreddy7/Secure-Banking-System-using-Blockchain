@@ -1,0 +1,124 @@
+1) localhost:8081/users/getUserInfo/
+- POST API
+- payload:
+{
+	"username":"dev204"
+}
+- returns details of the user
+- expected output: 
+{
+    "name": "Dev Sharma",
+    "emailString": "devanshs212@gmail.com",
+    "address": "123 ASU AZ",
+    "username": null,
+    "password": null
+}
+
+2) localhost:8081/users/homePageDetails
+- POST API
+- return details for home page
+- token:eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJzdWIiOiIxMjMiLCJleHAiOjE1ODYwNjg3MjV9.XUeLORal_J8bsiaEfdsF02Saob-EwEH0Xuh4qh1ryqUz-xXksogog3EPBvLGDMGHJKQGFVVPf9BbLIkog_ABrQ
+- output 
+[
+    
+    {
+        "acc_type": "savings",
+        "acc_holder_name": "ABC",
+        "acc_balance": 728121.0,
+        "username": "123",
+        "account_number": 8.2738967E7
+    },
+    {
+        "acc_type": "checking",
+        "acc_holder_name": "ABC",
+        "acc_balance": 12002.0,
+        "username": "123",
+        "account_number": 8.2738967E7
+    }
+]
+
+3) localhost:8081/users/otp_check - POST API
+Body:
+{
+	"username":"dev204",
+	"otp": "460653"
+}
+- verifies the OTP from database
+- expected output:
+OTP Verification Successful!
+
+4) localhost:8081/users/forgotPass 
+- POST API
+- sends OTP to email of the user
+- expected output: 
+OTP Successfully sent!
+- token: eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJzdWIiOiIxMjMiLCJleHAiOjE1ODYwNjg3MjV9.XUeLORal_J8bsiaEfdsF02Saob-EwEH0Xuh4qh1ryqUz-xXksogog3EPBvLGDMGHJKQGFVVPf9BbLIkog_ABrQ
+
+
+5)localhost:8081/users/updateDetails - POST API
+
+Body:
+	{
+	"username":"johnm",
+	"address":"doe",
+	"email":"doe11@gmail.com"
+	}
+	 
+Function updates the user details and updates them into user collection
+	 
+6). localhost:8081/users/register - POST API
+Body:
+{
+	"username":"Aviral111",
+	"password":"Vila",
+	"email":"allo@gmail.com",
+	"sex":1
+}
+Function creates the user in user collection and stores username and password in authenticationProfile collection
+
+7) localhost:8081/users/login POST API
+Body:
+{
+	"username":"Aviral111",
+	"password":"Vila",
+	"email":"allo@gmail.com",
+	"sex":1
+}
+Function validates the user in user collection
+
+8) localhost:8081/users/getUserInfoToken
+- POST API
+- return details of user by fetching username from token
+- No body reqd, only token: eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJzdWIiOiIxMjMiLCJleHAiOjE1ODYwNjg3MjV9.XUeLORal_J8bsiaEfdsF02Saob-EwEH0Xuh4qh1ryqUz-xXksogog3EPBvLGDMGHJKQGFVVPf9BbLIkog_ABrQ
+
+9) localhost:8081/users/resetPass
+- POST API
+- body:
+{
+	"password": "devansh"
+}
+- token: eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJzdWIiOiIxMjMiLCJleHAiOjE1ODYwNjg3MjV9.XUeLORal_J8bsiaEfdsF02Saob-EwEH0Xuh4qh1ryqUz-xXksogog3EPBvLGDMGHJKQGFVVPf9BbLIkog_ABrQ
+- resets the user password
+
+10) localhost:8081/users/resetPass
+- POST API
+- {
+	"username": "abc2",
+	"password": "def",
+	"newpassword": "def2"
+}
+
+11) localhost:8081/users/resetPass
+{
+	"username": "1",
+	"password": "123",
+	"newpassword": "devansh"
+}
+- todo: password hashing check
+
+12) localhost:8081/users/generateCheque
+{
+	"account_number" : "9544118057",
+	"amount_to_deduct": "10"
+}
+- token: eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJhc3UiLCJleHAiOjE1ODYwODkzNDV9.OTyDnkdGXthifWMVD7bufOBGQUBFpFx_mXlNpYMhxz40-Z2vQW8Fn6OJn1E2X-YF_WJPiCzS6f1-IME7zZj7zw
