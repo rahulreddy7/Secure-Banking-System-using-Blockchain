@@ -32,6 +32,22 @@ public class AccountServiceImpl implements AccountService {
 			.create("mongodb://admin:myadminpassword@18.222.64.16:27017");
 	final MongoDatabase database = mongoClient.getDatabase("mydb");
 
+	/*
+	 * 
+	 * Phone { mode : phone, self : false, fromAccNo : 1231231, amt : 11,
+	 * toBeneficiary : 148099099 }
+	 * 
+	 * Email { mode : email, self : false, fromAccNo : 1231231, amt : 11,
+	 * toBeneficiary : abc@test.com }
+	 * 
+	 * 
+	 * Account { mode : account, self : false, fromAccNo : 1231231, amt : 11,
+	 * toBeneficiary : 123333(will change according to the mode) }
+	 * 
+	 * Self { mode : account, self : true, fromAccNo : 1231231, amt : 11,
+	 * toBeneficiary : 123333 }
+	 */
+
 	@Override
 	public void transfer_funds(TransferPostDTO transferPostDTO) {
 		// TODO Auto-generated method stub
@@ -62,7 +78,7 @@ public class AccountServiceImpl implements AccountService {
 		Document from_accnt_doc = collection.find(eq("_id", from_accnt))
 				.first();
 		Document to_accnt_doc = collection.find(eq("_id", to_accnt)).first();
-		//TODO
+		// TODO
 		// Update from_accnt_doc collection, save it
 		// Update to_accnt_doc collection, save it
 		// Add the Transaction in the mongo collection for transaction

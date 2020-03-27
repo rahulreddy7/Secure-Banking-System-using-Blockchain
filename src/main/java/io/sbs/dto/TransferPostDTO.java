@@ -7,7 +7,16 @@ public class TransferPostDTO {
 	private String to_accnt;
 	private String description;
 	private double amount;
+	private boolean self;
 	
+	public boolean isSelf() {
+		return self;
+	}
+
+	public void setSelf(boolean self) {
+		this.self = self;
+	}
+
 	private long phoneNumber;
 	private String email;
 	
