@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.http.ResponseEntity;
 
 import io.sbs.dto.UserDTO;
+import io.sbs.dto.WorkflowDTO;
 import io.sbs.model.Account;
 import io.sbs.model.User;
 
@@ -18,11 +19,16 @@ public interface UserService {
 
 	UserDTO login(UserDTO userDTO);
 	
-	public UserDTO updateDetails( UserDTO user);
+	public WorkflowDTO updateDetails( WorkflowDTO workflowDTO);
 
 	public boolean checkAndMatchOTP(String userid, String otp);
 
 	public boolean forgotPasswordOTP(String userid);
+
+
+	public WorkflowDTO createUser(WorkflowDTO workflowDTO);
+
+	UserDTO updateUserInfo(UserDTO user);
 
 
 	public ResponseEntity<?> resetPass(String username, String oldpassword, String newpassword);
@@ -32,5 +38,6 @@ public interface UserService {
 	public ResponseEntity<?> generateChequeService(String username, Account acc);
 
 	public ResponseEntity<?> debitAmountService(String username, Account acc);
+
 
 }

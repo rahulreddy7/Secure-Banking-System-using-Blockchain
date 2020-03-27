@@ -1,12 +1,33 @@
 package io.sbs.controller;
 
 
+
+import io.sbs.constant.UserType;
+import io.sbs.dto.UserDTO;
+import io.sbs.dto.WorkflowDTO;
+import io.sbs.model.Account;
+import io.sbs.model.LoginOTP;
+import io.sbs.model.User;
+import io.sbs.model.ApplicationUser;
+import io.sbs.security.JWTAuthenticationFilter;
+import io.sbs.security.SecurityConstants;
+import io.sbs.service.UserService;
+import io.sbs.vo.ResultVO;
+
+import io.sbs.exception.RecordNotFoundException;
+import io.sbs.service.UserServiceImpl;
+
+import static com.auth0.jwt.algorithms.Algorithm.HMAC512;
+
+
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 
+import org.apache.tomcat.util.net.openssl.ciphers.Authentication;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -18,7 +39,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
-
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
 
@@ -36,6 +56,7 @@ public class UserController {
 
 	@Autowired
 	private UserService userService;
+
 
 	@RequestMapping(value = "/homePageDetails", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<?> getAccountDetails(HttpServletRequest request) {
@@ -98,6 +119,7 @@ public class UserController {
 		userService.register(userDTO);
 		return ResultVO.createSuccess(userDTO);
 	}
+	
 
 	/*
 	 * Sample payload { "username":"johnm", "password":"doe", }
@@ -131,8 +153,22 @@ public class UserController {
 	
 	@PostMapping("updateDetails")
 	public ResultVO updateDetails( @RequestBody UserDTO userDTO) {
-		UserDTO userObj = userService.updateDetails(userDTO);
+		UserDTO userObj = userService.updateUserInfo(userDTO);
 		return ResultVO.createSuccess(userObj);
+	}
+	@PostMapping("approve")
+	public ResultVO approve( @RequestBody WorkflowDTO workflowDTO) {
+		WorkflowDTO workflowObj = new WorkflowDTO();
+		if(workflowDTO.getType().equals("New_User")) {
+			workflowObj = userService.createUser(workflowDTO);
+		}	
+		else if(workflowDTO.getType().equals("update_details") && workflowDTO.getRole()==UserType.Tier2) {
+			workflowObj = userService.updateDetails(workflowDTO);
+		}
+			
+//		else if(workflowDTO.getType()=="appointment")
+//			workflowObj = appointmentService.createAppointments(workflowDTO);
+		return ResultVO.createSuccess(workflowObj);
 	}
 	
 //	@PostMapping("appt")
