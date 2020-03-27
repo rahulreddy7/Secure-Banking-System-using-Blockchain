@@ -12,6 +12,8 @@ import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -21,23 +23,18 @@ import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.result.UpdateResult;
 
-import io.sbs.dto.UserDTO;
-import io.sbs.exception.BusinessException;
-import io.sbs.model.Account;
-import io.sbs.model.User;
 import io.sbs.dto.AuthenticationProfileDTO;
 import io.sbs.dto.UserDTO;
 import io.sbs.exception.BusinessException;
 import io.sbs.exception.ValidationException;
 import io.sbs.model.Account;
-import io.sbs.model.ApplicationUser;
+import io.sbs.model.User;
 
 @Service
 public class UserServiceImpl implements UserService {
 	
 	MongoClient mongoClient = MongoClients.create("mongodb://admin:myadminpassword@18.222.64.16:27017");
 	MongoDatabase database = mongoClient.getDatabase("mydb");
-
 
 	@Autowired
 	private MongoTemplate mongoTemplate;
@@ -52,14 +49,14 @@ public class UserServiceImpl implements UserService {
 	    
 	    MongoCollection<Document> collection_acc = database.getCollection("account");
 	    List<Document> cursor_accounts = collection_acc.find(eq("username", username)).into(new ArrayList<Document>());
-	      
+	    
 		List<Account> acc_list = new ArrayList<Account>();
 	    for (Document account : cursor_accounts) {
 	    	Account a = new Account();
 	    	a.setAcc_holder_name(myDoc.get("name").toString());
-	        a.setAccount_number(Double.parseDouble(account.get("account_num").toString()));
-	        a.setAcc_type(account.get("type").toString());
-	        a.setAcc_balance(Double.parseDouble(account.get("balance").toString()));
+	        a.setAccount_number(account.get("account_number").toString());
+	        a.setAcc_type(account.get("acc_type").toString());
+	        a.setAcc_balance(Double.parseDouble(account.get("acc_balance").toString()));
 	        a.setUsername(username);
 	        acc_list.add(a);
 	    }
@@ -68,13 +65,13 @@ public class UserServiceImpl implements UserService {
 	}
 
 	@Override
-	public ApplicationUser getUserInfo(String username) {
+	public User getUserInfo(String username) {
 		MongoCollection<Document> collection = database.getCollection("user");
 		Document myDoc = collection.find(eq("username", username)).first();
-		ApplicationUser user = new ApplicationUser();
-		user.setName(myDoc.get("name").toString());
-		user.setEmailString(myDoc.get("email").toString());
-		user.setAddress(myDoc.get("address").toString());
+		User user = new User();
+		if (myDoc.get("name") != null) user.setName(myDoc.get("name").toString());
+		if (myDoc.get("email") != null) user.setEmailString(myDoc.get("email").toString());
+		if (myDoc.get("address") != null) user.setAddress(myDoc.get("address").toString());
 		return user;
 	}
 	
@@ -157,6 +154,89 @@ public class UserServiceImpl implements UserService {
 		String subject = "SBS Bank Password Reset OTP";
 		es.send_email(username, email, subject);
 		return true;
+	}
+
+	@Override
+	public ResponseEntity<?> resetPass(String username, String currpassword, String newpassword) {
+		System.out.println(username+currpassword);
+		MongoCollection<Document> collection = database.getCollection("user");
+		Document myDoc = collection.find(eq("username", username)).first();
+		if (myDoc == null)
+			return new ResponseEntity<>("The user does not exist. ", HttpStatus.BAD_REQUEST);
+		BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+		String hashedPassword = passwordEncoder.encode(newpassword);
+//		System.out.println(myDoc.get("password").toString());
+//		System.out.println(passwordEncoder.encode("def"));
+//		if (passwordEncoder.matches((CharSequence)currpassword, myDoc.get("password").toString()))
+//			System.out.println("match");
+//		else 
+//			System.out.println("NOT match");
+		collection.updateOne(eq("username", username), new Document("$set", new Document("password", newpassword)));
+		MongoCollection<Document> c = database.getCollection("authenticationProfile");
+		c.updateOne(eq("username", username), new Document("$set", new Document("password", newpassword)));
+		return new ResponseEntity<>("Password successfully updated.", HttpStatus.OK);
+
+	}
+
+	@Override
+	public ResponseEntity<?> addAcc(String username, Account acc) {
+		EmailService es = new EmailService();
+		String acc_num = new String(es.generate_random(9));
+		MongoCollection<Document> collection = database.getCollection("user");
+		Document myDoc = collection.find(eq("username", username)).first();
+		if (myDoc == null)
+			return new ResponseEntity<>("No user found. ", HttpStatus.OK);
+		collection = database.getCollection("account");
+		myDoc = collection.find(eq("account_number", acc_num)).first();
+		if (myDoc != null)
+			acc_num = new String(es.generate_random(9));
+
+		Document doc = new Document("username", username)
+                .append("acc_type", acc.getAcc_type())
+                .append("acc_holder_name", acc.getAcc_holder_name())
+                .append("acc_balance", acc.getAcc_balance())
+                .append("account_number", "9"+ acc_num);
+		collection.insertOne(doc);
+		return new ResponseEntity<>("Successfully added new account ", HttpStatus.OK);
+	}
+
+	@Override
+	public ResponseEntity<?> generateChequeService(String username, Account acc) {
+		MongoCollection<Document> collection = database.getCollection("user");
+		Document myDoc = collection.find(eq("username", username)).first();
+		String email = myDoc.getString("email");
+		EmailService es = new EmailService();
+		collection = database.getCollection("account");
+		myDoc = collection.find(eq("username", username)).first();
+		if (myDoc == null)
+			return new ResponseEntity<>("No username found. ", HttpStatus.OK);
+
+		myDoc = collection.find(eq("account_number", acc.getAccount_number())).first();
+		if (myDoc == null)
+			return new ResponseEntity<>("No account found. ", HttpStatus.OK);
+
+		double balance = myDoc.getDouble("acc_balance");
+		balance = balance - acc.getAmount_to_deduct();
+		collection.updateOne(eq("account_number", acc.getAccount_number()), new Document("$set", new Document("acc_balance", balance)));
+		es.send_email_cheque_success(email, "Cashier Cheque Issued", acc.getAmount_to_deduct());
+		return new ResponseEntity<>("Successfully issued new cheque ", HttpStatus.OK);
+	}
+
+	@Override
+	public ResponseEntity<?> debitAmountService(String username, Account acc) {
+		MongoCollection<Document> collection = database.getCollection("account");
+		Document myDoc = collection.find(eq("username", username)).first();
+		if (myDoc == null)
+			return new ResponseEntity<>("No username found. ", HttpStatus.OK);
+
+		myDoc = collection.find(eq("account_number", acc.getAccount_number())).first();
+		if (myDoc == null)
+			return new ResponseEntity<>("No account found. ", HttpStatus.OK);
+		
+		double balance = myDoc.getDouble("acc_balance");
+		balance = balance - acc.getAmount_to_deduct();
+		collection.updateOne(eq("account_number", acc.getAccount_number()), new Document("$set", new Document("acc_balance", balance)));
+		return new ResponseEntity<>("Amount successfully debited from account. ", HttpStatus.OK);
 	}
 
 }

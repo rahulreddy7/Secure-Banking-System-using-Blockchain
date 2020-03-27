@@ -34,15 +34,10 @@ public class EmailService {
 	
 	public boolean send_email(String userName, String to_emailID, String subject) {
 		try {
-			mailServerProperties = System.getProperties();
-			mailServerProperties.put("mail.smtp.port", "587");
-			mailServerProperties.put("mail.smtp.auth", "true");
-			mailServerProperties.put("mail.smtp.starttls.enable", "true");
-			getMailSession = Session.getDefaultInstance(mailServerProperties, null);
-			generateMailMessage = new MimeMessage(getMailSession);
+			generateMailMessage = getProperties();
 			generateMailMessage.addRecipient(Message.RecipientType.TO, new InternetAddress(to_emailID));
 			generateMailMessage.setSubject(subject);
-			String otp_string = new String(generate_otp(6));
+			String otp_string = new String(generate_random(6));
 			System.out.println("Generated otp: " + otp_string);
 			String emailBody = "Your One Time Password (OTP) is: "+ otp_string +"." + "<br><br> Regards, <br>SBS Admin";
 			generateMailMessage.setContent(emailBody, "text/html");
@@ -68,6 +63,35 @@ public class EmailService {
 			return false;
 		}
 	}
+
+	public boolean send_email_cheque_success (String to_emailID, String subject, double amt) {
+		
+		try {
+			generateMailMessage = getProperties();
+			generateMailMessage.addRecipient(Message.RecipientType.TO, new InternetAddress(to_emailID));
+			generateMailMessage.setSubject(subject);
+			String emailBody = "A cashier cheque of amount: "+ amt +" has been issued" + "<br><br> Regards, <br>SBS Admin";
+			generateMailMessage.setContent(emailBody, "text/html");
+			Transport transport = getMailSession.getTransport("smtp");	
+			transport.connect("smtp.gmail.com", "sbs.cse545.softsec@gmail.com", "asucse545");
+			transport.sendMessage(generateMailMessage, generateMailMessage.getAllRecipients());
+			transport.close();
+			return true;
+		} catch (Exception e) {
+			e.printStackTrace();
+			return false;
+		}
+	}
+	
+	public MimeMessage getProperties() {
+		mailServerProperties = System.getProperties();
+		mailServerProperties.put("mail.smtp.port", "587");
+		mailServerProperties.put("mail.smtp.auth", "true");
+		mailServerProperties.put("mail.smtp.starttls.enable", "true");
+		getMailSession = Session.getDefaultInstance(mailServerProperties, null);
+		generateMailMessage = new MimeMessage(getMailSession);
+		return generateMailMessage;
+	}
 	
 	private void saveToDB(String userName, String to_emailID, String otp_string) {
 		MongoCollection<Document> collection = database.getCollection("loginOTP");
@@ -83,7 +107,7 @@ public class EmailService {
 		collection.updateOne(filter, update, options);
 	}
 
-	private char[] generate_otp(int len) {
+	public char[] generate_random(int len) {
 		String numbers = "0123456789"; 
 		Random rndm_method = new Random();
 		
