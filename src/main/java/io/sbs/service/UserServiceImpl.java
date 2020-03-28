@@ -10,6 +10,7 @@ import io.sbs.exception.BusinessException;
 import io.sbs.exception.ValidationException;
 import io.sbs.model.Account;
 import io.sbs.model.User;
+import io.sbs.model.Workflow;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -333,6 +334,14 @@ public class UserServiceImpl implements UserService {
 		if(!es.send_email(dto.getUsername(), dto.getEmail(), subject)) {
 			throw new BusinessException("Error in sending the email！");
 		}
+		return workflowDTO;
+	}
+
+	@Override
+	public WorkflowDTO updateStateOfWorkflow(WorkflowDTO workflowDTO) {
+		Update update = new Update();
+		update.set("state", workflowDTO.getState());
+		UpdateResult userObj = mongoTemplate.updateFirst(Query.query(Criteria.where("workflow_id").is(workflowDTO.getWorkflow_id())), update, WorkflowDTO.class, "workflow");
 		return workflowDTO;
 	}
 

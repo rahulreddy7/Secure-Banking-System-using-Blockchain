@@ -44,5 +44,7 @@ public interface UserService {
 
 	WorkflowDTO createAppointments(WorkflowDTO workflowDTO);
 
+	public WorkflowDTO updateStateOfWorkflow(WorkflowDTO workflowDTO);
+
 
 }
