@@ -8,7 +8,7 @@ import io.sbs.model.Account;
 import io.sbs.model.LoginOTP;
 import io.sbs.model.User;
 import io.sbs.security.SecurityConstants;
-import io.sbs.service.AppointmentServiceImpl;
+import io.sbs.service.AppointmentService;
 import io.sbs.service.UserService;
 import io.sbs.vo.ResultVO;
 
@@ -39,7 +39,9 @@ public class UserController {
 
 	@Autowired
 	private UserService userService;
-	private AppointmentServiceImpl appointmentService = new AppointmentServiceImpl();
+
+	@Autowired
+	private AppointmentService appointmentService;
 
 	// @Autowired
 	// private AppointmentService appointmentService;
@@ -98,13 +100,7 @@ public class UserController {
 	}
 
 	/*
-	 * Sample payload { "uid":"testuserid", "username":"johnm",
-	 * "password":"doe", "sex":1, "name":"testname" }
-	 * 
-	 * 
 	 * Function registers the user and saves into user collection
-	 * 
-	 * *
 	 */
 	@PostMapping("register")
 	@ResponseStatus(HttpStatus.CREATED)
@@ -112,15 +108,6 @@ public class UserController {
 		userService.register(userDTO);
 		return ResultVO.createSuccess(userDTO);
 	}
-
-	/*
-	 * Sample payload { "username":"johnm", "password":"doe", }
-	 * 
-	 * 
-	 * Function registers the user and saves into user collection
-	 * 
-	 * *
-	 */
 
 	@PostMapping("login")
 	public ResultVO login(@RequestBody UserDTO userDTO) {
@@ -130,13 +117,7 @@ public class UserController {
 	}
 
 	/*
-	 * Sample payload { "username":"johnm", "address":"doe",
-	 * "email":"doe11@gmail.com" }
-	 * 
-	 * 
 	 * Function updates the user details and updates them into user collection
-	 * 
-	 * *
 	 */
 
 	@PostMapping("updateDetails")

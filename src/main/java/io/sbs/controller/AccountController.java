@@ -18,15 +18,6 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping(value = "/acc")
 public class AccountController {
-
-	// AccountsRepository accounts = new AccountsRepository();
-	//
-	// @RequestMapping(value = "/alldata", method = RequestMethod.GET)
-	// public String getAll() {
-	// System.out.println("Listing sample data");
-	// return accounts.getdata();
-	// }
-
 	@Autowired
 	AccountService accountService;
 
@@ -49,9 +40,6 @@ public class AccountController {
 				&& workflowDTO.getRole() == UserType.Tier1) {
 			workflowObj = accountService.approveNonCriticalTransfer(workflowDTO);
 		}
-
-		// else if(workflowDTO.getType()=="appointment")
-		// workflowObj = appointmentService.createAppointments(workflowDTO);
 		return ResultVO.createSuccess(workflowObj);
 
 	}

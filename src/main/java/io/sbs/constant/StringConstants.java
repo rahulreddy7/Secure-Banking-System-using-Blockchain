@@ -9,5 +9,10 @@ public class StringConstants {
 	
 	public static final String CRITICAL_TRANSACTION = "critical";
 	public static final String NONCRITICAL_TRANSACTION = "noncritical";
+	
+	public static final String WORKFLOW_PENDING = "Pending";
+	public static final String WORKFLOW_APPROVED = "Approved";
+	public static final String WORKFLOW_DECLINED = "Declined";
+	
 
 }

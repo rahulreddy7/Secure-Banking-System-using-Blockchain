@@ -47,10 +47,6 @@ public class AccountServiceImpl implements AccountService {
 	@Autowired
 	private Environment env;
 
-	// public void testMethod() {
-	// //TODO Implement this
-	// }
-
 	final MongoClient mongoClient = MongoClients
 			.create("mongodb://admin:myadminpassword@18.222.64.16:27017");
 	final MongoDatabase database = mongoClient.getDatabase("mydb");
@@ -166,6 +162,7 @@ public class AccountServiceImpl implements AccountService {
 		details.add(obj);
 		workDTO.setDetails(details);
 		workDTO.setRole(role);
+		workDTO.setType(StringConstants.WORKFLOW_PENDING);
 		return workDTO;
 	}
 
@@ -266,6 +263,9 @@ public class AccountServiceImpl implements AccountService {
 		Transaction transaction = saveTransaction(map, transactionType);
 		// transaction.setTransaction_type(transaction_type)
 		mongoTemplate.save(transaction, "transaction");
+		workflowDTO.setType(StringConstants.WORKFLOW_APPROVED);
+
+		// TODO mongoTemplate.save(workflowDTO, "workflow");
 		return workflowDTO;
 	}
 
