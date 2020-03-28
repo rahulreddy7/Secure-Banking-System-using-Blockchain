@@ -1,15 +1,22 @@
 package io.sbs.service;
 
 import static com.mongodb.client.model.Filters.eq;
+import io.sbs.constant.UserType;
+import io.sbs.dto.AppointmentDTO;
+import io.sbs.dto.AuthenticationProfileDTO;
+import io.sbs.dto.UserDTO;
+import io.sbs.dto.WorkflowDTO;
+import io.sbs.exception.BusinessException;
+import io.sbs.exception.ValidationException;
+import io.sbs.model.Account;
+import io.sbs.model.User;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Random;
 
-import org.apache.tomcat.util.json.JSONParser;
 import org.bson.Document;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
@@ -23,34 +30,17 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import com.mongodb.BasicDBObject;
-import com.mongodb.DBObject;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoClients;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.result.UpdateResult;
-import com.mongodb.util.JSON;
-
-
-import io.sbs.dto.UserDTO;
-import io.sbs.dto.WorkflowDTO;
-import io.sbs.exception.BusinessException;
-import io.sbs.exception.ValidationException;
-import io.sbs.model.Account;
-import io.sbs.model.User;
-import net.minidev.json.JSONObject;
-import io.sbs.constant.UserType;
-import io.sbs.dto.AppointmentDTO;
-import io.sbs.dto.AuthenticationProfileDTO;
-import io.sbs.model.Account;
-import io.sbs.model.User;
 
 @Service
 public class UserServiceImpl implements UserService {
 	
-	MongoClient mongoClient = MongoClients.create("mongodb://admin:myadminpassword@18.222.64.16:27017");
-	MongoDatabase database = mongoClient.getDatabase("mydb");
+	final MongoClient mongoClient = MongoClients.create("mongodb://admin:myadminpassword@18.222.64.16:27017");
+	final MongoDatabase database = mongoClient.getDatabase("mydb");
 
 	@Autowired
 	private MongoTemplate mongoTemplate;

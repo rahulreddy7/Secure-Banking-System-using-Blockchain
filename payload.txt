@@ -122,3 +122,61 @@ Function validates the user in user collection
 	"amount_to_deduct": "10"
 }
 - token: eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJhc3UiLCJleHAiOjE1ODYwODkzNDV9.OTyDnkdGXthifWMVD7bufOBGQUBFpFx_mXlNpYMhxz40-Z2vQW8Fn6OJn1E2X-YF_WJPiCzS6f1-IME7zZj7zw
+
+
+
+13) localhost:8081/acc/transfer
+Possible types of transfer payload
+	Phone { mode : phone, self : false, fromAccNo : 1231231, amt : 11,
+	toBeneficiary : 148099099 }
+	
+	Email { mode : email, self : false, fromAccNo : 1231231, amt : 11,
+	toBeneficiary : abc@test.com }
+	
+	
+	Account { mode : account, self : false, fromAccNo : 1231231, amt : 11,
+	toBeneficiary : 123333(will change according to the mode) }
+	
+	Self { mode : account, self : true, fromAccNo : 1231231, amt : 11,
+	toBeneficiary : 123333 } 
+- Details
+	POST API- Saves the transfer details in the workflow object with respective role
+		- Critical - Tier2
+		- Non Critical - Tier1
+	Returns - Void
+	
+14) localhost:8081/acc/transfer_approve
+Details
+-The api called when the transfer(critical or non critical transaction is approved)
+Payload
+- 
+Critical transfer
+{ 
+details : [
+{
+"type" : "phone",
+"self" : false, 
+ "fromAccNo" : "1231231",
+ "amt" : 1002,
+ "toBeneficiary" : "148099099"
+}
+],
+role: Tier2,
+state: "Pending", 
+ }
+ 
+ NonCritical transfer
+{ 
+details : [
+{
+"type" : "phone",
+"self" : false, 
+ "fromAccNo" : "1231231",
+ "amt" : 199,
+ "toBeneficiary" : "148099099"
+}
+],
+role: Tier1,
+state: "Pending", 
+ }
+Returns - Updated workflow object with updated state Approved
