@@ -109,7 +109,7 @@ public class AccountServiceImpl implements AccountService {
 							eq("username", user.get("username")))).first();
 
 			// accountRepository
-			int s = 2;
+			// int s = 2;
 			break;
 		case "account":
 			/*
@@ -126,20 +126,22 @@ public class AccountServiceImpl implements AccountService {
 				.first();
 		String type = null;
 		WorkflowDTO workDTO = null;
-		
-		if (transferPostDTO.getAmount() > 1000) {
-			type = "type.criticaltransfer";
+
+		if (transferPostDTO.getAmount() > 1000.0) {
+			// //type = "type.criticaltransfer";
 			EmailService es = new EmailService();
 			String subject = "One Time Password (OTP) for Critical Transfer";
-			if(!es.send_email(from_accnt_doc.get("username").toString(), from_accnt_doc.get("email").toString(), subject)) {
+			if (!es.send_email(from_accnt_doc.get("username").toString(),
+					from_accnt_doc.get("email").toString(), subject)) {
 				throw new BusinessException("Error in sending the email！");
 			}
 			workDTO = saveWorkflow(transferPostDTO, toBeneficiary, from_accnt,
-					type, UserType.Tier2);
+					StringConstants.WORKFLOW_CRITICAL_TRANSFER, UserType.Tier2);
 		} else {
-			type = "type.noncriticaltransfer";
+			// type = "type.noncriticaltransfer";
 			workDTO = saveWorkflow(transferPostDTO, toBeneficiary, from_accnt,
-					type, UserType.Tier1);
+					StringConstants.WORKFLOW_NON_CRITICAL_TRANSFER,
+					UserType.Tier1);
 		}
 
 		mongoTemplate.save(workDTO, "workflow");
@@ -153,7 +155,7 @@ public class AccountServiceImpl implements AccountService {
 	private WorkflowDTO saveWorkflow(TransferPostDTO transferPostDTO,
 			String toBeneficiary, String from_accnt, String type, UserType role) {
 		WorkflowDTO workDTO = new WorkflowDTO();
-		workDTO.setType(env.getProperty(type));
+		workDTO.setType(type);
 		List<TransferPostDTO> details = new ArrayList<TransferPostDTO>();
 		TransferPostDTO obj = new TransferPostDTO();
 		obj.setAmount(transferPostDTO.getAmount());
@@ -163,7 +165,6 @@ public class AccountServiceImpl implements AccountService {
 		obj.setDescription(transferPostDTO.getDescription());
 		details.add(obj);
 		workDTO.setDetails(details);
-		UserType usertype = null;
 		workDTO.setRole(role);
 		return workDTO;
 	}
@@ -214,47 +215,62 @@ public class AccountServiceImpl implements AccountService {
 	public WorkflowDTO approveCriticalTransfer(WorkflowDTO workflowDTO) {
 		// TODO Auto-generated method stub
 		return updateAccount(workflowDTO,
-				StringConstants.WORKFLOW_CRITICAL_TRANSFER);
+				StringConstants.WORKFLOW_CRITICAL_TRANSFER,
+				StringConstants.CRITICAL_TRANSACTION);
 	}
 
 	private WorkflowDTO updateAccount(WorkflowDTO workflowDTO,
-			String transferType) {
+			String transferType, String transactionType) {
 		if (transferType.equals(StringConstants.WORKFLOW_CRITICAL_TRANSFER)) {
 			// Do something about OTP
 		}
 
 		LinkedHashMap map = (LinkedHashMap) workflowDTO.getDetails().get(0);
 		Update update = new Update();
-		UpdateResult userObj = null;
+		UpdateResult accnObj = null;
 		if (map.get("fromAccNo").toString() != null) {
-			double existing_balance = 0.0;
-			double new_balance = existing_balance - (double) map.get("amount");
-			update.set("acc_balance", map.get("address").toString());
-			userObj = mongoTemplate.updateFirst(
+			// UserDTO dto =
+			// mongoTemplate.findOne(Query.query(Criteria.where("username").is(userDTO.getUsername())),
+			// UserDTO.class, "user");
+			Account account = mongoTemplate.findOne(
+					Query.query(Criteria.where("account_number").is(
+							map.get("fromAccnNo"))), Account.class, "account");
+
+			double new_balance = account.getAcc_balance()
+					- (double) map.get("amount");
+			update.set("acc_balance", new_balance);
+			accnObj = mongoTemplate.updateFirst(
 					Query.query(Criteria.where("account_number").is(
 							map.get("fromAccNo").toString())), update,
 					Account.class, "account");
 		}
 		if (map.get("toBeneficiary").toString() != null) {
-			double existing_balance = 0.0;
-			double new_balance = existing_balance + (double) map.get("amount");
-			userObj = mongoTemplate.updateFirst(
+			Account account = mongoTemplate.findOne(
+					Query.query(Criteria.where("account_number").is(
+							map.get("toBeneficiary"))), Account.class,
+					"account");
+
+			double new_balance = account.getAcc_balance()
+					+ (double) map.get("amount");
+			update.set("acc_balance", new_balance);
+			accnObj = mongoTemplate.updateFirst(
 					Query.query(Criteria.where("account_number").is(
 							map.get("toBeneficiary").toString())), update,
 					Account.class, "account");
 		}
-		if (userObj == null) {
+		if (accnObj == null) {
 			throw new BusinessException("cannot be updated！");
 		}
 
 		// Save Transaction in mongo and hyperledger
-		Transaction transaction = saveTransaction(map);
+		Transaction transaction = saveTransaction(map, transactionType);
 		// transaction.setTransaction_type(transaction_type)
 		mongoTemplate.save(transaction, "transaction");
 		return workflowDTO;
 	}
 
-	private Transaction saveTransaction(LinkedHashMap transferObjMap) {
+	private Transaction saveTransaction(LinkedHashMap transferObjMap,
+			String transactionType) {
 		Transaction transaction = new Transaction();
 		transaction.setAmount((double) transferObjMap.get("amount"));
 		transaction.setFrom_accnt(transferObjMap.get("fromAccNo").toString());
@@ -262,6 +278,7 @@ public class AccountServiceImpl implements AccountService {
 		Calendar cal = Calendar.getInstance();
 		Date date = cal.getTime();
 		transaction.setCreationTime(date);
+		transaction.setTransaction_type(transactionType);
 		return transaction;
 	}
 
@@ -269,6 +286,7 @@ public class AccountServiceImpl implements AccountService {
 	public WorkflowDTO approveNonCriticalTransfer(WorkflowDTO workflowDTO) {
 		// TODO Auto-generated method stub
 		return updateAccount(workflowDTO,
-				StringConstants.WORKFLOW_NON_CRITICAL_TRANSFER);
+				StringConstants.WORKFLOW_NON_CRITICAL_TRANSFER,
+				StringConstants.NONCRITICAL_TRANSACTION);
 	}
 }

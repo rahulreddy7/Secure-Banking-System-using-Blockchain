@@ -6,5 +6,8 @@ public class StringConstants {
 	public static final String WORKFLOW_APPOINTMENT = "";
 	public static final String WORKFLOW_NON_CRITICAL_TRANSFER = "criticaltransfer";
 	public static final String WORKFLOW_CRITICAL_TRANSFER = "noncriticaltransfer";
+	
+	public static final String CRITICAL_TRANSACTION = "critical";
+	public static final String NONCRITICAL_TRANSACTION = "noncritical";
 
 }
