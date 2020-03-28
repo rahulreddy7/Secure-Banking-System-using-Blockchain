@@ -71,7 +71,6 @@ public class AccountServiceImpl implements AccountService {
 
 	@Override
 	public void transfer_funds(TransferPostDTO transferPostDTO) {
-		// TODO Auto-generated method stub
 		String mode = transferPostDTO.getMode();
 		String toBeneficiary = transferPostDTO.gettoBeneficiary();
 
@@ -81,7 +80,6 @@ public class AccountServiceImpl implements AccountService {
 		MongoCollection<Document> collection_user = database
 				.getCollection("user");
 
-		Double query_param = null;
 		List<Account> accounts = new ArrayList<Account>();
 		Document user = null;
 
@@ -103,16 +101,8 @@ public class AccountServiceImpl implements AccountService {
 			to_account = collection_accnt.find(
 					Filters.and(eq("acc_type", PRIMARY_ACCNT),
 							eq("username", user.get("username")))).first();
-
-			// accountRepository
-			// int s = 2;
 			break;
 		case "account":
-			/*
-			 * 
-			 * Code for transfering the amount via accounts 1.if to_accn is
-			 * null, update the
-			 */
 			to_account = collection_accnt.find(
 					eq("account_number", PRIMARY_ACCNT)).first();
 		}
@@ -124,7 +114,6 @@ public class AccountServiceImpl implements AccountService {
 		WorkflowDTO workDTO = null;
 
 		if (transferPostDTO.getAmount() > 1000.0) {
-			// //type = "type.criticaltransfer";
 			EmailService es = new EmailService();
 			String subject = "One Time Password (OTP) for Critical Transfer";
 			if (!es.send_email(from_accnt_doc.get("username").toString(),
@@ -134,18 +123,12 @@ public class AccountServiceImpl implements AccountService {
 			workDTO = saveWorkflow(transferPostDTO, toBeneficiary, from_accnt,
 					StringConstants.WORKFLOW_CRITICAL_TRANSFER, UserType.Tier2);
 		} else {
-			// type = "type.noncriticaltransfer";
 			workDTO = saveWorkflow(transferPostDTO, toBeneficiary, from_accnt,
 					StringConstants.WORKFLOW_NON_CRITICAL_TRANSFER,
 					UserType.Tier1);
 		}
 
 		mongoTemplate.save(workDTO, "workflow");
-
-		// Update from_accnt_doc collection, save it
-		// Update to_accnt_doc collection, save it
-		// Add the Transaction in the mongo collection for transaction
-		// collection.updateon
 	}
 
 	private WorkflowDTO saveWorkflow(TransferPostDTO transferPostDTO,
@@ -210,7 +193,6 @@ public class AccountServiceImpl implements AccountService {
 
 	@Override
 	public WorkflowDTO approveCriticalTransfer(WorkflowDTO workflowDTO) {
-		// TODO Auto-generated method stub
 		return updateAccount(workflowDTO,
 				StringConstants.WORKFLOW_CRITICAL_TRANSFER,
 				StringConstants.CRITICAL_TRANSACTION);
@@ -226,9 +208,6 @@ public class AccountServiceImpl implements AccountService {
 		Update update = new Update();
 		UpdateResult accnObj = null;
 		if (map.get("fromAccNo").toString() != null) {
-			// UserDTO dto =
-			// mongoTemplate.findOne(Query.query(Criteria.where("username").is(userDTO.getUsername())),
-			// UserDTO.class, "user");
 			Account account = mongoTemplate.findOne(
 					Query.query(Criteria.where("account_number").is(
 							map.get("fromAccnNo"))), Account.class, "account");
@@ -261,7 +240,6 @@ public class AccountServiceImpl implements AccountService {
 
 		// Save Transaction in mongo and hyperledger
 		Transaction transaction = saveTransaction(map, transactionType);
-		// transaction.setTransaction_type(transaction_type)
 		mongoTemplate.save(transaction, "transaction");
 		workflowDTO.setType(StringConstants.WORKFLOW_APPROVED);
 
@@ -284,7 +262,6 @@ public class AccountServiceImpl implements AccountService {
 
 	@Override
 	public WorkflowDTO approveNonCriticalTransfer(WorkflowDTO workflowDTO) {
-		// TODO Auto-generated method stub
 		return updateAccount(workflowDTO,
 				StringConstants.WORKFLOW_NON_CRITICAL_TRANSFER,
 				StringConstants.NONCRITICAL_TRANSACTION);

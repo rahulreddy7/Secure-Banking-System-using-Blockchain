@@ -38,7 +38,8 @@ public class AccountController {
 		} else if (workflowDTO.getType().equals(
 				StringConstants.WORKFLOW_NON_CRITICAL_TRANSFER)
 				&& workflowDTO.getRole() == UserType.Tier1) {
-			workflowObj = accountService.approveNonCriticalTransfer(workflowDTO);
+			workflowObj = accountService
+					.approveNonCriticalTransfer(workflowDTO);
 		}
 		return ResultVO.createSuccess(workflowObj);
 
