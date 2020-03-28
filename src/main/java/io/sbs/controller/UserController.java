@@ -182,7 +182,7 @@ public class UserController {
 	}
 	@PostMapping("approve")
 	public ResultVO approve( @RequestBody WorkflowDTO workflowDTO) {
-		
+		workflowDTO.setState("Approved");
 		WorkflowDTO workflowObj = new WorkflowDTO();
 		if(workflowDTO.getType().equals("New_User")) {
 			workflowObj = userService.createUser(workflowDTO);

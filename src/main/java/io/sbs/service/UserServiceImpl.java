@@ -119,6 +119,7 @@ public class UserServiceImpl implements UserService {
 		details.add(userDTO);
 		workDTO.setDetails(details);
 		workDTO.setRole(usertype.Tier2); // hardCoded
+		workDTO.setState("Pending");
 		mongoTemplate.save(workDTO, "workflow");
 	}
 
@@ -157,6 +158,7 @@ public class UserServiceImpl implements UserService {
 		workDTO.setDetails(details);
 		UserType usertype = null;
 		workDTO.setRole(usertype.Tier2);
+		workDTO.setState("Pending");
 		mongoTemplate.save(workDTO, "workflow");
 		return user;
 	}
@@ -319,6 +321,7 @@ public class UserServiceImpl implements UserService {
 		workDTO.setDetails(details);
 		UserType usertype = null;
 		workDTO.setRole(usertype.Tier1);
+		workDTO.setState("Pending");
 		mongoTemplate.save(workDTO, "workflow");
 		return appointmentDTO;
 	}
