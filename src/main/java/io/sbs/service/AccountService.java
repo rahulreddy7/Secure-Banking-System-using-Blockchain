@@ -1,14 +1,14 @@
 package io.sbs.service;
 
 import io.sbs.dto.TransferPostDTO;
-import io.sbs.model.Account;
-
-import java.util.List;
-import java.util.Map;
-
+import io.sbs.dto.WorkflowDTO;
 
 public interface AccountService {
 	public void transfer_funds(TransferPostDTO transferPostDTO);
 
-	public List<Account> getAllMatchingAccounts(Map<String, ?> query);
+	// public List<Account> getAllMatchingAccounts(Map<String, ?> query);
+
+	public WorkflowDTO approveCriticalTransfer(WorkflowDTO workflowDTO);
+
+	public WorkflowDTO approveNonCriticalTransfer(WorkflowDTO workflowDTO);
 }
