@@ -180,3 +180,27 @@ role: Tier1,
 state: "Pending", 
  }
 Returns - Updated workflow object with updated state Approved
+14) Approve api, details object will be modified according to the request 
+localhost:8081/users/approve
+{  "type" : "update_details",
+ "workflow_id" : "ce7e8cf4-956b-49cc-9a3f-416bde1d3cbe",
+ "details" : [ { "username" : "u1", "password" : "Vila", "email" : "devanshs212@gmail.com@gmail.com", "acc_balance" : 0, "account_number" : 0, "updated_at" : "2020-03-28T22:14:04.216Z" } ],
+  "role" : "Tier2", "state" : "Pending" }
+
+ token:
+ 
+15) To create the appointments
+ localhost:8081/users/appt
+ {
+	"username":"u1",
+	"time":"5:30",
+	"date":"12/30/2000",
+	"details":"blah"
+}
+16) update details of the user update either the email or the address
+
+localhost:8081/users/updateDetails
+{
+	"username":"u1",
+	"email":"riya.saxena3012@gmail.com"
+}
