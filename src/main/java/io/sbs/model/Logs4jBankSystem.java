@@ -21,10 +21,11 @@ import javax.servlet.*;
 import java.io.*;
 import java.util.*;
 
+@Aspect
 public class Logs4jBankSystem {
 
 
-    //private Logger logger = LogManager.getLogger();
+    private Logger logger = LogManager.getLogger();
 
 
 
@@ -80,5 +81,43 @@ public class Logs4jBankSystem {
     the method use time=799s
     */
 
+
+    ThreadLocal<Long> startTime = new ThreadLocal<>();
+
+    @Pointcut("execution(public * io.sbs.controller.UserController.*(..))")
+    public void getlog(){
+    }
+
+    @Before("getlog()")
+    public void dobefore(JoinPoint joinPoint){
+        ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
+        HttpServletRequest request = attributes.getRequest();
+
+        startTime.set(System.currentTimeMillis());
+
+        logger.info("url={}", request.getRequestURI());
+        logger.info("method={}", request.getMethod());
+
+        Object[] args = joinPoint.getArgs();
+
+        try{
+            List<Object> objects = Arrays.asList(args);
+            logger.info("parameter get={}", objects);
+        }
+        catch (Exception e){
+
+        }
+
+
+
+    }
+
+    @After("getlog()")
+    public void doafter(){
+
+
+        logger.info("the method use time={}s", System.currentTimeMillis()-startTime.get());
+
+    }
 
 }
