@@ -159,6 +159,7 @@ public class UserController {
 			// workflowObj = appointmentService.createAppointments(workflowDTO);
 			workflowObj = userService.createAppointments(workflowDTO);
 		}
+		workflowObj=userService.updateStateOfWorkflow(workflowDTO);
 		return ResultVO.createSuccess(workflowObj);
 	}
 
