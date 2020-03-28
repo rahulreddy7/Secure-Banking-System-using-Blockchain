@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration>
+    <Properties>
+        <Property name="datePattern">
+            <!-- the rule of format：[level of logs][name of thread-thread ID][the time that logs generate][the time of logs record][logs full class name][logs specific line] -->
+            [%p] [%t-%T] [%r] [%d{yyyy-MM-dd HH:mm:ss,SSS}] [%c{10}] [%l] %m%n
+        </Property>
+        <!-- the root path of logs store -->
+        <Property name="logBasePath">logs</Property>
+        <Property name="debugLogFilePath">${logBasePath}/debug/app.log</Property>
+        <Property name="infoLogFilePath">${logBasePath}/info/app.log</Property>
+        <Property name="errorLogFilePath">${logBasePath}/error/app.log</Property>
+        <!-- single logs size -->
+        <Property name="logFileSize">10M</Property>
+    </Properties>
+    <Appenders>
+        <Console name="Console" target="STDOUT">
+            <PatternLayout pattern="${datePattern}" />
+        </Console>
+        <RollingFile name="debugAppender"
+                     fileName="${debugLogFilePath}"
+                     filePattern="${logBasePath}/$${date:yyyy-MM-dd}/app-%d{yyyy-MM-dd}-%i.log.debug.gz">
+            <PatternLayout>
+                <Pattern>${datePattern}</Pattern>
+            </PatternLayout>
+            <Policies>
+                <TimeBasedTriggeringPolicy />
+                <SizeBasedTriggeringPolicy	size="${logFileSize}" />
+            </Policies>
+        </RollingFile>
+        <RollingFile name="infoAppender"
+                     fileName="${infoLogFilePath}"
+                     filePattern="${logBasePath}/$${date:yyyy-MM-dd}/app-%d{yyyy-MM-dd}-%i.log.info.gz">
+            <PatternLayout>
+                <Pattern>${datePattern}</Pattern>
+            </PatternLayout>
+            <Policies>
+                <TimeBasedTriggeringPolicy />
+                <SizeBasedTriggeringPolicy	size="${logFileSize}" />
+            </Policies>
+        </RollingFile>
+        <RollingFile name="errorAppender"
+                     fileName="${errorLogFilePath}"
+                     filePattern="${logBasePath}/$${date:yyyy-MM-dd}/app-%d{MM-dd-yyyy}-%i.log.error.gz">
+            <PatternLayout>
+                <Pattern>${datePattern}</Pattern>
+            </PatternLayout>
+            <Policies>
+                <TimeBasedTriggeringPolicy />
+                <SizeBasedTriggeringPolicy	size="${logFileSize}" />
+            </Policies>
+        </RollingFile>
+    </Appenders>
+    <Loggers>
+        <Logger name="com.xd">
+            <AppenderRef ref="debugAppender" level="debug" />
+            <AppenderRef ref="infoAppender" level="info" />
+            <AppenderRef ref="errorAppender" level="error" />
+        </Logger>
+        <Root level="info">
+            <AppenderRef ref="Console"/>
+            <AppenderRef ref="debugAppender" level="debug" />
+            <AppenderRef ref="infoAppender" level="info" />
+            <AppenderRef ref="errorAppender" level="error" />
+        </Root>
+    </Loggers>
+</Configuration>
