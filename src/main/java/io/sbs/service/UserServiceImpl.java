@@ -4,6 +4,7 @@ import static com.mongodb.client.model.Filters.eq;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Random;
@@ -40,7 +41,7 @@ import io.sbs.model.Account;
 import io.sbs.model.User;
 import net.minidev.json.JSONObject;
 import io.sbs.constant.UserType;
-
+import io.sbs.dto.AppointmentDTO;
 import io.sbs.dto.AuthenticationProfileDTO;
 import io.sbs.model.Account;
 import io.sbs.model.User;
@@ -102,6 +103,9 @@ public class UserServiceImpl implements UserService {
 		BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 		String hashedPassword = passwordEncoder.encode(userDTO.getPassword());
 		userDTO.setPassword(hashedPassword);
+		Date date= new Date();
+		userDTO.setCreated_at(date);
+		userDTO.setUpdated_at(date);
 		Random rnd = new Random();
 		double account_number = 10000000 + rnd.nextInt(90000000);
 		userDTO.setAccount_number(account_number);
@@ -147,6 +151,8 @@ public class UserServiceImpl implements UserService {
 //		if(usertype!=UserType.Tier1 || usertype!=UserType.Tier2 || usertype!=UserType.Customer)
 //			throw new ValidationException("Invalid user role");
 		List<UserDTO> details=new ArrayList<UserDTO>();
+		Date date = new Date();
+		user.setUpdated_at(date);
 		details.add(user);
 		workDTO.setDetails(details);
 		UserType usertype = null;
@@ -297,6 +303,44 @@ public class UserServiceImpl implements UserService {
 		collection.updateOne(eq("account_number", acc.getAccount_number()), new Document("$set", new Document("acc_balance", balance)));
 		return new ResponseEntity<>("Amount successfully debited from account. ", HttpStatus.OK);
 
+	}
+
+	@Override
+	public AppointmentDTO createAppointment(AppointmentDTO appointmentDTO) {
+		WorkflowDTO workDTO=new WorkflowDTO();
+		workDTO.setType(env.getProperty("type.createAppointment"));
+//		UserType usertype=userDTO.getRole();
+//		if(usertype!=UserType.Tier1 || usertype!=UserType.Tier2 || usertype!=UserType.Customer)
+//			throw new ValidationException("Invalid user role");
+		List<AppointmentDTO> details=new ArrayList<AppointmentDTO>();
+		Date date = new Date();  
+		appointmentDTO.setCreated_at(date);
+		details.add(appointmentDTO);
+		workDTO.setDetails(details);
+		UserType usertype = null;
+		workDTO.setRole(usertype.Tier1);
+		mongoTemplate.save(workDTO, "workflow");
+		return appointmentDTO;
+	}
+	
+	@Override
+	public WorkflowDTO createAppointments(WorkflowDTO workflowDTO) {
+//		// TODO Auto-generated method stub
+		
+		LinkedHashMap map = (LinkedHashMap) workflowDTO.getDetails().get(0);
+		System.out.println(mongoTemplate);
+		UserDTO dto = mongoTemplate.findOne(Query.query(Criteria.where("username").is(map.get("username").toString())), UserDTO.class, "user");
+		
+		if (dto == null) {
+			throw new BusinessException("User not found!");
+		}
+		
+		EmailService es = new EmailService();
+		String subject = "Appointment created";
+		if(!es.send_email(dto.getUsername(), dto.getEmail(), subject)) {
+			throw new BusinessException("Error in sending the email！");
+		}
+		return workflowDTO;
 	}
 
 }
