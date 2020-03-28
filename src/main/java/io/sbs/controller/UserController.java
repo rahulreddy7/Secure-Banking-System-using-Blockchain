@@ -3,6 +3,7 @@ package io.sbs.controller;
 
 
 import io.sbs.constant.UserType;
+import io.sbs.dto.AppointmentDTO;
 import io.sbs.dto.UserDTO;
 import io.sbs.dto.WorkflowDTO;
 import io.sbs.model.Account;
@@ -11,6 +12,8 @@ import io.sbs.model.User;
 import io.sbs.model.ApplicationUser;
 import io.sbs.security.JWTAuthenticationFilter;
 import io.sbs.security.SecurityConstants;
+import io.sbs.service.AppointmentService;
+import io.sbs.service.AppointmentServiceImpl;
 import io.sbs.service.UserService;
 import io.sbs.vo.ResultVO;
 
@@ -56,6 +59,9 @@ public class UserController {
 
 	@Autowired
 	private UserService userService;
+	private AppointmentServiceImpl appointmentService=new AppointmentServiceImpl();
+//	@Autowired
+//	private AppointmentService appointmentService;
 
 
 	@RequestMapping(value = "/homePageDetails", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
@@ -156,18 +162,38 @@ public class UserController {
 		UserDTO userObj = userService.updateUserInfo(userDTO);
 		return ResultVO.createSuccess(userObj);
 	}
+	/*
+	 * Sample payload
+	 * 			{
+  				"date":"johnm",
+  				"time":"doe",
+  				"details":query,
+  				"username"
+				}
+	 * 
+	 *
+	 * Function updates the user details and updates them into user collection
+	 * 
+	 * **/
+	@PostMapping("appt")
+	public ResultVO appt( @RequestBody AppointmentDTO appointmentDTO) {
+		AppointmentDTO apptObj = userService.createAppointment(appointmentDTO);
+		return ResultVO.createSuccess(apptObj);
+	}
 	@PostMapping("approve")
 	public ResultVO approve( @RequestBody WorkflowDTO workflowDTO) {
+		workflowDTO.setState("Approved");
 		WorkflowDTO workflowObj = new WorkflowDTO();
 		if(workflowDTO.getType().equals("New_User")) {
 			workflowObj = userService.createUser(workflowDTO);
 		}	
 		else if(workflowDTO.getType().equals("update_details") && workflowDTO.getRole()==UserType.Tier2) {
 			workflowObj = userService.updateDetails(workflowDTO);
-		}
-			
-//		else if(workflowDTO.getType()=="appointment")
+		}	
+		else if(workflowDTO.getType().equals("appt")&& workflowDTO.getRole()==UserType.Tier1) {
 //			workflowObj = appointmentService.createAppointments(workflowDTO);
+			workflowObj = userService.createAppointments(workflowDTO);
+		}
 		return ResultVO.createSuccess(workflowObj);
 	}
 	
