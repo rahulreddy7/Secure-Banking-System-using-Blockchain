@@ -23,11 +23,17 @@ import io.sbs.service.UserServiceImpl;
 import static com.auth0.jwt.algorithms.Algorithm.HMAC512;
 
 
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
 import org.apache.tomcat.util.net.openssl.ciphers.Authentication;
@@ -35,6 +41,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -310,5 +317,27 @@ public class UserController {
 			return new ResponseEntity<>(e.toString(), HttpStatus.BAD_REQUEST);
 		}
 	}
+
+    @RequestMapping(value="/log", method = { RequestMethod.GET, RequestMethod.POST })
+    public void log(HttpServletRequest req, Model model, HttpServletResponse response)
+            throws ServletException, IOException {
+        System.out.println("this is log download html");
+
+        String filename="logs/info/app.log";
+        String downFilename="app.log";//the logs file that need to be download
+        response.setContentType("text/plain");
+        response.setHeader("Location",downFilename);
+        response.setHeader("Content-Disposition", "attachment; filename=" + downFilename);
+        OutputStream outputStream = response.getOutputStream();
+        InputStream inputStream = new FileInputStream( filename);
+        byte[] buffer = new byte[1024];
+        int i = -1;
+        while ((i = inputStream.read(buffer)) != -1) {
+            outputStream.write(buffer, 0, i);
+        }
+        outputStream.flush();
+        outputStream.close();
+        inputStream.close();
+    }
 
 }
