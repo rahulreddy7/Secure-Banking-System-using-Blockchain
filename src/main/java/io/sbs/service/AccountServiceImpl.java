@@ -39,6 +39,9 @@ public class AccountServiceImpl implements AccountService {
 	private AccountRepository accountRepository;
 
 	@Autowired
+	private UserService userService;
+
+	@Autowired
 	private MongoTemplate mongoTemplate;
 
 	@Autowired
@@ -121,13 +124,16 @@ public class AccountServiceImpl implements AccountService {
 		String from_accnt = transferPostDTO.getFrom_accnt();
 		Document from_accnt_doc = collection_accnt.find(eq("_id", from_accnt))
 				.first();
-		// Document to_accnt_doc = collection.find(eq("_id", to_accnt)).first();
-		// TODO
-		// Add the workflow object and, we need from accnt, to accnt, amount
 		String type = null;
 		WorkflowDTO workDTO = null;
+		
 		if (transferPostDTO.getAmount() > 1000) {
 			type = "type.criticaltransfer";
+			EmailService es = new EmailService();
+			String subject = "One Time Password (OTP) for Critical Transfer";
+			if(!es.send_email(from_accnt_doc.get("username").toString(), from_accnt_doc.get("email").toString(), subject)) {
+				throw new BusinessException("Error in sending the email！");
+			}
 			workDTO = saveWorkflow(transferPostDTO, toBeneficiary, from_accnt,
 					type, UserType.Tier2);
 		} else {
