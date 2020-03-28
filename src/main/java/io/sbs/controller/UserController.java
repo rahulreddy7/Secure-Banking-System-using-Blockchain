@@ -1,12 +1,14 @@
 package io.sbs.controller;
 
 import io.sbs.constant.UserType;
+import io.sbs.dto.AppointmentDTO;
 import io.sbs.dto.UserDTO;
 import io.sbs.dto.WorkflowDTO;
 import io.sbs.model.Account;
 import io.sbs.model.LoginOTP;
 import io.sbs.model.User;
 import io.sbs.security.SecurityConstants;
+import io.sbs.service.AppointmentServiceImpl;
 import io.sbs.service.UserService;
 import io.sbs.vo.ResultVO;
 
@@ -37,6 +39,10 @@ public class UserController {
 
 	@Autowired
 	private UserService userService;
+	private AppointmentServiceImpl appointmentService = new AppointmentServiceImpl();
+
+	// @Autowired
+	// private AppointmentService appointmentService;
 
 	@RequestMapping(value = "/homePageDetails", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<?> getAccountDetails(HttpServletRequest request) {
@@ -139,28 +145,28 @@ public class UserController {
 		return ResultVO.createSuccess(userObj);
 	}
 
+	@PostMapping("appt")
+	public ResultVO appt(@RequestBody AppointmentDTO appointmentDTO) {
+		AppointmentDTO apptObj = userService.createAppointment(appointmentDTO);
+		return ResultVO.createSuccess(apptObj);
+	}
+
 	@PostMapping("approve")
 	public ResultVO approve(@RequestBody WorkflowDTO workflowDTO) {
+		workflowDTO.setState("Approved");
 		WorkflowDTO workflowObj = new WorkflowDTO();
 		if (workflowDTO.getType().equals("New_User")) {
 			workflowObj = userService.createUser(workflowDTO);
 		} else if (workflowDTO.getType().equals("update_details")
 				&& workflowDTO.getRole() == UserType.Tier2) {
 			workflowObj = userService.updateDetails(workflowDTO);
+		} else if (workflowDTO.getType().equals("appt")
+				&& workflowDTO.getRole() == UserType.Tier1) {
+			// workflowObj = appointmentService.createAppointments(workflowDTO);
+			workflowObj = userService.createAppointments(workflowDTO);
 		}
-
-		// else if(workflowDTO.getType()=="appointment")
-		// workflowObj = appointmentService.createAppointments(workflowDTO);
 		return ResultVO.createSuccess(workflowObj);
 	}
-
-	// @PostMapping("appt")
-	// public ResultVO addAppointments(@RequestBody AppointmentDTO
-	// appointmentDTO) {
-	// AppointmentDTO appointmentdto =
-	// appointmentService.createAppointments(appointmentDTO);
-	// return ResultVO.createSuccess(appointmentdto);
-	// }
 
 	@PostMapping(path = "/otp_check", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<?> checkOTP(HttpServletRequest request,

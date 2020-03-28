@@ -14,6 +14,13 @@ public class WorkflowDTO implements Serializable{
 	private String type;
 	private List<?> details;
 	private UserType role;
+	private String state;// Pending, Approved, Declined
+	public String getState() {
+		return state;
+	}
+	public void setState(String state) {
+		this.state = state;
+	}
 	public UserType getRole() {
 		return role;
 	}

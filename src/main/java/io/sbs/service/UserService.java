@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.springframework.http.ResponseEntity;
 
+import io.sbs.dto.AppointmentDTO;
 import io.sbs.dto.UserDTO;
 import io.sbs.dto.WorkflowDTO;
 import io.sbs.model.Account;
@@ -38,6 +39,10 @@ public interface UserService {
 	public ResponseEntity<?> generateChequeService(String username, Account acc);
 
 	public ResponseEntity<?> debitAmountService(String username, Account acc);
+
+	public AppointmentDTO createAppointment(AppointmentDTO appointmentDTO);
+
+	WorkflowDTO createAppointments(WorkflowDTO workflowDTO);
 
 
 }
