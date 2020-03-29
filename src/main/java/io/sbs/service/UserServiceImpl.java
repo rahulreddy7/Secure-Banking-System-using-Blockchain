@@ -96,8 +96,8 @@ public class UserServiceImpl implements UserService {
 		String hashedPassword = passwordEncoder.encode(userDTO.getPassword());
 		userDTO.setPassword(hashedPassword);
 		Date date= new Date();
-		userDTO.setCreated_at(date);
-		userDTO.setUpdated_at(date);
+		userDTO.setCreated_at(date.toString());
+		userDTO.setUpdated_at(date.toString());
 		Random rnd = new Random();
 		double account_number = 10000000 + rnd.nextInt(90000000);
 		userDTO.setAccount_number(account_number);
@@ -145,7 +145,7 @@ public class UserServiceImpl implements UserService {
 //			throw new ValidationException("Invalid user role");
 		List<UserDTO> details=new ArrayList<UserDTO>();
 		Date date = new Date();
-		user.setUpdated_at(date);
+		user.setUpdated_at(date.toString());
 		details.add(user);
 		workDTO.setDetails(details);
 		UserType usertype = null;
