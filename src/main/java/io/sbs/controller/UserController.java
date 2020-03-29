@@ -1,5 +1,6 @@
 package io.sbs.controller;
 
+import io.sbs.constant.StringConstants;
 import io.sbs.constant.UserType;
 import io.sbs.dto.AppointmentDTO;
 import io.sbs.dto.UserDTO;
@@ -158,7 +159,10 @@ public class UserController {
 		} else if (workflowDTO.getType().equals("update_details")
 				&& workflowDTO.getRole() == UserType.Tier2) {
 			workflowObj = userService.updateDetails(workflowDTO);
-		} else if (workflowDTO.getType().equals("appt")
+		} else if (workflowDTO.getType().equals(StringConstants.WORKFLOW_NEW_ACC)) {
+			workflowObj = userService.createNewAcc(workflowDTO);
+		}
+		else if (workflowDTO.getType().equals("appt")
 				&& workflowDTO.getRole() == UserType.Tier1) {
 			// workflowObj = appointmentService.createAppointments(workflowDTO);
 			workflowObj = userService.createAppointments(workflowDTO);
@@ -180,8 +184,10 @@ public class UserController {
 					.getSubject();
 			boolean otp_match = userService.checkAndMatchOTP(username,
 					login_otp.getOtp());
+			UserDTO user_verified = new UserDTO();
+			user_verified.setRole(userService.getUserRole(username));
 			if (otp_match)
-				return new ResponseEntity<>("OTP Verification Successful!",
+				return new ResponseEntity<>(user_verified,
 						HttpStatus.OK);
 			else
 				return new ResponseEntity<>("OTP Not Verified.",
@@ -256,7 +262,7 @@ public class UserController {
 									.getBytes())).build()
 					.verify(token.replace(SecurityConstants.TOKEN_PREFIX, ""))
 					.getSubject();
-			return userService.addAcc(username, acc);
+			return userService.addAccToWorkflow(username, acc);
 		} catch (Exception e) {
 			return new ResponseEntity<>(e.toString(), HttpStatus.BAD_REQUEST);
 		}
