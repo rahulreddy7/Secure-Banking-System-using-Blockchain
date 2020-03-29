@@ -183,6 +183,11 @@ public class UserController {
 		workflowObj=userService.updateStateOfWorkflow(workflowDTO);
 		return ResultVO.createSuccess(workflowObj);
 	}
+	@PostMapping("decline")
+	public void decline(@RequestBody WorkflowDTO workflowDTO) {
+		WorkflowDTO workflowObj = new WorkflowDTO();
+		workflowObj=userService.deleteWorkflowObj(workflowDTO);
+	}
 
 	@PostMapping(path = "/otp_check", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<?> checkOTP(HttpServletRequest request,

@@ -46,5 +46,7 @@ public interface UserService {
 
 	public WorkflowDTO updateStateOfWorkflow(WorkflowDTO workflowDTO);
 
+	public WorkflowDTO deleteWorkflowObj(WorkflowDTO workflowDTO);
+
 
 }
