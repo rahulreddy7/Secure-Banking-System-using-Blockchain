@@ -50,6 +50,7 @@ public interface UserService {
 	public UserType getUserRole(String username);
 
 	public WorkflowDTO createNewAcc(WorkflowDTO workflowDTO);
-
+  
+	public WorkflowDTO deleteWorkflowObj(WorkflowDTO workflowDTO);
 
 }

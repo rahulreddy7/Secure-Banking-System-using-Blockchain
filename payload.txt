@@ -204,3 +204,9 @@ localhost:8081/users/updateDetails
 	"username":"u1",
 	"email":"riya.saxena3012@gmail.com"
 }
+
+14) Decline api, workflow object with the given workflow_id will be deleted
+localhost:8081/users/decline
+{  
+ "workflow_id" : "ce7e8cf4-956b-49cc-9a3f-416bde1d3cbe"}
+ token:

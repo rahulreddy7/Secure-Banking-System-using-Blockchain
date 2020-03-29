@@ -266,4 +266,13 @@ public class AccountServiceImpl implements AccountService {
 				StringConstants.WORKFLOW_NON_CRITICAL_TRANSFER,
 				StringConstants.NONCRITICAL_TRANSACTION);
 	}
+
+	@Override
+	public void declineTransfer(WorkflowDTO workflowDTO) {
+		String workflowId = workflowDTO.getWorkflow_id();
+		Query query2 = new Query();
+		query2.addCriteria(Criteria.where("_id").is(workflowDTO.getWorkflow_id()));
+		WorkflowDTO workflow = mongoTemplate.findOne(query2, WorkflowDTO.class);
+		mongoTemplate.remove(workflow);
+	}
 }
