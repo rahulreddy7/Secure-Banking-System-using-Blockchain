@@ -11,4 +11,6 @@ public interface AccountService {
 	public WorkflowDTO approveCriticalTransfer(WorkflowDTO workflowDTO);
 
 	public WorkflowDTO approveNonCriticalTransfer(WorkflowDTO workflowDTO);
+
+	public void declineTransfer(WorkflowDTO workflowDTO);
 }
