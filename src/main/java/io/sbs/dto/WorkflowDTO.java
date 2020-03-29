@@ -13,7 +13,7 @@ import io.sbs.model.Account;
 
 public class WorkflowDTO implements Serializable{
 	private String type;
-	private String workflow_id = UUID.randomUUID().toString();;
+	private String workflow_id = UUID.randomUUID().toString();
 	private List<?> details;
 	private UserType role;
 	private String state;// Pending, Approved, Declined

@@ -1,6 +1,16 @@
 package io.sbs.service;
 
 import static com.mongodb.client.model.Filters.eq;
+import io.sbs.constant.StringConstants;
+import io.sbs.constant.UserType;
+import io.sbs.dto.AppointmentDTO;
+import io.sbs.dto.AuthenticationProfileDTO;
+import io.sbs.dto.UserDTO;
+import io.sbs.dto.WorkflowDTO;
+import io.sbs.exception.BusinessException;
+import io.sbs.exception.ValidationException;
+import io.sbs.model.Account;
+import io.sbs.model.User;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -26,17 +36,6 @@ import com.mongodb.client.MongoClients;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.result.UpdateResult;
-
-import io.sbs.constant.StringConstants;
-import io.sbs.constant.UserType;
-import io.sbs.dto.AppointmentDTO;
-import io.sbs.dto.AuthenticationProfileDTO;
-import io.sbs.dto.UserDTO;
-import io.sbs.dto.WorkflowDTO;
-import io.sbs.exception.BusinessException;
-import io.sbs.exception.ValidationException;
-import io.sbs.model.Account;
-import io.sbs.model.User;
 
 @Service
 public class UserServiceImpl implements UserService {
@@ -96,8 +95,8 @@ public class UserServiceImpl implements UserService {
 		String hashedPassword = passwordEncoder.encode(userDTO.getPassword());
 		userDTO.setPassword(hashedPassword);
 		Date date= new Date();
-		userDTO.setCreated_at(date);
-		userDTO.setUpdated_at(date);
+		userDTO.setCreated_at(date.toString());
+		userDTO.setUpdated_at(date.toString());
 		Random rnd = new Random();
 		double account_number = 10000000 + rnd.nextInt(90000000);
 		userDTO.setAccount_number(account_number);
@@ -145,7 +144,7 @@ public class UserServiceImpl implements UserService {
 //			throw new ValidationException("Invalid user role");
 		List<UserDTO> details=new ArrayList<UserDTO>();
 		Date date = new Date();
-		user.setUpdated_at(date);
+		user.setUpdated_at(date.toString());
 		details.add(user);
 		workDTO.setDetails(details);
 		UserType usertype = null;
@@ -379,5 +378,12 @@ public class UserServiceImpl implements UserService {
 		mongoTemplate.remove(new Query(Criteria.where("workflow_id").is(workflowDTO.getWorkflow_id())), WorkflowDTO.class);
 		return null;
 	}
+
+@Override
+public List<WorkflowDTO> getAllWorkflows(String username) {
+	UserDTO userDTO = mongoTemplate.findOne(new Query(Criteria.where("username").is(username)),UserDTO.class,"user");
+	List<WorkflowDTO> workflows = mongoTemplate.find(new Query(Criteria.where("role").is(userDTO.getRole())),WorkflowDTO.class,"workflow");
+	return workflows;
+}
 
 }
