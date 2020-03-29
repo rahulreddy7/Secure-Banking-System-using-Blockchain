@@ -1,6 +1,16 @@
 package io.sbs.service;
 
 import static com.mongodb.client.model.Filters.eq;
+import io.sbs.constant.StringConstants;
+import io.sbs.constant.UserType;
+import io.sbs.dto.AppointmentDTO;
+import io.sbs.dto.AuthenticationProfileDTO;
+import io.sbs.dto.UserDTO;
+import io.sbs.dto.WorkflowDTO;
+import io.sbs.exception.BusinessException;
+import io.sbs.exception.ValidationException;
+import io.sbs.model.Account;
+import io.sbs.model.User;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -26,17 +36,6 @@ import com.mongodb.client.MongoClients;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.result.UpdateResult;
-
-import io.sbs.constant.StringConstants;
-import io.sbs.constant.UserType;
-import io.sbs.dto.AppointmentDTO;
-import io.sbs.dto.AuthenticationProfileDTO;
-import io.sbs.dto.UserDTO;
-import io.sbs.dto.WorkflowDTO;
-import io.sbs.exception.BusinessException;
-import io.sbs.exception.ValidationException;
-import io.sbs.model.Account;
-import io.sbs.model.User;
 
 @Service
 public class UserServiceImpl implements UserService {
@@ -379,5 +378,17 @@ public class UserServiceImpl implements UserService {
 		mongoTemplate.remove(new Query(Criteria.where("workflow_id").is(workflowDTO.getWorkflow_id())), WorkflowDTO.class);
 		return null;
 	}
+
+@Override
+public List<WorkflowDTO> getAllWorkflows(String username) {
+	UserDTO userDTO = mongoTemplate.findOne(new Query(Criteria.where("username").is(username)),UserDTO.class,"user");
+	
+	Criteria criteria = new Criteria();
+	criteria = criteria.and("role").is(userDTO.getRole());
+	criteria = criteria.and("state").is(StringConstants.WORKFLOW_PENDING);
+	
+	List<WorkflowDTO> workflows = mongoTemplate.find(new Query(criteria),WorkflowDTO.class,"workflow");
+	return workflows;
+}
 
 }

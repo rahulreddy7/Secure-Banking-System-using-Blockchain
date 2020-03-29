@@ -52,5 +52,7 @@ public interface UserService {
 	public WorkflowDTO createNewAcc(WorkflowDTO workflowDTO);
   
 	public WorkflowDTO deleteWorkflowObj(WorkflowDTO workflowDTO);
+	
+	public List<WorkflowDTO> getAllWorkflows(String username);
 
 }

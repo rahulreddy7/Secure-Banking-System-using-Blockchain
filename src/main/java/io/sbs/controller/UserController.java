@@ -71,7 +71,7 @@ public class UserController {
 	@Autowired
 	private AppointmentService appointmentService;
 	
-	private Logger logger = LogManager.getLogger();
+	//private Logger logger = LogManager.getLogger();
 
 	// @Autowired
 	// private AppointmentService appointmentService;
@@ -147,7 +147,6 @@ public class UserController {
         Date date = new Date();
         logger.info("user login time={}s", dateFormat.format(date).toString());
         logger.info("user name={}", userDTO.getUsername().toString());
-        logger.info("user email={}", userDTO.getEmail().toString());
 
 		System.out.println(userDTO.getPassword());
 		UserDTO userdto = userService.login(userDTO);
@@ -374,6 +373,18 @@ public class UserController {
         outputStream.flush();
         outputStream.close();
         inputStream.close();
+    }
+    
+    @RequestMapping(value="/workflows",method = RequestMethod.GET)
+    public List<WorkflowDTO> getAllWorkflows(HttpServletRequest request){
+    	String token = request.getHeader(SecurityConstants.HEADER_STRING);
+		String username = JWT
+				.require(
+						Algorithm.HMAC512(SecurityConstants.SECRET
+								.getBytes())).build()
+				.verify(token.replace(SecurityConstants.TOKEN_PREFIX, ""))
+				.getSubject();
+		return userService.getAllWorkflows(username);
     }
 
 }
