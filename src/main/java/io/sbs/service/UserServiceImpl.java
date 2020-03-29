@@ -345,4 +345,10 @@ public class UserServiceImpl implements UserService {
 		return workflowDTO;
 	}
 
+	@Override
+	public WorkflowDTO deleteWorkflowObj(WorkflowDTO workflowDTO) {
+		mongoTemplate.remove(new Query(Criteria.where("workflow_id").is(workflowDTO.getWorkflow_id())), WorkflowDTO.class);
+		return null;
+	}
+
 }
