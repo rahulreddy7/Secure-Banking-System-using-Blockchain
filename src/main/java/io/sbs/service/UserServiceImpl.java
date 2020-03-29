@@ -1,16 +1,6 @@
 package io.sbs.service;
 
 import static com.mongodb.client.model.Filters.eq;
-import io.sbs.constant.UserType;
-import io.sbs.dto.AppointmentDTO;
-import io.sbs.dto.AuthenticationProfileDTO;
-import io.sbs.dto.UserDTO;
-import io.sbs.dto.WorkflowDTO;
-import io.sbs.exception.BusinessException;
-import io.sbs.exception.ValidationException;
-import io.sbs.model.Account;
-import io.sbs.model.User;
-import io.sbs.model.Workflow;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -36,6 +26,17 @@ import com.mongodb.client.MongoClients;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.result.UpdateResult;
+
+import io.sbs.constant.StringConstants;
+import io.sbs.constant.UserType;
+import io.sbs.dto.AppointmentDTO;
+import io.sbs.dto.AuthenticationProfileDTO;
+import io.sbs.dto.UserDTO;
+import io.sbs.dto.WorkflowDTO;
+import io.sbs.exception.BusinessException;
+import io.sbs.exception.ValidationException;
+import io.sbs.model.Account;
+import io.sbs.model.User;
 
 @Service
 public class UserServiceImpl implements UserService {
@@ -120,7 +121,7 @@ public class UserServiceImpl implements UserService {
 		BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 		UserDTO dto = mongoTemplate.findOne(Query.query(Criteria.where("username").is(userDTO.getUsername())), UserDTO.class, "user");
 		if (dto == null) {
-			throw new BusinessException("the account doesn't register！");
+			throw new BusinessException("the account doesn't exist！");
 		}
 
 		if (!passwordEncoder.matches(userDTO.getPassword(), dto.getPassword())) {
@@ -216,7 +217,7 @@ public class UserServiceImpl implements UserService {
 		
 
 	public ResponseEntity<?> resetPass(String username, String currpassword, String newpassword) {
-		System.out.println(username+currpassword);
+
 		MongoCollection<Document> collection = database.getCollection("user");
 		Document myDoc = collection.find(eq("username", username)).first();
 		if (myDoc == null)
@@ -237,26 +238,40 @@ public class UserServiceImpl implements UserService {
 	}
 
 	@Override
-	public ResponseEntity<?> addAcc(String username, Account acc) {
+	public ResponseEntity<?> addAccToWorkflow(String username, Account acc) {
 		EmailService es = new EmailService();
-		String acc_num = new String(es.generate_random(9));
+		String acc_num = new String(es.generate_random(10));
+
 		MongoCollection<Document> collection = database.getCollection("user");
 		Document myDoc = collection.find(eq("username", username)).first();
 		if (myDoc == null)
 			return new ResponseEntity<>("No user found. ", HttpStatus.OK);
+		
 		collection = database.getCollection("account");
 		myDoc = collection.find(eq("account_number", acc_num)).first();
 		if (myDoc != null)
-			acc_num = new String(es.generate_random(9));
-
-		Document doc = new Document("username", username)
-                .append("acc_type", acc.getAcc_type())
-                .append("acc_holder_name", acc.getAcc_holder_name())
-                .append("acc_balance", acc.getAcc_balance())
-                .append("account_number", "9"+ acc_num);
-		collection.insertOne(doc);
-		return new ResponseEntity<>("Successfully added new account ", HttpStatus.OK);
+			acc_num = new String(es.generate_random(10));
+		acc.setAccount_number(acc_num);
+		acc.setUsername(username);
+		WorkflowDTO workDTO=new WorkflowDTO();
+		workDTO.setType(StringConstants.WORKFLOW_NEW_ACC);
+		
+		List<Account> details=new ArrayList<Account>();
+		details.add(acc);
+		workDTO.setDetails(details);
+		workDTO.setRole(UserType.Tier2);
+		workDTO.setState("Pending");
+		mongoTemplate.save(workDTO, "workflow");
+		return new ResponseEntity<>(acc, HttpStatus.OK);
 	}
+	
+	@Override
+	public WorkflowDTO createNewAcc(WorkflowDTO workflowDTO) {
+		LinkedHashMap map = (LinkedHashMap) workflowDTO.getDetails().get(0);
+		mongoTemplate.save(workflowDTO.getDetails().get(0), "account");
+		return workflowDTO;
+	}
+
 
 	@Override
 	public ResponseEntity<?> generateChequeService(String username, Account acc) {
@@ -274,9 +289,9 @@ public class UserServiceImpl implements UserService {
 			return new ResponseEntity<>("No account found. ", HttpStatus.OK);
 
 		double balance = myDoc.getDouble("acc_balance");
-		balance = balance - acc.getAmount_to_deduct();
+		balance = balance - acc.getAmount_to_debit();
 		collection.updateOne(eq("account_number", acc.getAccount_number()), new Document("$set", new Document("acc_balance", balance)));
-		es.send_email_cheque_success(email, "Cashier Cheque Issued", acc.getAmount_to_deduct());
+		es.send_email_cheque_success(email, "Cashier Cheque Issued", acc.getAmount_to_debit());
 		return new ResponseEntity<>("Successfully issued new cheque ", HttpStatus.OK);
 	}
 
@@ -292,7 +307,7 @@ public class UserServiceImpl implements UserService {
 			return new ResponseEntity<>("No account found. ", HttpStatus.OK);
 		
 		double balance = myDoc.getDouble("acc_balance");
-		balance = balance - acc.getAmount_to_deduct();
+		balance += acc.getAmount_to_credit();
 		collection.updateOne(eq("account_number", acc.getAccount_number()), new Document("$set", new Document("acc_balance", balance)));
 		return new ResponseEntity<>("Amount successfully debited from account. ", HttpStatus.OK);
 
@@ -346,7 +361,21 @@ public class UserServiceImpl implements UserService {
 	}
 
 	@Override
-	public WorkflowDTO deleteWorkflowObj(WorkflowDTO workflowDTO) {
+	public UserType getUserRole(String username) {
+		MongoCollection<Document> collection = database.getCollection("user");
+		Document myDoc = collection.find(eq("username", username)).first();
+		if (myDoc == null)
+			return null;
+		String role = myDoc.get("role").toString();
+		if (role.equalsIgnoreCase("Tier1"))
+			return UserType.Tier1;
+		else if (role.equalsIgnoreCase("Tier2"))
+			return UserType.Tier2;
+		else
+			return UserType.Customer;
+	}
+
+  public WorkflowDTO deleteWorkflowObj(WorkflowDTO workflowDTO) {
 		mongoTemplate.remove(new Query(Criteria.where("workflow_id").is(workflowDTO.getWorkflow_id())), WorkflowDTO.class);
 		return null;
 	}

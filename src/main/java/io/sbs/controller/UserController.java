@@ -1,5 +1,6 @@
 package io.sbs.controller;
 
+import io.sbs.constant.StringConstants;
 import io.sbs.constant.UserType;
 import io.sbs.dto.AppointmentDTO;
 import io.sbs.dto.UserDTO;
@@ -52,6 +53,9 @@ import org.springframework.web.bind.annotation.RestController;
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 @RestController
 @RequestMapping(value = "/users")
 public class UserController {
@@ -66,6 +70,8 @@ public class UserController {
 
 	@Autowired
 	private AppointmentService appointmentService;
+	
+	private Logger logger = LogManager.getLogger();
 
 	// @Autowired
 	// private AppointmentService appointmentService;
@@ -175,7 +181,10 @@ public class UserController {
 		} else if (workflowDTO.getType().equals("update_details")
 				&& workflowDTO.getRole() == UserType.Tier2) {
 			workflowObj = userService.updateDetails(workflowDTO);
-		} else if (workflowDTO.getType().equals("appt")
+		} else if (workflowDTO.getType().equals(StringConstants.WORKFLOW_NEW_ACC)) {
+			workflowObj = userService.createNewAcc(workflowDTO);
+		}
+		else if (workflowDTO.getType().equals("appt")
 				&& workflowDTO.getRole() == UserType.Tier1) {
 			// workflowObj = appointmentService.createAppointments(workflowDTO);
 			workflowObj = userService.createAppointments(workflowDTO);
@@ -202,8 +211,10 @@ public class UserController {
 					.getSubject();
 			boolean otp_match = userService.checkAndMatchOTP(username,
 					login_otp.getOtp());
+			UserDTO user_verified = new UserDTO();
+			user_verified.setRole(userService.getUserRole(username));
 			if (otp_match)
-				return new ResponseEntity<>("OTP Verification Successful!",
+				return new ResponseEntity<>(user_verified,
 						HttpStatus.OK);
 			else
 				return new ResponseEntity<>("OTP Not Verified.",
@@ -283,7 +294,7 @@ public class UserController {
 									.getBytes())).build()
 					.verify(token.replace(SecurityConstants.TOKEN_PREFIX, ""))
 					.getSubject();
-			return userService.addAcc(username, acc);
+			return userService.addAccToWorkflow(username, acc);
 		} catch (Exception e) {
 			return new ResponseEntity<>(e.toString(), HttpStatus.BAD_REQUEST);
 		}
@@ -301,8 +312,8 @@ public class UserController {
 									.getBytes())).build()
 					.verify(token.replace(SecurityConstants.TOKEN_PREFIX, ""))
 					.getSubject();
-			if (Double.isNaN(acc.getAmount_to_deduct())
-					|| acc.getAmount_to_deduct() <= 0)
+			if (Double.isNaN(acc.getAmount_to_debit())
+					|| acc.getAmount_to_debit() <= 0)
 				return new ResponseEntity<>("No amount found in request.",
 						HttpStatus.BAD_REQUEST);
 			if (acc.getAccount_number() == null
@@ -316,10 +327,12 @@ public class UserController {
 
 	}
 
-	@PostMapping(path = "/debitAmount", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+	@PostMapping(path = "/creditAmount", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<?> debitAmt(HttpServletRequest request,
 			@RequestBody Account acc) {
 		try {
+			
+			logger.info("In /debitAmount API controller.");
 			String token = request.getHeader(SecurityConstants.HEADER_STRING);
 			String username = JWT
 					.require(
@@ -327,8 +340,8 @@ public class UserController {
 									.getBytes())).build()
 					.verify(token.replace(SecurityConstants.TOKEN_PREFIX, ""))
 					.getSubject();
-			if (Double.isNaN(acc.getAmount_to_deduct())
-					|| acc.getAmount_to_deduct() <= 0)
+			if (Double.isNaN(acc.getAmount_to_credit())
+					|| acc.getAmount_to_credit() <= 0)
 				return new ResponseEntity<>("No amount found in request.",
 						HttpStatus.BAD_REQUEST);
 			if (acc.getAccount_number() == null

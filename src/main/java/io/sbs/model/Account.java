@@ -16,7 +16,8 @@ public class Account {
     private double acc_balance;
     private String username;
     private String account_number;
-    private double amount_to_deduct;
+    private double amount_to_debit;
+    private double amount_to_credit;
 	
 	public String getAcc_type() {
 		return acc_type;
@@ -42,17 +43,23 @@ public class Account {
 	public void setUsername(String username) {
 		this.username = username;
 	}
-	public double getAmount_to_deduct() {
-		return amount_to_deduct;
+	public double getAmount_to_debit() {
+		return amount_to_debit;
 	}
-	public void setAmount_to_deduct(double amount_to_deduct) {
-		this.amount_to_deduct = amount_to_deduct;
+	public void setAmount_to_debit(double amount_to_deduct) {
+		this.amount_to_debit = amount_to_deduct;
 	}
 	public String getAccount_number() {
 		return account_number;
 	}
 	public void setAccount_number(String account_number) {
 		this.account_number = account_number;
+	}
+	public double getAmount_to_credit() {
+		return amount_to_credit;
+	}
+	public void setAmount_to_credit(double amount_to_credit) {
+		this.amount_to_credit = amount_to_credit;
 	}
 
 

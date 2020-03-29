@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.springframework.http.ResponseEntity;
 
+import io.sbs.constant.UserType;
 import io.sbs.dto.AppointmentDTO;
 import io.sbs.dto.UserDTO;
 import io.sbs.dto.WorkflowDTO;
@@ -34,7 +35,7 @@ public interface UserService {
 
 	public ResponseEntity<?> resetPass(String username, String oldpassword, String newpassword);
 
-	public ResponseEntity<?> addAcc(String username, Account acc);
+	public ResponseEntity<?> addAccToWorkflow(String username, Account acc);
 
 	public ResponseEntity<?> generateChequeService(String username, Account acc);
 
@@ -46,7 +47,10 @@ public interface UserService {
 
 	public WorkflowDTO updateStateOfWorkflow(WorkflowDTO workflowDTO);
 
-	public WorkflowDTO deleteWorkflowObj(WorkflowDTO workflowDTO);
+	public UserType getUserRole(String username);
 
+	public WorkflowDTO createNewAcc(WorkflowDTO workflowDTO);
+  
+	public WorkflowDTO deleteWorkflowObj(WorkflowDTO workflowDTO);
 
 }
