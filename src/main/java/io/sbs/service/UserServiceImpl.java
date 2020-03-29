@@ -120,7 +120,7 @@ public class UserServiceImpl implements UserService {
 		BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 		UserDTO dto = mongoTemplate.findOne(Query.query(Criteria.where("username").is(userDTO.getUsername())), UserDTO.class, "user");
 		if (dto == null) {
-			throw new BusinessException("the account doesn't register！");
+			throw new BusinessException("the account doesn't exist！");
 		}
 
 		if (!passwordEncoder.matches(userDTO.getPassword(), dto.getPassword())) {
@@ -274,9 +274,9 @@ public class UserServiceImpl implements UserService {
 			return new ResponseEntity<>("No account found. ", HttpStatus.OK);
 
 		double balance = myDoc.getDouble("acc_balance");
-		balance = balance - acc.getAmount_to_deduct();
+		balance = balance - acc.getAmount_to_debit();
 		collection.updateOne(eq("account_number", acc.getAccount_number()), new Document("$set", new Document("acc_balance", balance)));
-		es.send_email_cheque_success(email, "Cashier Cheque Issued", acc.getAmount_to_deduct());
+		es.send_email_cheque_success(email, "Cashier Cheque Issued", acc.getAmount_to_debit());
 		return new ResponseEntity<>("Successfully issued new cheque ", HttpStatus.OK);
 	}
 
@@ -292,7 +292,7 @@ public class UserServiceImpl implements UserService {
 			return new ResponseEntity<>("No account found. ", HttpStatus.OK);
 		
 		double balance = myDoc.getDouble("acc_balance");
-		balance = balance - acc.getAmount_to_deduct();
+		balance += acc.getAmount_to_credit();
 		collection.updateOne(eq("account_number", acc.getAccount_number()), new Document("$set", new Document("acc_balance", balance)));
 		return new ResponseEntity<>("Amount successfully debited from account. ", HttpStatus.OK);
 

@@ -46,6 +46,9 @@ import org.springframework.web.bind.annotation.RestController;
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 @RestController
 @RequestMapping(value = "/users")
 public class UserController {
@@ -55,6 +58,8 @@ public class UserController {
 
 	@Autowired
 	private AppointmentService appointmentService;
+	
+	private Logger logger = LogManager.getLogger();
 
 	// @Autowired
 	// private AppointmentService appointmentService;
@@ -124,7 +129,6 @@ public class UserController {
 
 	@PostMapping("login")
 	public ResultVO login(@RequestBody UserDTO userDTO) {
-		System.out.println(userDTO.getPassword());
 		UserDTO userdto = userService.login(userDTO);
 		return ResultVO.createSuccess(userDTO);
 	}
@@ -270,8 +274,8 @@ public class UserController {
 									.getBytes())).build()
 					.verify(token.replace(SecurityConstants.TOKEN_PREFIX, ""))
 					.getSubject();
-			if (Double.isNaN(acc.getAmount_to_deduct())
-					|| acc.getAmount_to_deduct() <= 0)
+			if (Double.isNaN(acc.getAmount_to_debit())
+					|| acc.getAmount_to_debit() <= 0)
 				return new ResponseEntity<>("No amount found in request.",
 						HttpStatus.BAD_REQUEST);
 			if (acc.getAccount_number() == null
@@ -285,10 +289,12 @@ public class UserController {
 
 	}
 
-	@PostMapping(path = "/debitAmount", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+	@PostMapping(path = "/creditAmount", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<?> debitAmt(HttpServletRequest request,
 			@RequestBody Account acc) {
 		try {
+			
+			logger.info("In /debitAmount API controller.");
 			String token = request.getHeader(SecurityConstants.HEADER_STRING);
 			String username = JWT
 					.require(
@@ -296,8 +302,8 @@ public class UserController {
 									.getBytes())).build()
 					.verify(token.replace(SecurityConstants.TOKEN_PREFIX, ""))
 					.getSubject();
-			if (Double.isNaN(acc.getAmount_to_deduct())
-					|| acc.getAmount_to_deduct() <= 0)
+			if (Double.isNaN(acc.getAmount_to_credit())
+					|| acc.getAmount_to_credit() <= 0)
 				return new ResponseEntity<>("No amount found in request.",
 						HttpStatus.BAD_REQUEST);
 			if (acc.getAccount_number() == null
