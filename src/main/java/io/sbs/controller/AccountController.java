@@ -5,6 +5,7 @@ import io.sbs.constant.UserType;
 import io.sbs.dto.TransferPostDTO;
 import io.sbs.dto.WorkflowDTO;
 import io.sbs.service.AccountService;
+import io.sbs.service.UserService;
 import io.sbs.vo.ResultVO;
 
 import javax.servlet.http.HttpServletRequest;
@@ -20,6 +21,9 @@ import org.springframework.web.bind.annotation.RestController;
 public class AccountController {
 	@Autowired
 	AccountService accountService;
+
+	@Autowired
+	UserService userService;
 
 	@RequestMapping(value = "/transfer", method = RequestMethod.POST)
 	public void transfer_funds(HttpServletRequest request,
@@ -41,6 +45,7 @@ public class AccountController {
 			workflowObj = accountService
 					.approveNonCriticalTransfer(workflowDTO);
 		}
+		workflowObj = userService.updateStateOfWorkflow(workflowDTO);
 		return ResultVO.createSuccess(workflowObj);
 
 	}
