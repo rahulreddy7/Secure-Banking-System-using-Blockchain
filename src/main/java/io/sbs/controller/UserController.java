@@ -376,16 +376,15 @@ public class UserController {
     }
     
     @RequestMapping(value="/workflows",method = RequestMethod.GET)
-    public List<WorkflowDTO> getAllWorkflows(){
-//    	String token = request.getHeader(SecurityConstants.HEADER_STRING);
-//		String username = JWT
-//				.require(
-//						Algorithm.HMAC512(SecurityConstants.SECRET
-//								.getBytes())).build()
-//				.verify(token.replace(SecurityConstants.TOKEN_PREFIX, ""))
-//				.getSubject();
-		System.out.println("TEST workflows");
-		return userService.getAllWorkflows("a12");
+    public List<WorkflowDTO> getAllWorkflows(HttpServletRequest request){
+    	String token = request.getHeader(SecurityConstants.HEADER_STRING);
+		String username = JWT
+				.require(
+						Algorithm.HMAC512(SecurityConstants.SECRET
+								.getBytes())).build()
+				.verify(token.replace(SecurityConstants.TOKEN_PREFIX, ""))
+				.getSubject();
+		return userService.getAllWorkflows(username);
     }
 
 }
