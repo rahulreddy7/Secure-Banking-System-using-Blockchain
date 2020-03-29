@@ -49,4 +49,30 @@ public class AccountController {
 		return ResultVO.createSuccess(workflowObj);
 
 	}
+
+	@RequestMapping(value = "/transfer_decline", method = RequestMethod.POST)
+	public ResultVO transfer_decline(@RequestBody WorkflowDTO workflowDTO) {
+		WorkflowDTO workflowObj = new WorkflowDTO();
+		if ((workflowDTO.getType().equals(
+				StringConstants.WORKFLOW_CRITICAL_TRANSFER) && workflowDTO
+				.getRole() == UserType.Tier2)
+				|| (workflowDTO.getType().equals(
+						StringConstants.WORKFLOW_NON_CRITICAL_TRANSFER) && workflowDTO
+						.getRole() == UserType.Tier1)) {
+
+			// workflowObj =
+			// accountService.approveCriticalTransfer(workflowDTO);
+			// delete the workflow object from the mongo
+			accountService.declineTransfer(workflowDTO);
+			// } else if (workflowDTO.getType().equals(
+			// StringConstants.WORKFLOW_NON_CRITICAL_TRANSFER)
+			// && workflowDTO.getRole() == UserType.Tier1) {
+			// workflowObj = accountService
+			// .approveNonCriticalTransfer(workflowDTO);
+			// }
+		}
+		workflowDTO.setState(StringConstants.WORKFLOW_DECLINED);
+		workflowObj = userService.updateStateOfWorkflow(workflowDTO);
+		return ResultVO.createSuccess(workflowObj);
+	}
 }
