@@ -18,6 +18,10 @@ import io.sbs.service.UserServiceImpl;
 import static com.auth0.jwt.algorithms.Algorithm.HMAC512;
 
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -30,6 +34,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -49,6 +55,11 @@ import com.auth0.jwt.algorithms.Algorithm;
 @RestController
 @RequestMapping(value = "/users")
 public class UserController {
+
+    ThreadLocal<Long> startTime = new ThreadLocal<>();
+    private Logger logger = LogManager.getLogger();
+    DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+    Date date = new Date();
 
 	@Autowired
 	private UserService userService;
@@ -124,8 +135,18 @@ public class UserController {
 
 	@PostMapping("login")
 	public ResultVO login(@RequestBody UserDTO userDTO) {
+
+        startTime.set(System.currentTimeMillis());
+        DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+        Date date = new Date();
+        logger.info("user login time={}s", dateFormat.format(date).toString());
+        logger.info("user name={}", userDTO.getUsername().toString());
+        logger.info("user email={}", userDTO.getEmail().toString());
+
 		System.out.println(userDTO.getPassword());
 		UserDTO userdto = userService.login(userDTO);
+
+        logger.info("user login use time={}s", System.currentTimeMillis()-startTime.get());
 		return ResultVO.createSuccess(userDTO);
 	}
 
@@ -232,6 +253,11 @@ public class UserController {
 
 	@GetMapping("logout")
 	public ResultVO logout(HttpServletRequest request) {
+
+        DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+        Date date = new Date();
+        logger.info("user logout time={}s", dateFormat.format(date).toString());
+
 		String token = request.getHeader(SecurityConstants.HEADER_STRING);
 		String user = JWT
 				.require(Algorithm.HMAC512(SecurityConstants.SECRET.getBytes()))
