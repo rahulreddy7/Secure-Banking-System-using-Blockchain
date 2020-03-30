@@ -48,12 +48,7 @@ public class EmpController {
 	@PostMapping(path= "/addEmp", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<?> addEmp(HttpServletRequest request, @Valid @RequestBody Employee employee){
 		try {
-			String token = request.getHeader(SecurityConstants.HEADER_STRING);
-	        String  username = JWT.require(Algorithm.HMAC512(SecurityConstants.SECRET.getBytes()))
-	                    .build()
-	                    .verify(token.replace(SecurityConstants.TOKEN_PREFIX, ""))
-	                    .getSubject();
-			return empService.addNewEmpService(employee, username);
+			return empService.addNewEmpService(employee, employee.getUsername());
 		} catch (JWTVerificationException e) {
 			e.printStackTrace();
 			return new ResponseEntity<>(e.toString(), HttpStatus.UNAUTHORIZED);
