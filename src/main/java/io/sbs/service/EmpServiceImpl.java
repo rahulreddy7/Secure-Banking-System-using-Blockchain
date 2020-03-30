@@ -41,10 +41,10 @@ public class EmpServiceImpl implements EmpService{
 		collection.insertOne(doc);
 
 		collection = database.getCollection("authenticationProfile");
-		myDoc = collection.find(eq("username", username)).first();
+		Document myDoc2 = collection.find(eq("username", username)).first();
 		Document authenticationProfileDTO = new Document("username", username).append("password", hashedPassword).append("role", e.getEmployee_role());
-		if (myDoc == null) collection.insertOne(authenticationProfileDTO);
-		else collection.updateOne(eq("username",username), new Document("$set", new Document("password", hashedPassword)));
+		if (myDoc2 == null) collection.insertOne(authenticationProfileDTO);
+		else collection.updateOne(eq("username",username), new Document("$set", new Document("password", hashedPassword).append("role", e.getEmployee_role())));
 		
 		return new ResponseEntity<>("Successfully added new employee.", HttpStatus.OK);
 	}
