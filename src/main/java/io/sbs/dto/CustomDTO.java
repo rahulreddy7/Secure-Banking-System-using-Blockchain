@@ -15,7 +15,7 @@ public class CustomDTO implements Serializable{
 	private UserType role;
 	private String acc_type;
     private double acc_balance;
-    private double account_number;
+    private String account_number;
     private String created_at;
     private String updated_at;
     private String phone;
@@ -86,14 +86,6 @@ public class CustomDTO implements Serializable{
 		this.acc_balance = acc_balance;
 	}
 
-	public double getAccount_number() {
-		return account_number;
-	}
-
-	public void setAccount_number(double account_number) {
-		this.account_number = account_number;
-	}
-
 	public String getName() {
         return name;
     }
@@ -145,6 +137,14 @@ public class CustomDTO implements Serializable{
 
 	public void setNewpassword(String newpassword) {
 		this.newpassword = newpassword;
+	}
+
+	public String getAccount_number() {
+		return account_number;
+	}
+
+	public void setAccount_number(String account_number) {
+		this.account_number = account_number;
 	}
 
 }

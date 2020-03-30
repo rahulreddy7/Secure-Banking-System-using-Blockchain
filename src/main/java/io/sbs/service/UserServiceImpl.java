@@ -71,9 +71,9 @@ public class UserServiceImpl implements UserService {
 	    for (Document account : cursor_accounts) {
 	    	Account a = new Account();
 	    	if (myDoc.get("name").toString() != null) a.setAcc_holder_name(myDoc.get("name").toString());
-	    	if (myDoc.get("account_number").toString() != null) a.setAccount_number(account.get("account_number").toString());
-	    	if (myDoc.get("acc_type").toString() != null) a.setAcc_type(account.get("acc_type").toString());
-	    	if (myDoc.get("acc_balance").toString() != null) a.setAcc_balance(Double.parseDouble(account.get("acc_balance").toString()));
+	    	if (account.get("account_number").toString() != null) a.setAccount_number(account.get("account_number").toString());
+	    	if (account.get("acc_type").toString() != null) a.setAcc_type(account.get("acc_type").toString());
+	    	if (account.get("acc_balance").toString() != null) a.setAcc_balance(Double.parseDouble(account.get("acc_balance").toString()));
 	        a.setUsername(username);
 	        acc_list.add(a);
 	    }
@@ -109,8 +109,9 @@ public class UserServiceImpl implements UserService {
 		customDTO.setCreated_at(date.toString());
 		customDTO.setUpdated_at(date.toString());
 		Random rnd = new Random();
-		double account_number = 10000000 + rnd.nextInt(90000000);
-		customDTO.setAccount_number(account_number);
+		long account_number = 10000000 + rnd.nextInt(90000000);
+		String acc_num = String.valueOf((account_number));
+		customDTO.setAccount_number(acc_num);
 		if(customDTO.getAcc_balance()<=0.0)
 			throw new ValidationException("Minimum account balance needed");
 		WorkflowDTO workDTO=new WorkflowDTO();
@@ -249,7 +250,7 @@ public class UserServiceImpl implements UserService {
 		Date date= new Date();
 		userDTO.setCreated_at(date.toString());
 		userDTO.setUpdated_at(date.toString());
-		double acc_num = Double.parseDouble(map.get("account_number").toString());
+		String acc_num = map.get("account_number").toString();
 		double acc_bal = Double.parseDouble(map.get("acc_balance").toString());
 		accountDTO.setAccount_number(acc_num);
 		accountDTO.setAcc_balance(acc_bal);
