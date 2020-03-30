@@ -132,7 +132,6 @@ res.addHeader(SecurityConstants.HEADER_STRING,
 		SecurityConstants.TOKEN_PREFIX + token);
 
 String role = getUserRole(username);
-res.addHeader("Access-Control-Expose-Headers", "Authorization, X-Custom");
 
 if (role != null)
 	res.addHeader("role", role);
