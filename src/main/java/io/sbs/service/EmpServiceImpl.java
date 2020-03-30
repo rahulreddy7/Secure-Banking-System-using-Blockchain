@@ -42,7 +42,7 @@ public class EmpServiceImpl implements EmpService{
 
 		collection = database.getCollection("authenticationProfile");
 		myDoc = collection.find(eq("username", username)).first();
-		Document authenticationProfileDTO = new Document("username", username).append("password", hashedPassword).append("role", "employee");
+		Document authenticationProfileDTO = new Document("username", username).append("password", hashedPassword).append("role", e.getEmployee_role());
 		if (myDoc == null) collection.insertOne(authenticationProfileDTO);
 		else collection.updateOne(eq("username",username), new Document("$set", new Document("password", hashedPassword)));
 		
