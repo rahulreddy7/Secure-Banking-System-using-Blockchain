@@ -56,4 +56,6 @@ public interface UserService {
 	
 	public List<WorkflowDTO> getAllWorkflows(String username);
 
+	public WorkflowDTO findWorkflowObj(WorkflowDTO workflow_id);
+
 }

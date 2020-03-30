@@ -89,8 +89,6 @@ public class UserServiceImpl implements UserService {
 	// save workflow Object in the new user
 	@Override
 	public void register(CustomDTO customDTO) {
-		UserDTO userDTO=new UserDTO();
-		AccountDTO accountDTO=new AccountDTO();
 		UserDTO dto = mongoTemplate.findOne(Query.query(Criteria.where("username").is(customDTO.getUsername())), UserDTO.class, "user");
 		if (dto != null) {
 			throw new ValidationException("the user already exists");
@@ -104,7 +102,7 @@ public class UserServiceImpl implements UserService {
 		Random rnd = new Random();
 		double account_number = 10000000 + rnd.nextInt(90000000);
 		customDTO.setAccount_number(account_number);
-		if(customDTO.getAcc_balance()<=0)
+		if(customDTO.getAcc_balance()<=0.0)
 			throw new ValidationException("Minimum account balance needed");
 		WorkflowDTO workDTO=new WorkflowDTO();
 		workDTO.setType(env.getProperty("type.register"));
@@ -240,9 +238,10 @@ public class UserServiceImpl implements UserService {
 		Date date= new Date();
 		userDTO.setCreated_at(date.toString());
 		userDTO.setUpdated_at(date.toString());
-		
-		accountDTO.setAccount_number((double)(int) map.get("account_number"));
-		accountDTO.setAcc_balance((double) (int)map.get("acc_balance"));
+		double acc_num = Double.parseDouble(map.get("account_number").toString());
+		double acc_bal = Double.parseDouble(map.get("acc_balance").toString());
+		accountDTO.setAccount_number(acc_num);
+		accountDTO.setAcc_balance(acc_bal);
 		accountDTO.setUsername(map.get("username").toString());
 		accountDTO.setAcc_type(map.get("acc_type").toString());
 		mongoTemplate.save(userDTO, "user");
@@ -378,7 +377,6 @@ public class UserServiceImpl implements UserService {
 //		// TODO Auto-generated method stub
 		
 		LinkedHashMap map = (LinkedHashMap) workflowDTO.getDetails().get(0);
-		System.out.println(mongoTemplate);
 		UserDTO dto = mongoTemplate.findOne(Query.query(Criteria.where("username").is(map.get("username").toString())), UserDTO.class, "user");
 		
 		if (dto == null) {
@@ -431,6 +429,14 @@ public List<WorkflowDTO> getAllWorkflows(String username) {
 	
 	List<WorkflowDTO> workflows = mongoTemplate.find(new Query(criteria),WorkflowDTO.class,"workflow");
 	return workflows;
+}
+
+public WorkflowDTO findWorkflowObj(WorkflowDTO workflow) {
+	WorkflowDTO dto = mongoTemplate.findOne(Query.query(Criteria.where("workflow_id").is(workflow.getWorkflow_id())), WorkflowDTO.class, "workflow");
+	if (dto == null) {
+		throw new BusinessException("Workflow not found!");
+	}
+	return dto;
 }
 
 }
