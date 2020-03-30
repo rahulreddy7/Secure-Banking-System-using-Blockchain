@@ -32,8 +32,9 @@ public class AccountController {
 	}
 
 	@RequestMapping(value = "/transfer_approve", method = RequestMethod.POST)
-	public ResultVO transfer_approve(@RequestBody WorkflowDTO workflowDTO) {
-		WorkflowDTO workflowObj = new WorkflowDTO();
+	public ResultVO transfer_approve(@RequestBody WorkflowDTO workflow) {
+		WorkflowDTO workflowObj = null;
+		WorkflowDTO workflowDTO = userService.findWorkflowObj(workflow);
 		if (workflowDTO.getType().equals(
 				StringConstants.WORKFLOW_CRITICAL_TRANSFER)
 				&& workflowDTO.getRole() == UserType.Tier2) {
@@ -51,8 +52,9 @@ public class AccountController {
 	}
 
 	@RequestMapping(value = "/transfer_decline", method = RequestMethod.POST)
-	public ResultVO transfer_decline(@RequestBody WorkflowDTO workflowDTO) {
+	public ResultVO transfer_decline(@RequestBody WorkflowDTO workflow) {
 		WorkflowDTO workflowObj = new WorkflowDTO();
+		WorkflowDTO workflowDTO = userService.findWorkflowObj(workflow);
 		if ((workflowDTO.getType().equals(
 				StringConstants.WORKFLOW_CRITICAL_TRANSFER) && workflowDTO
 				.getRole() == UserType.Tier2)
