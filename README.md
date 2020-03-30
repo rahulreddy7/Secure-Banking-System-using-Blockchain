@@ -46,3 +46,9 @@ switched to db mydb
 Work distibution:<br />
 Branch- nchen19-patch-1 <br />
 Authors : Nanqiao Chen, Anay Paul<br />
+
+scp -i soft-sec.pem /Users/devansh/Desktop/sbs-microservice-0.0.1-SNAPSHOT.jar ubuntu@18.222.64.16:~/
+ ps -ef | grep java
+ sudo kill -9 5762
+nohup java -jar sbs-microservice-0.0.1-SNAPSHOT.jar > new_deploy.log 2>&1 &
+tail -f new_deploy.log
