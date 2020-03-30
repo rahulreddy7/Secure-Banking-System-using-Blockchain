@@ -1,8 +1,11 @@
 package io.sbs.security;
 
 import static com.auth0.jwt.algorithms.Algorithm.HMAC512;
+import static com.mongodb.client.model.Filters.eq;
+
 import io.sbs.model.ApplicationUser;
 import io.sbs.model.LoginOTP;
+import io.sbs.service.UserService;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -13,6 +16,8 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.bson.Document;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -21,7 +26,12 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.security.core.userdetails.User;
 
 import com.auth0.jwt.JWT;
+import com.auth0.jwt.algorithms.Algorithm;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.mongodb.client.MongoClient;
+import com.mongodb.client.MongoClients;
+import com.mongodb.client.MongoCollection;
+import com.mongodb.client.MongoDatabase;
 
 //public class JWTAuthenticationFilter extends
 //		UsernamePasswordAuthenticationFilter{
@@ -79,6 +89,8 @@ UsernamePasswordAuthenticationFilter{
 
 private AuthenticationManager authenticationManager;
 
+@Autowired
+private UserService userService;
 
 public JWTAuthenticationFilter(AuthenticationManager authenticationManager) {
 super();
@@ -105,6 +117,7 @@ try {
 protected void successfulAuthentication(HttpServletRequest req,
 	HttpServletResponse res, FilterChain chain, Authentication auth)
 	throws IOException, ServletException {
+	String role = userService.getUserRole("");
 
 String token = JWT
 		.create()
@@ -113,8 +126,36 @@ String token = JWT
 				new Date(System.currentTimeMillis()
 						+ SecurityConstants.EXPIRATION_TIME))
 		.sign(HMAC512(SecurityConstants.SECRET.getBytes()));
+String username = JWT.require(
+		Algorithm.HMAC512(SecurityConstants.SECRET
+				.getBytes())).build().verify(token.replace(SecurityConstants.TOKEN_PREFIX, "")).getSubject();
 res.addHeader(SecurityConstants.HEADER_STRING,
 		SecurityConstants.TOKEN_PREFIX + token);
+//System.out.println("HEREE E " + username);
+//if (role != null)
+//	res.addHeader("userRole", role);
+//else
+//	res.addHeader("userRole", "norole");
+	
+
 }
 
+public String getUserRole(String username) {
+	try {
+		final MongoClient mongoClient = MongoClients.create("mongodb://admin:myadminpassword@18.222.64.16:27017");
+		final MongoDatabase database = mongoClient.getDatabase("mydb");
+		MongoCollection<Document> collection = database.getCollection("user");
+		Document myDoc = collection.find(eq("username", username)).first();
+		if (myDoc == null)
+			return null;
+		String role = myDoc.get("role").toString();
+		if (role != null)
+			return role;
+		else
+			return null;
+	} catch (Exception e) {
+		e.printStackTrace();
+		return null;
+	}
+}
 }
