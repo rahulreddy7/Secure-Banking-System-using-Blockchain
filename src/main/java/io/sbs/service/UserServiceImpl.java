@@ -3,8 +3,10 @@ package io.sbs.service;
 import static com.mongodb.client.model.Filters.eq;
 import io.sbs.constant.StringConstants;
 import io.sbs.constant.UserType;
+import io.sbs.dto.AccountDTO;
 import io.sbs.dto.AppointmentDTO;
 import io.sbs.dto.AuthenticationProfileDTO;
+import io.sbs.dto.CustomDTO;
 import io.sbs.dto.UserDTO;
 import io.sbs.dto.WorkflowDTO;
 import io.sbs.exception.BusinessException;
@@ -86,29 +88,30 @@ public class UserServiceImpl implements UserService {
 	
 	// save workflow Object in the new user
 	@Override
-	public void register(UserDTO userDTO) {
-		UserDTO dto = mongoTemplate.findOne(Query.query(Criteria.where("username").is(userDTO.getUsername())), UserDTO.class, "user");
+	public void register(CustomDTO customDTO) {
+		UserDTO userDTO=new UserDTO();
+		AccountDTO accountDTO=new AccountDTO();
+		UserDTO dto = mongoTemplate.findOne(Query.query(Criteria.where("username").is(customDTO.getUsername())), UserDTO.class, "user");
 		if (dto != null) {
 			throw new ValidationException("the user already exists");
 		}
 		BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
-		String hashedPassword = passwordEncoder.encode(userDTO.getPassword());
-		userDTO.setPassword(hashedPassword);
+		String hashedPassword = passwordEncoder.encode(customDTO.getPassword());
+		customDTO.setPassword(hashedPassword);
 		Date date= new Date();
-		userDTO.setCreated_at(date.toString());
-		userDTO.setUpdated_at(date.toString());
+		customDTO.setCreated_at(date.toString());
+		customDTO.setUpdated_at(date.toString());
 		Random rnd = new Random();
 		double account_number = 10000000 + rnd.nextInt(90000000);
-		userDTO.setAccount_number(account_number);
+		customDTO.setAccount_number(account_number);
+		if(customDTO.getAcc_balance()<=0)
+			throw new ValidationException("Minimum account balance needed");
 		WorkflowDTO workDTO=new WorkflowDTO();
 		workDTO.setType(env.getProperty("type.register"));
-		UserType usertype = null;
-//		UserType usertype=userDTO.getRole();
-//		if(usertype!=UserType.Tier1 || usertype!=UserType.Tier2 || usertype!=UserType.Customer)
-//			throw new ValidationException("Invalid user role");
-		List<UserDTO> details=new ArrayList<UserDTO>();
-		details.add(userDTO);
+		List<CustomDTO> details=new ArrayList<CustomDTO>();
+		details.add(customDTO);
 		workDTO.setDetails(details);
+		UserType usertype=null;
 		workDTO.setRole(usertype.Tier2); // hardCoded
 		workDTO.setState("Pending");
 		mongoTemplate.save(workDTO, "workflow");
@@ -206,10 +209,49 @@ public class UserServiceImpl implements UserService {
 //			throw new ValidationException("the user already exists");
 //		}
 		LinkedHashMap map = (LinkedHashMap) workflowDTO.getDetails().get(0);
-		mongoTemplate.save(workflowDTO.getDetails().get(0), "user");
+		AccountDTO accountDTO = new AccountDTO();
+		UserDTO userDTO = new UserDTO();
 		AuthenticationProfileDTO authenticationProfileDTO = new AuthenticationProfileDTO();
+		userDTO.setPassword(map.get("password").toString());
+		if(map.get("phone")!=null)
+			userDTO.setPhone(map.get("phone").toString());
+		userDTO.setUsername(map.get("username").toString());
+		if(map.get("email")!=null)
+			userDTO.setEmail(map.get("email").toString());
+		if(map.get("address")!=null)
+			userDTO.setAddress(map.get("address").toString());
+		String role = map.get("role").toString();
+		if(role.equals("Tier1")) {
+			System.out.println(role);
+			authenticationProfileDTO.setRole(UserType.Tier1);
+			userDTO.setRole(UserType.Tier1);
+		}
+		else if(role.equals("Tier2")) {
+			authenticationProfileDTO.setRole(UserType.Tier2);
+			userDTO.setRole(UserType.Tier2);
+		}	
+		else if(role.equals("Customer")) {
+			userDTO.setRole(UserType.Customer);
+			authenticationProfileDTO.setRole(UserType.Customer);
+		}
+			
+		
+//			throw new ValidationException("Invalid user role");
+		Date date= new Date();
+		userDTO.setCreated_at(date.toString());
+		userDTO.setUpdated_at(date.toString());
+		
+		accountDTO.setAccount_number((double)(int) map.get("account_number"));
+		accountDTO.setAcc_balance((double) (int)map.get("acc_balance"));
+		accountDTO.setUsername(map.get("username").toString());
+		accountDTO.setAcc_type(map.get("acc_type").toString());
+		mongoTemplate.save(userDTO, "user");
+		mongoTemplate.save(accountDTO, "account");
+		
+		
 		authenticationProfileDTO.setPassword(map.get("password").toString());
 		authenticationProfileDTO.setUsername(map.get("username").toString());
+		
 		mongoTemplate.save(authenticationProfileDTO, "authenticationProfile");
 		return workflowDTO;
 	}

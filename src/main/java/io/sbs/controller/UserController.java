@@ -3,6 +3,7 @@ package io.sbs.controller;
 import io.sbs.constant.StringConstants;
 import io.sbs.constant.UserType;
 import io.sbs.dto.AppointmentDTO;
+import io.sbs.dto.CustomDTO;
 import io.sbs.dto.UserDTO;
 import io.sbs.dto.WorkflowDTO;
 import io.sbs.model.Account;
@@ -134,9 +135,9 @@ public class UserController {
 	 */
 	@PostMapping("register")
 	@ResponseStatus(HttpStatus.CREATED)
-	public ResultVO register(@RequestBody UserDTO userDTO) {
-		userService.register(userDTO);
-		return ResultVO.createSuccess(userDTO);
+	public ResultVO register(@RequestBody CustomDTO customDTO) {
+		userService.register(customDTO);
+		return ResultVO.createSuccess(customDTO);
 	}
 
 	@PostMapping("login")

@@ -6,6 +6,7 @@ import org.springframework.http.ResponseEntity;
 
 import io.sbs.constant.UserType;
 import io.sbs.dto.AppointmentDTO;
+import io.sbs.dto.CustomDTO;
 import io.sbs.dto.UserDTO;
 import io.sbs.dto.WorkflowDTO;
 import io.sbs.model.Account;
@@ -17,7 +18,7 @@ public interface UserService {
 
 	public User getUserInfo(String userid);
 
-    void register(UserDTO userDTO);
+    void register(CustomDTO customDTO);
 
 	UserDTO login(UserDTO userDTO);
 	
