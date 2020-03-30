@@ -117,7 +117,6 @@ try {
 protected void successfulAuthentication(HttpServletRequest req,
 	HttpServletResponse res, FilterChain chain, Authentication auth)
 	throws IOException, ServletException {
-	String role = userService.getUserRole("");
 
 String token = JWT
 		.create()
@@ -131,11 +130,13 @@ String username = JWT.require(
 				.getBytes())).build().verify(token.replace(SecurityConstants.TOKEN_PREFIX, "")).getSubject();
 res.addHeader(SecurityConstants.HEADER_STRING,
 		SecurityConstants.TOKEN_PREFIX + token);
-//System.out.println("HEREE E " + username);
-//if (role != null)
-//	res.addHeader("userRole", role);
-//else
-//	res.addHeader("userRole", "norole");
+
+String role = getUserRole(username);
+
+if (role != null)
+	res.addHeader("role", role);
+else
+	res.addHeader("role", "norole");
 	
 
 }
