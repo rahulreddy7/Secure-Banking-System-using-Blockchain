@@ -51,26 +51,34 @@ public class UserServiceImpl implements UserService {
 	private static ApplicationContext applicationContext;
 	
 	@Override
-	public List<Account> getUserAccountDetails(String username) {
+	public ResponseEntity<?> getUserAccountDetails(String username) {
 
 	    MongoCollection<Document> collection = database.getCollection("user");
 	    Document myDoc = collection.find(eq("username", username)).first();
 	    
+	    if (myDoc == null)
+	    	return new ResponseEntity<>("No username exists in DB!",HttpStatus.NO_CONTENT);
+	    
 	    MongoCollection<Document> collection_acc = database.getCollection("account");
 	    List<Document> cursor_accounts = collection_acc.find(eq("username", username)).into(new ArrayList<Document>());
+	    
+	    if (cursor_accounts == null)
+	    	return new ResponseEntity<>("No accounts linked to this username!",HttpStatus.NO_CONTENT);
 	    
 		List<Account> acc_list = new ArrayList<Account>();
 	    for (Document account : cursor_accounts) {
 	    	Account a = new Account();
-	    	a.setAcc_holder_name(myDoc.get("name").toString());
-	        a.setAccount_number(account.get("account_number").toString());
-	        a.setAcc_type(account.get("acc_type").toString());
-	        a.setAcc_balance(Double.parseDouble(account.get("acc_balance").toString()));
+	    	if (myDoc.get("name").toString() != null) a.setAcc_holder_name(myDoc.get("name").toString());
+	    	if (myDoc.get("account_number").toString() != null) a.setAccount_number(account.get("account_number").toString());
+	    	if (myDoc.get("acc_type").toString() != null) a.setAcc_type(account.get("acc_type").toString());
+	    	if (myDoc.get("acc_balance").toString() != null) a.setAcc_balance(Double.parseDouble(account.get("acc_balance").toString()));
 	        a.setUsername(username);
 	        acc_list.add(a);
 	    }
-
-		return acc_list;		
+		if (acc_list.size() > 0)
+			return new ResponseEntity<>(acc_list, HttpStatus.OK);
+		else
+			return new ResponseEntity<>("No Records Found!",HttpStatus.NO_CONTENT);
 	}
 
 	@Override
@@ -81,6 +89,7 @@ public class UserServiceImpl implements UserService {
 		if (myDoc.get("name") != null) user.setName(myDoc.get("name").toString());
 		if (myDoc.get("email") != null) user.setEmailString(myDoc.get("email").toString());
 		if (myDoc.get("address") != null) user.setAddress(myDoc.get("address").toString());
+		if (myDoc.get("phone") != null) user.setPhone(myDoc.get("phone").toString());
 		return user;
 	}
 	
