@@ -14,7 +14,7 @@ import io.sbs.model.User;
 
 public interface UserService {
 
-	public List<Account> getUserAccountDetails(String userid);
+	public ResponseEntity<?> getUserAccountDetails(String userid);
 
 	public User getUserInfo(String userid);
 

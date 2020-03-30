@@ -87,14 +87,8 @@ public class UserController {
 									.getBytes())).build()
 					.verify(token.replace(SecurityConstants.TOKEN_PREFIX, ""))
 					.getSubject();
+			return userService.getUserAccountDetails(username);
 
-			List<Account> acc_list = new ArrayList<Account>();
-			acc_list = userService.getUserAccountDetails(username);
-			if (acc_list.size() > 0)
-				return new ResponseEntity<>(acc_list, HttpStatus.OK);
-			else
-				return new ResponseEntity<>("No Records Found!",
-						HttpStatus.NO_CONTENT);
 		} catch (Exception e) {
 			return new ResponseEntity<>(e.toString(), HttpStatus.BAD_REQUEST);
 		}
