@@ -220,6 +220,8 @@ public class UserServiceImpl implements UserService {
 		UserDTO userDTO = new UserDTO();
 		AuthenticationProfileDTO authenticationProfileDTO = new AuthenticationProfileDTO();
 		userDTO.setPassword(map.get("password").toString());
+		if(map.get("name")!=null)
+			userDTO.setName(map.get("name").toString());
 		if(map.get("phone")!=null)
 			userDTO.setPhone(map.get("phone").toString());
 		userDTO.setUsername(map.get("username").toString());
