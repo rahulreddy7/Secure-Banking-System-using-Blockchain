@@ -154,14 +154,31 @@ public class UserController {
 	 * Function updates the user details and updates them into user collection
 	 */
 
-	@PostMapping("updateDetails")
-	public ResultVO updateDetails(@RequestBody UserDTO userDTO) {
+	@RequestMapping(value = "/updateDetails", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+	public ResultVO updateDetails(HttpServletRequest request, @RequestBody UserDTO userDTO) {
+		
+		String token = request.getHeader(SecurityConstants.HEADER_STRING);
+		String username = JWT
+				.require(
+						Algorithm.HMAC512(SecurityConstants.SECRET
+								.getBytes())).build()
+				.verify(token.replace(SecurityConstants.TOKEN_PREFIX, ""))
+				.getSubject();
+		userDTO.setUsername(username);
 		UserDTO userObj = userService.updateUserInfo(userDTO);
 		return ResultVO.createSuccess(userObj);
 	}
 
-	@PostMapping("appt")
-	public ResultVO appt(@RequestBody AppointmentDTO appointmentDTO) {
+	@RequestMapping(value = "/appt", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+	public ResultVO appt(HttpServletRequest request, @RequestBody AppointmentDTO appointmentDTO) {
+		String token = request.getHeader(SecurityConstants.HEADER_STRING);
+		String username = JWT
+				.require(
+						Algorithm.HMAC512(SecurityConstants.SECRET
+								.getBytes())).build()
+				.verify(token.replace(SecurityConstants.TOKEN_PREFIX, ""))
+				.getSubject();
+		appointmentDTO.setUsername(username);
 		AppointmentDTO apptObj = userService.createAppointment(appointmentDTO);
 		return ResultVO.createSuccess(apptObj);
 	}
