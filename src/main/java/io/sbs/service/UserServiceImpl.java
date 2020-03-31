@@ -175,6 +175,9 @@ public class UserServiceImpl implements UserService {
 		if(map.get("email")!=null) {
 			update.set("email", map.get("email").toString());
 		}
+		if(map.get("phone")!=null) {
+			update.set("phone", map.get("phone").toString());
+		}
 		
 		UpdateResult userObj = mongoTemplate.updateFirst(Query.query(Criteria.where("username").is(map.get("username").toString())), update, User.class, "user");
 		if (userObj == null) {
