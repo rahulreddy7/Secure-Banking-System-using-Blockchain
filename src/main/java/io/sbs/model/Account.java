@@ -10,7 +10,6 @@ public class Account {
 	
 	@NotNull
 	private String acc_type;
-	@NotNull
 	private String acc_holder_name;
 	@NotNull
     private double acc_balance;
