@@ -307,7 +307,7 @@ public class UserServiceImpl implements UserService {
 		String hashedPassword = passwordEncoder.encode(newpassword);
 		MongoCollection<Document> c = database.getCollection("authenticationProfile");
 		c.updateOne(eq("username", username), new Document("$set", new Document("password", hashedPassword)));
-		return new ResponseEntity<>("Password successfully updated.", HttpStatus.OK);
+		return new ResponseEntity<>(HttpStatus.OK);
 
 	}
 
@@ -366,7 +366,7 @@ public class UserServiceImpl implements UserService {
 		balance = balance - acc.getAmount_to_debit();
 		collection.updateOne(eq("account_number", acc.getAccount_number()), new Document("$set", new Document("acc_balance", balance)));
 		es.send_email_cheque_success(email, "Cashier Cheque Issued", acc.getAmount_to_debit());
-		return new ResponseEntity<>("Successfully issued new cheque ", HttpStatus.OK);
+		return new ResponseEntity<>(HttpStatus.OK);
 	}
 
 	@Override
@@ -383,7 +383,7 @@ public class UserServiceImpl implements UserService {
 		double balance = myDoc.getDouble("acc_balance");
 		balance += acc.getAmount_to_credit();
 		collection.updateOne(eq("account_number", acc.getAccount_number()), new Document("$set", new Document("acc_balance", balance)));
-		return new ResponseEntity<>("Amount successfully debited from account. ", HttpStatus.OK);
+		return new ResponseEntity<>(HttpStatus.OK);
 
 	}
 
