@@ -135,7 +135,7 @@ public class UserController {
 	}
 
 	@PostMapping("login")
-	public ResultVO login(@RequestBody UserDTO userDTO) {
+	public ResponseEntity<?> login(@RequestBody UserDTO userDTO) {
 
         startTime.set(System.currentTimeMillis());
         DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
@@ -143,11 +143,8 @@ public class UserController {
         logger.info("user login time={}s", dateFormat.format(date).toString());
         logger.info("user name={}", userDTO.getUsername().toString());
 
-		System.out.println(userDTO.getPassword());
-		UserDTO userdto = userService.login(userDTO);
-
         logger.info("user login use time={}s", System.currentTimeMillis()-startTime.get());
-		return ResultVO.createSuccess(userDTO);
+		return userService.login(userDTO);
 	}
 
 	/*
@@ -261,20 +258,16 @@ public class UserController {
 
 	// todo: verify old password as well
 	@RequestMapping(value = "/resetPass", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-	public ResponseEntity<?> resetPassword(HttpServletRequest request,
-			@RequestBody UserDTO user) {
+	public ResponseEntity<?> resetPassword(@RequestBody UserDTO user) {
 		try {
-			String token = request.getHeader(SecurityConstants.HEADER_STRING);
-			String username = JWT
-					.require(
-							Algorithm.HMAC512(SecurityConstants.SECRET
-									.getBytes())).build()
-					.verify(token.replace(SecurityConstants.TOKEN_PREFIX, ""))
-					.getSubject();
-			return new ResponseEntity<>(userService.resetPass(username,
-					user.getPassword(), user.getNewpassword()), HttpStatus.OK);
+			String username;
+			if (user.getUsername() != null) 
+				username = user.getUsername();
+			else 
+				return new ResponseEntity<>("No username found.", HttpStatus.BAD_REQUEST); 
+			return userService.resetPass(username,user.getPassword(), user.getNewpassword());
 		} catch (Exception e) {
-			return new ResponseEntity<>("OK", HttpStatus.OK);
+			return new ResponseEntity<>("OK", HttpStatus.BAD_REQUEST);
 		}
 
 	}
