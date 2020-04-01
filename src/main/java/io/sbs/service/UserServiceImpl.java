@@ -149,7 +149,7 @@ public class UserServiceImpl implements UserService {
 					throw new BusinessException("Error in sending the email！");
 				}
 				dto2.setPassword(null);
-				return new ResponseEntity<>("Login successful.", HttpStatus.OK);
+				return new ResponseEntity<>(HttpStatus.OK);
 			} 
 		} else {
 			Employee dto3 = mongoTemplate.findOne(Query.query(Criteria.where("username").is(userDTO.getUsername())), Employee.class, "employee");
@@ -160,7 +160,7 @@ public class UserServiceImpl implements UserService {
 					throw new BusinessException("Error in sending the email！");
 				}
 				dto3.setEmployee_password(null);
-				return new ResponseEntity<>("Login successful.", HttpStatus.OK);
+				return new ResponseEntity<>(HttpStatus.OK);
 			}
 		}
 		return new ResponseEntity<>("No records found.", HttpStatus.OK);
