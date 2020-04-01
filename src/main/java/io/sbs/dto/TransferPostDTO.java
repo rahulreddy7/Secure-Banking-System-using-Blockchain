@@ -8,7 +8,32 @@ public class TransferPostDTO {
 	private String description;
 	private double amount;
 	private boolean self;
+	private String otp; //Only in case of OTP(Transfer amount > 1000.0)
 	
+	public String getFromAccNo() {
+		return fromAccNo;
+	}
+
+	public void setFromAccNo(String fromAccNo) {
+		this.fromAccNo = fromAccNo;
+	}
+
+	public String getToBeneficiary() {
+		return toBeneficiary;
+	}
+
+	public void setToBeneficiary(String toBeneficiary) {
+		this.toBeneficiary = toBeneficiary;
+	}
+
+	public String getOtp() {
+		return otp;
+	}
+
+	public void setOtp(String otp) {
+		this.otp = otp;
+	}
+
 	public boolean isSelf() {
 		return self;
 	}

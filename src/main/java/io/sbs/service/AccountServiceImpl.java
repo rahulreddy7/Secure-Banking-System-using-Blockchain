@@ -142,6 +142,7 @@ public class AccountServiceImpl implements AccountService {
 		obj.settoBeneficiary(toBeneficiary);
 		obj.setAmount(transferPostDTO.getAmount());
 		obj.setDescription(transferPostDTO.getDescription());
+		obj.setSelf(transferPostDTO.isSelf());
 		details.add(obj);
 		workDTO.setDetails(details);
 		workDTO.setRole(role);
@@ -271,7 +272,8 @@ public class AccountServiceImpl implements AccountService {
 	public void declineTransfer(WorkflowDTO workflowDTO) {
 		String workflowId = workflowDTO.getWorkflow_id();
 		Query query2 = new Query();
-		query2.addCriteria(Criteria.where("_id").is(workflowDTO.getWorkflow_id()));
+		query2.addCriteria(Criteria.where("_id").is(
+				workflowDTO.getWorkflow_id()));
 		WorkflowDTO workflow = mongoTemplate.findOne(query2, WorkflowDTO.class);
 		mongoTemplate.remove(workflow);
 	}
