@@ -449,7 +449,8 @@ public class UserServiceImpl implements UserService {
 	}
 
   public WorkflowDTO deleteWorkflowObj(WorkflowDTO workflowDTO) {
-		mongoTemplate.remove(new Query(Criteria.where("workflow_id").is(workflowDTO.getWorkflow_id())), WorkflowDTO.class);
+		MongoCollection<Document> collection = database.getCollection("workflow");
+		collection.deleteOne(eq("workflow_id", workflowDTO.getWorkflow_id()));
 		return null;
 	}
 
