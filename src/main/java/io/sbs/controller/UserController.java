@@ -136,14 +136,6 @@ public class UserController {
 
 	@PostMapping("login")
 	public ResponseEntity<?> login(@RequestBody UserDTO userDTO) {
-
-        startTime.set(System.currentTimeMillis());
-        DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
-        Date date = new Date();
-        logger.info("user login time={}s", dateFormat.format(date).toString());
-        logger.info("user name={}", userDTO.getUsername().toString());
-
-        logger.info("user login use time={}s", System.currentTimeMillis()-startTime.get());
 		return userService.login(userDTO);
 	}
 
