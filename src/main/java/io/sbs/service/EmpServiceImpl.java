@@ -92,7 +92,13 @@ public class EmpServiceImpl implements EmpService{
 		Document myDoc = collection.find(eq("username", username)).first();
 		if (myDoc == null)
 			return new ResponseEntity<>("The user does not exist. ", HttpStatus.BAD_REQUEST);
-		return new ResponseEntity<>(myDoc, HttpStatus.OK);
+		Employee e = new Employee();
+		e.setEmployee_email(myDoc.getString("employee_email"));
+		e.setEmployee_name(myDoc.getString("employee_name"));
+		e.setEmployee_phone(myDoc.getString("employee_phone"));
+		e.setEmployee_address(myDoc.getString("employee_address"));
+		e.setEmployee_role(myDoc.getString("employee_role"));
+		return new ResponseEntity<>(e, HttpStatus.OK);
 	}
 
 }

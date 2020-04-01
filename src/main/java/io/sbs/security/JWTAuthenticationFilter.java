@@ -144,7 +144,7 @@ public String getUserRole(String username) {
 	try {
 		final MongoClient mongoClient = MongoClients.create("mongodb://admin:myadminpassword@18.222.64.16:27017");
 		final MongoDatabase database = mongoClient.getDatabase("mydb");
-		MongoCollection<Document> collection = database.getCollection("user");
+		MongoCollection<Document> collection = database.getCollection("authenticationProfile");
 		Document myDoc = collection.find(eq("username", username)).first();
 		if (myDoc == null)
 			return null;

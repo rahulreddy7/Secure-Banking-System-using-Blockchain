@@ -52,3 +52,20 @@ scp -i soft-sec.pem /Users/devansh/Desktop/sbs-microservice-0.0.1-SNAPSHOT.jar u
  sudo kill -9 5762
 nohup java -jar sbs-microservice-0.0.1-SNAPSHOT.jar > new_deploy.log 2>&1 &
 tail -f new_deploy.log
+
+
+
+tier1emp@protonmail.com<br />
+tier1pass<br />
+"username":"tier1",<br />
+"employee_password": "tier1pass"<br />
+<br />
+tier2emp@protonmail.com<br />
+tier2pass<br />
+"username":"tier2",<br />
+"employee_password": "tier2pass",<br />
+<br />
+adminemp@protonmail.com<br />
+adminpass<br />
+"username":"admin",<br />
+"employee_password": "adminpass"<br />

@@ -20,7 +20,7 @@ public interface UserService {
 
     void register(CustomDTO customDTO);
 
-	UserDTO login(UserDTO userDTO);
+	ResponseEntity<?> login(UserDTO userDTO);
 	
 	public WorkflowDTO updateDetails( WorkflowDTO workflowDTO);
 
