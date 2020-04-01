@@ -58,7 +58,7 @@ public class WebSecurity extends WebSecurityConfigurerAdapter {
 				.disable()
 				.authorizeRequests()
 				.antMatchers(HttpMethod.POST, SecurityConstants.SIGN_UP_URL,
-						SecurityConstants.LOGIN_URL,SecurityConstants.OTP_URL,SecurityConstants.Forgot_Pass)
+						SecurityConstants.LOGIN_URL,SecurityConstants.OTP_URL,SecurityConstants.Forgot_Pass,SecurityConstants.RESET_PASS)
 				.permitAll()
 				.anyRequest()
 				.authenticated()

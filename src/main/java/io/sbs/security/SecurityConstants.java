@@ -10,5 +10,5 @@ public class SecurityConstants {
 	public static final String LOGIN_URL = "/users/login";
 	public static final String OTP_URL = "/users/otp_check";
 	public static final String Forgot_Pass = "/users/forgotPass";
-	
+	public static final String RESET_PASS = "/users/resetPass";
 }

@@ -12,6 +12,7 @@ import io.sbs.dto.WorkflowDTO;
 import io.sbs.exception.BusinessException;
 import io.sbs.exception.ValidationException;
 import io.sbs.model.Account;
+import io.sbs.model.Employee;
 import io.sbs.model.User;
 
 import java.util.ArrayList;
@@ -127,9 +128,9 @@ public class UserServiceImpl implements UserService {
 
 	
 	@Override
-	public UserDTO login(UserDTO userDTO) {
+	public ResponseEntity<?> login(UserDTO userDTO) {
 		BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
-		UserDTO dto = mongoTemplate.findOne(Query.query(Criteria.where("username").is(userDTO.getUsername())), UserDTO.class, "user");
+		UserDTO dto = mongoTemplate.findOne(Query.query(Criteria.where("username").is(userDTO.getUsername())), UserDTO.class, "authenticationProfile");
 		if (dto == null) {
 			throw new BusinessException("the account doesn't exist！");
 		}
@@ -137,13 +138,32 @@ public class UserServiceImpl implements UserService {
 		if (!passwordEncoder.matches(userDTO.getPassword(), dto.getPassword())) {
 			throw new BusinessException("password is wrong！");
 		}
-		EmailService es = new EmailService();
-		String subject = "One Time Password (OTP) for Login";
-		if(!es.send_email(dto.getUsername(), dto.getEmail(), subject)) {
-			throw new BusinessException("Error in sending the email！");
+		
+		String role = dto.getRole().toString();
+		if (role.equalsIgnoreCase("Customer")) {
+			UserDTO dto2 = mongoTemplate.findOne(Query.query(Criteria.where("username").is(userDTO.getUsername())), UserDTO.class, "user");
+			if (dto2 != null) {
+				EmailService es = new EmailService();
+				String subject = "One Time Password (OTP) for Login";
+				if(!es.send_email(dto2.getUsername(), dto2.getEmail(), subject)) {
+					throw new BusinessException("Error in sending the email！");
+				}
+				dto2.setPassword(null);
+				return new ResponseEntity<>("Login successful.", HttpStatus.OK);
+			} 
+		} else {
+			Employee dto3 = mongoTemplate.findOne(Query.query(Criteria.where("username").is(userDTO.getUsername())), Employee.class, "employee");
+			if (dto3 != null) {
+				EmailService es = new EmailService();
+				String subject = "One Time Password (OTP) for Login";
+				if(!es.send_email(dto3.getUsername(), dto3.getEmployee_email(), subject)) {
+					throw new BusinessException("Error in sending the email！");
+				}
+				dto3.setEmployee_password(null);
+				return new ResponseEntity<>("Login successful.", HttpStatus.OK);
+			}
 		}
-		dto.setPassword(null);
-		return dto;
+		return new ResponseEntity<>("No records found.", HttpStatus.OK);
 	}
 	@Override
 	public UserDTO updateUserInfo( UserDTO user) {
@@ -269,25 +289,24 @@ public class UserServiceImpl implements UserService {
 		mongoTemplate.save(authenticationProfileDTO, "authenticationProfile");
 		return workflowDTO;
 	}
+	
+	
 		
 
 	public ResponseEntity<?> resetPass(String username, String currpassword, String newpassword) {
 
-		MongoCollection<Document> collection = database.getCollection("user");
-		Document myDoc = collection.find(eq("username", username)).first();
-		if (myDoc == null)
-			return new ResponseEntity<>("The user does not exist. ", HttpStatus.BAD_REQUEST);
 		BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+		UserDTO dto = mongoTemplate.findOne(Query.query(Criteria.where("username").is(username)), UserDTO.class, "authenticationProfile");
+		if (dto == null) {
+			return new ResponseEntity<>("No username exists.", HttpStatus.BAD_REQUEST);
+		}
+
+		if (!passwordEncoder.matches(currpassword, dto.getPassword())) {
+			return new ResponseEntity<>("Password does not match.", HttpStatus.FORBIDDEN);
+		}
 		String hashedPassword = passwordEncoder.encode(newpassword);
-//		System.out.println(myDoc.get("password").toString());
-//		System.out.println(passwordEncoder.encode("def"));
-//		if (passwordEncoder.matches((CharSequence)currpassword, myDoc.get("password").toString()))
-//			System.out.println("match");
-//		else 
-//			System.out.println("NOT match");
-		collection.updateOne(eq("username", username), new Document("$set", new Document("password", newpassword)));
 		MongoCollection<Document> c = database.getCollection("authenticationProfile");
-		c.updateOne(eq("username", username), new Document("$set", new Document("password", newpassword)));
+		c.updateOne(eq("username", username), new Document("$set", new Document("password", hashedPassword)));
 		return new ResponseEntity<>("Password successfully updated.", HttpStatus.OK);
 
 	}

@@ -28,13 +28,18 @@ public class EmpController {
 	private EmpService empService;
 	
 	@PostMapping(path= "/viewEmp", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-	public ResponseEntity<?> viewEmp(HttpServletRequest request){
+	public ResponseEntity<?> viewEmp(HttpServletRequest request, @RequestBody Employee employee){
 		try {
-			String token = request.getHeader(SecurityConstants.HEADER_STRING);
-	        String  username = JWT.require(Algorithm.HMAC512(SecurityConstants.SECRET.getBytes()))
-	                    .build()
-	                    .verify(token.replace(SecurityConstants.TOKEN_PREFIX, ""))
-	                    .getSubject();
+			String username;
+			if (employee.getUsername() != null) 
+				username = employee.getUsername();
+			else {
+				String token = request.getHeader(SecurityConstants.HEADER_STRING);
+		        username = JWT.require(Algorithm.HMAC512(SecurityConstants.SECRET.getBytes()))
+		                    .build()
+		                    .verify(token.replace(SecurityConstants.TOKEN_PREFIX, ""))
+		                    .getSubject();
+			}
 			return empService.viewEmpService(username);
 		} catch (JWTVerificationException e) {
 			e.printStackTrace();
