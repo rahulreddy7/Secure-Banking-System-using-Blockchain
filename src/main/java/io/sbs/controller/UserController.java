@@ -388,7 +388,7 @@ public class UserController {
         inputStream.close();
     }
     
-    @RequestMapping(value="/workflows",method = RequestMethod.GET)
+    @RequestMapping(value="/workflows",method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE)
     public List<WorkflowDTO> getAllWorkflows(HttpServletRequest request){
     	String token = request.getHeader(SecurityConstants.HEADER_STRING);
 		String username = JWT
