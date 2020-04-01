@@ -419,12 +419,12 @@ public class UserServiceImpl implements UserService {
 		
 		EmailService es = new EmailService();
 		String subject = "Appointment created";
-		if(!es.send_email(dto.getUsername(), dto.getEmail(), subject)) {
+		String appointment_details = map.get("date")+ " at " +map.get("time")+ "<br>"+map.get("details");
+		if(!es.send_email_appointment(dto.getUsername(), dto.getEmail(), subject, appointment_details)) {
 			throw new BusinessException("Error in sending the email！");
 		}
 		return workflowDTO;
 	}
-
 	@Override
 	public WorkflowDTO updateStateOfWorkflow(WorkflowDTO workflowDTO) {
 		Update update = new Update();

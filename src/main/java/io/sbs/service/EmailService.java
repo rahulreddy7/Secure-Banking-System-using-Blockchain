@@ -64,6 +64,35 @@ public class EmailService {
 			return false;
 		}
 	}
+	
+	public boolean send_email_appointment(String userName, String to_emailID, String subject, String appointment_details) {
+		try {
+			generateMailMessage = getProperties();
+			generateMailMessage.addRecipient(Message.RecipientType.TO, new InternetAddress(to_emailID));
+			generateMailMessage.setSubject(subject);
+			String emailBody = "Your appointment details are: <br>"+ appointment_details +"." + "<br><br> Regards, <br>SBS Admin";
+			generateMailMessage.setContent(emailBody, "text/html");
+			Transport transport = getMailSession.getTransport("smtp");	
+			transport.connect("smtp.gmail.com", "sbs.cse545.softsec@gmail.com", "asucse545");
+			transport.sendMessage(generateMailMessage, generateMailMessage.getAllRecipients());
+			transport.close();
+			saveToDB(userName,to_emailID,appointment_details);
+			return true;
+
+		} catch (AddressException e) {
+			e.printStackTrace();
+			return false;
+		} catch (NoSuchProviderException e) {
+			e.printStackTrace();
+			return false;
+		} catch (MessagingException e) {
+			e.printStackTrace();
+			return false;
+		} catch (Exception e) {
+			e.printStackTrace();
+			return false;
+		}
+	}
 
 	public boolean send_email_cheque_success (String to_emailID, String subject, double amt) {
 		
@@ -121,5 +150,7 @@ public class EmailService {
         }
 		return otp;
 	}
+
+	
 	
 }
