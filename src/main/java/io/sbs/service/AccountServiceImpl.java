@@ -94,6 +94,9 @@ public class AccountServiceImpl implements AccountService {
 		Document user = null;
 
 		Document to_account = null;
+		String from_accnt = transferPostDTO.getFrom_accnt();
+		Document from_accnt_doc = collection_accnt.find(
+				eq("account_number", from_accnt)).first();
 
 		switch (mode) {
 		case "phone":
@@ -115,15 +118,25 @@ public class AccountServiceImpl implements AccountService {
 			}
 			break;
 		case "account":
+			if (transferPostDTO.isSelf()) {
+				// validate the account number
+				if (transferPostDTO.getFromAccNo().equals(
+						transferPostDTO.gettoBeneficiary())) {
+					// right call
+					to_account = from_accnt_doc;
+				} else {
+					to_account = null;
+				}
+			}
 			to_account = collection_accnt.find(
 					eq("account_number", transferPostDTO.gettoBeneficiary()))
 					.first();
 		}
 
 		if (to_account != null) {
-			String from_accnt = transferPostDTO.getFrom_accnt();
-			Document from_accnt_doc = collection_accnt.find(
-					eq("account_number", from_accnt)).first();
+			// String from_accnt = transferPostDTO.getFrom_accnt();
+			// Document from_accnt_doc = collection_accnt.find(
+			// eq("account_number", from_accnt)).first();
 			Document from_user_doc = collection_user.find(
 					eq("username", from_accnt_doc.get("username"))).first();
 			String type = null;
@@ -267,7 +280,7 @@ public class AccountServiceImpl implements AccountService {
 		// Save Transaction in mongo and hyperledger
 		Transaction transaction = saveTransaction(map, transactionType);
 		mongoTemplate.save(transaction, "transaction");
-		workflowDTO.setType(StringConstants.WORKFLOW_APPROVED);
+		workflowDTO.setType(transferType);
 
 		// TODO mongoTemplate.save(workflowDTO, "workflow");
 		return workflowDTO;

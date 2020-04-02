@@ -70,6 +70,7 @@ public class AccountController {
 					.approveNonCriticalTransfer(workflowDTO);
 		}
 		workflowObj = userService.updateStateOfWorkflow(workflowDTO);
+		workflowObj.setState(StringConstants.WORKFLOW_APPROVED);
 		return ResultVO.createSuccess(workflowObj);
 
 	}
