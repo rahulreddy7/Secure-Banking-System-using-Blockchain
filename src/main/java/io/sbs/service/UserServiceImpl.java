@@ -7,6 +7,7 @@ import io.sbs.dto.AccountDTO;
 import io.sbs.dto.AppointmentDTO;
 import io.sbs.dto.AuthenticationProfileDTO;
 import io.sbs.dto.CustomDTO;
+import io.sbs.dto.CustomWorkflowDTO;
 import io.sbs.dto.UserDTO;
 import io.sbs.dto.WorkflowDTO;
 import io.sbs.exception.BusinessException;
@@ -486,7 +487,7 @@ public List<WorkflowDTO> getAllWorkflows(String username) {
 	return workflows;
 }
 
-public WorkflowDTO findWorkflowObj(WorkflowDTO workflow) {
+public WorkflowDTO findWorkflowObj(CustomWorkflowDTO workflow) {
 	WorkflowDTO dto = mongoTemplate.findOne(Query.query(Criteria.where("workflow_id").is(workflow.getWorkflow_id())), WorkflowDTO.class, "workflow");
 	if (dto == null) {
 		throw new BusinessException("Workflow not found!");
