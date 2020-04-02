@@ -35,7 +35,7 @@ public interface UserService {
 	UserDTO updateUserInfo(UserDTO user);
 
 
-	public ResponseEntity<?> resetPass(String username, String oldpassword, String newpassword);
+	public ResponseEntity<?> resetPass(UserDTO user);
 
 	public ResponseEntity<?> addAccToWorkflow(String username, Account acc);
 

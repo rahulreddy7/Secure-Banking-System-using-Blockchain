@@ -256,25 +256,20 @@ public class UserController {
 	}
 
 	@RequestMapping(value = "/forgotPass", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-	public ResponseEntity<?> sendOTPEmail(HttpServletRequest request) {
+	public ResponseEntity<?> sendOTPEmail(HttpServletRequest request, @RequestBody UserDTO user) {
 		try {
 			logger.info("In /forgotPass API controller.");
-			String token = request.getHeader(SecurityConstants.HEADER_STRING);
-			String username = JWT
-					.require(
-							Algorithm.HMAC512(SecurityConstants.SECRET
-									.getBytes())).build()
-					.verify(token.replace(SecurityConstants.TOKEN_PREFIX, ""))
-					.getSubject();
-			if (userService.forgotPasswordOTP(username))
-				return new ResponseEntity<>("OTP Successfully sent!",
-						HttpStatus.OK);
+			
+			if (user.getUsername() == null)
+				return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+			
+			if (userService.forgotPasswordOTP(user.getUsername()))
+				return new ResponseEntity<>(HttpStatus.OK);
 			else
-				return new ResponseEntity<>("Error looking up linked email.",
-						HttpStatus.BAD_REQUEST);
+				return new ResponseEntity<>("Error looking up linked email.",HttpStatus.BAD_REQUEST);
 
 		} catch (Exception e) {
-			return new ResponseEntity<>(e.toString(), HttpStatus.BAD_REQUEST);
+			return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 		}
 	}
 
@@ -283,12 +278,10 @@ public class UserController {
 	public ResponseEntity<?> resetPassword(@RequestBody UserDTO user) {
 		try {
 			logger.info("In /resetPass API controller.");
-			String username;
-			if (user.getUsername() != null) 
-				username = user.getUsername();
-			else 
-				return new ResponseEntity<>("No username found.", HttpStatus.BAD_REQUEST); 
-			return userService.resetPass(username,user.getPassword(), user.getNewpassword());
+			if (user.getUsername() == null || user.getPassword() == null || user.getOtp() == null) 
+				return new ResponseEntity<>("Missing details.", HttpStatus.BAD_REQUEST);
+
+			return userService.resetPass(user);
 		} catch (Exception e) {
 			return new ResponseEntity<>("OK", HttpStatus.BAD_REQUEST);
 		}

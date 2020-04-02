@@ -20,6 +20,7 @@ public class UserDTO implements Serializable {
     private String password;
     private String email;
 	private String address;
+	private String otp;
 	
 	private UserType role;
     private String created_at;
@@ -126,5 +127,13 @@ public class UserDTO implements Serializable {
 
 	public void setNewpassword(String newpassword) {
 		this.newpassword = newpassword;
+	}
+
+	public String getOtp() {
+		return otp;
+	}
+
+	public void setOtp(String otp) {
+		this.otp = otp;
 	}
 }

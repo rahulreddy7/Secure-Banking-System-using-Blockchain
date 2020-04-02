@@ -1,6 +1,7 @@
 package io.sbs.service;
 
 import static com.mongodb.client.model.Filters.eq;
+import static com.mongodb.client.model.Filters.and;
 import io.sbs.constant.StringConstants;
 import io.sbs.constant.UserType;
 import io.sbs.dto.AccountDTO;
@@ -134,7 +135,6 @@ public class UserServiceImpl implements UserService {
 		workDTO.setState("Pending");
 		mongoTemplate.save(workDTO, "workflow");
 	}
-
 	
 	@Override
 	public ResponseEntity<?> login(UserDTO userDTO) {
@@ -216,27 +216,46 @@ public class UserServiceImpl implements UserService {
 		}
 		return workflowDTO;
 	}
-	
 
 	@Override
 	public boolean checkAndMatchOTP(String username, String otp) {
 		logger.info("In checkAndMatchOTP API service.");
 		MongoCollection<Document> collection = database.getCollection("loginOTP");
-		Document myDoc = collection.find(eq("username", username)).first();
+		Document myDoc = collection.find(and(eq("username", username), eq("verified", false))).first();
+		if (myDoc == null || myDoc.get("otp") == null)
+			return false;
+
 		String otp_db = myDoc.get("otp").toString();
-		if (otp_db.equals(otp)) {
+		
+		BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+		if (passwordEncoder.matches(otp, otp_db)) {
 			collection.updateOne(eq("username", username), new Document("$set", new Document("verified", true)));
 			return true;
-		}
-		return false;
+		} else return false;
+
 	}
 
 	@Override
 	public boolean forgotPasswordOTP(String username) {
 		logger.info("In forgotPasswordOTP API service.");
-		MongoCollection<Document> collection = database.getCollection("user");
-		Document myDoc = collection.find(eq("username", username)).first();
-		String email = myDoc.get("email").toString();
+		String role = getRoleGeneric(username).toString();
+		if (role == null)
+			return false;
+		
+		MongoCollection<Document> collection = null;
+		Document myDoc = null;
+		String email = null;
+		if (role.equalsIgnoreCase("Customer")) {
+			collection = database.getCollection("user");
+			myDoc = collection.find(eq("username", username)).first();
+			if (myDoc.get("email") == null) return false;
+			email = myDoc.get("email").toString();
+		} else {
+			collection = database.getCollection("employee");
+			myDoc = collection.find(eq("username", username)).first();
+			if (myDoc.get("employee_email") == null) return false;
+			email = myDoc.get("employee_email").toString();
+		}
 		if (email.isEmpty()) return false;
 		EmailService es = new EmailService();
 		String subject = "SBS Bank Password Reset OTP";
@@ -280,9 +299,6 @@ public class UserServiceImpl implements UserService {
 			userDTO.setRole(UserType.Customer);
 			authenticationProfileDTO.setRole(UserType.Customer);
 		}
-			
-		
-//			throw new ValidationException("Invalid user role");
 		Date date= new Date();
 		userDTO.setCreated_at(date.toString());
 		userDTO.setUpdated_at(date.toString());
@@ -295,31 +311,26 @@ public class UserServiceImpl implements UserService {
 		mongoTemplate.save(userDTO, "user");
 		mongoTemplate.save(accountDTO, "account");
 		
-		
 		authenticationProfileDTO.setPassword(map.get("password").toString());
 		authenticationProfileDTO.setUsername(map.get("username").toString());
-		
 		mongoTemplate.save(authenticationProfileDTO, "authenticationProfile");
 		return workflowDTO;
 	}
-	
-	
-		
 
-	public ResponseEntity<?> resetPass(String username, String currpassword, String newpassword) {
+	public ResponseEntity<?> resetPass(UserDTO user) {
 		logger.info("In resetPass API service.");
 		BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
-		UserDTO dto = mongoTemplate.findOne(Query.query(Criteria.where("username").is(username)), UserDTO.class, "authenticationProfile");
+		UserDTO dto = mongoTemplate.findOne(Query.query(Criteria.where("username").is(user.getUsername())), UserDTO.class, "authenticationProfile");
 		if (dto == null) {
-			return new ResponseEntity<>("No username exists.", HttpStatus.BAD_REQUEST);
+			return new ResponseEntity<>("No linked username exists.", HttpStatus.BAD_REQUEST);
 		}
 
-		if (!passwordEncoder.matches(currpassword, dto.getPassword())) {
-			return new ResponseEntity<>("Password does not match.", HttpStatus.FORBIDDEN);
-		}
-		String hashedPassword = passwordEncoder.encode(newpassword);
+		if (!checkAndMatchOTP(user.getUsername(), user.getOtp()))
+			return new ResponseEntity<>("OTP doesn't match.", HttpStatus.BAD_REQUEST);
+
+		String hashedPassword = passwordEncoder.encode(user.getPassword());
 		MongoCollection<Document> c = database.getCollection("authenticationProfile");
-		c.updateOne(eq("username", username), new Document("$set", new Document("password", hashedPassword)));
+		c.updateOne(eq("username", user.getUsername()), new Document("$set", new Document("password", hashedPassword)));
 		return new ResponseEntity<>(HttpStatus.OK);
 
 	}
@@ -498,7 +509,7 @@ public class UserServiceImpl implements UserService {
 	public List<WorkflowDTO> getAllWorkflows(String username) {
 		logger.info("In getAllWorkflows API service.");
 		UserDTO userDTO = mongoTemplate.findOne(new Query(Criteria.where("username").is(username)),UserDTO.class,"authenticationProfile");
-		System.out.println(username + " sad ");
+
 		Criteria criteria = new Criteria();
 		criteria = criteria.and("role").is(userDTO.getRole().toString());
 		criteria = criteria.and("state").is(StringConstants.WORKFLOW_PENDING);
