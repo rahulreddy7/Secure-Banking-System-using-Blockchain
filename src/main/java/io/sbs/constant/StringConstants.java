@@ -18,5 +18,7 @@ public class StringConstants {
 	public static final String LOGIN_OTP = "LOGIN_OTP";
 	public static final String CRITICAL_TRANSFER_OTP = "CRITICAL_TRANSFER_OTP";
 	
+	public static final String PRIMARY_ACCOUNT = "Checking";
+	
 
 }
