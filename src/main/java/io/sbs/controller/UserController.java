@@ -98,6 +98,17 @@ public class UserController {
 	public ResponseEntity<?> getUserDetails(@RequestBody User user) {
 
 		try {
+			
+			String role = null;
+			if (userService.getRoleGeneric(user.getUsername()) != null)
+				role = userService.getRoleGeneric(user.getUsername()).toString();
+
+			if (role == null)
+				return new ResponseEntity<>("No role found.",HttpStatus.BAD_REQUEST);
+			
+			if (role != UserType.Tier1.toString() || role != UserType.Tier2.toString())
+				return new ResponseEntity<>("Insufficient access. ",HttpStatus.UNAUTHORIZED);
+
 			return new ResponseEntity<>(userService.getUserInfo(user
 					.getUsername()), HttpStatus.OK);
 
@@ -307,8 +318,7 @@ public class UserController {
 	}
 
 	@RequestMapping(value = "/generateCheque", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-	public ResponseEntity<?> generateCheque(HttpServletRequest request,
-			@RequestBody Account acc) {
+	public ResponseEntity<?> generateCheque(HttpServletRequest request, @RequestBody Account acc) {
 		try {
 			String token = request.getHeader(SecurityConstants.HEADER_STRING);
 			String username = JWT
@@ -317,15 +327,23 @@ public class UserController {
 									.getBytes())).build()
 					.verify(token.replace(SecurityConstants.TOKEN_PREFIX, ""))
 					.getSubject();
-			if (Double.isNaN(acc.getAmount_to_debit())
-					|| acc.getAmount_to_debit() <= 0)
-				return new ResponseEntity<>("No amount found in request.",
-						HttpStatus.BAD_REQUEST);
-			if (acc.getAccount_number() == null
-					|| acc.getAccount_number().isEmpty())
-				return new ResponseEntity<>("No account number found.",
-						HttpStatus.BAD_REQUEST);
-			return userService.generateChequeService(username, acc);
+			String role = null;
+			if (userService.getRoleGeneric(username) != null)
+				role = userService.getRoleGeneric(username).toString();
+
+			if (role == null)
+				return new ResponseEntity<>("No role found.",HttpStatus.BAD_REQUEST);
+
+			if (role != UserType.Tier1.toString())
+				return new ResponseEntity<>("Insufficient access. ",HttpStatus.UNAUTHORIZED);
+
+			if (Double.isNaN(acc.getAmount_to_debit())|| acc.getAmount_to_debit() <= 0)
+				return new ResponseEntity<>("No amount found in request.", HttpStatus.BAD_REQUEST);
+
+			if (acc.getAccount_number() == null || acc.getAccount_number().isEmpty())
+				return new ResponseEntity<>("No account number found.", HttpStatus.BAD_REQUEST);
+
+			return userService.generateChequeService(acc);
 		} catch (Exception e) {
 			return new ResponseEntity<>(e.toString(), HttpStatus.BAD_REQUEST);
 		}
@@ -333,11 +351,11 @@ public class UserController {
 	}
 
 	@PostMapping(path = "/creditAmount", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-	public ResponseEntity<?> debitAmt(HttpServletRequest request,
-			@RequestBody Account acc) {
+	public ResponseEntity<?> debitAmt(HttpServletRequest request, @RequestBody Account acc) {
 		try {
 			
 			logger.info("In /debitAmount API controller.");
+			
 			String token = request.getHeader(SecurityConstants.HEADER_STRING);
 			String username = JWT
 					.require(
@@ -345,15 +363,25 @@ public class UserController {
 									.getBytes())).build()
 					.verify(token.replace(SecurityConstants.TOKEN_PREFIX, ""))
 					.getSubject();
+
+			String role = null;
+			if (userService.getRoleGeneric(username) != null)
+				role = userService.getRoleGeneric(username).toString();
+
+			if (role == null)
+				return new ResponseEntity<>("No role found.",HttpStatus.BAD_REQUEST);
+			
+			if (role != UserType.Tier1.toString())
+				return new ResponseEntity<>("Insufficient access. ",HttpStatus.UNAUTHORIZED);
+
 			if (Double.isNaN(acc.getAmount_to_credit())
 					|| acc.getAmount_to_credit() <= 0)
-				return new ResponseEntity<>("No amount found in request.",
-						HttpStatus.BAD_REQUEST);
-			if (acc.getAccount_number() == null
-					|| acc.getAccount_number().isEmpty())
-				return new ResponseEntity<>("No account number found.",
-						HttpStatus.BAD_REQUEST);
-			return userService.debitAmountService(username, acc);
+				return new ResponseEntity<>("No amount found in request.",HttpStatus.BAD_REQUEST);
+
+			if (acc.getAccount_number() == null || acc.getAccount_number().isEmpty())
+				return new ResponseEntity<>("No account number found.", HttpStatus.BAD_REQUEST);
+
+			return userService.creditAmountService(acc);
 		} catch (Exception e) {
 			return new ResponseEntity<>(e.toString(), HttpStatus.BAD_REQUEST);
 		}
@@ -390,6 +418,8 @@ public class UserController {
 								.getBytes())).build()
 				.verify(token.replace(SecurityConstants.TOKEN_PREFIX, ""))
 				.getSubject();
+		
+		
 		return userService.getAllWorkflows(username);
     }
 

@@ -38,9 +38,9 @@ public interface UserService {
 
 	public ResponseEntity<?> addAccToWorkflow(String username, Account acc);
 
-	public ResponseEntity<?> generateChequeService(String username, Account acc);
+	public ResponseEntity<?> generateChequeService(Account acc);
 
-	public ResponseEntity<?> debitAmountService(String username, Account acc);
+	public ResponseEntity<?> creditAmountService(Account acc);
 
 	public AppointmentDTO createAppointment(AppointmentDTO appointmentDTO);
 
@@ -57,5 +57,7 @@ public interface UserService {
 	public List<WorkflowDTO> getAllWorkflows(String username);
 
 	public WorkflowDTO findWorkflowObj(WorkflowDTO workflow_id);
+
+	public UserType getRoleGeneric(String username);
 
 }

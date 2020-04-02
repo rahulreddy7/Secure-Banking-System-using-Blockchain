@@ -3,6 +3,7 @@ package io.sbs.service;
 import static com.mongodb.client.model.Filters.eq;
 
 import org.bson.Document;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -20,7 +21,7 @@ public class EmpServiceImpl implements EmpService{
 	
 	MongoClient mongoClient = MongoClients.create("mongodb://admin:myadminpassword@18.222.64.16:27017");
 	MongoDatabase database = mongoClient.getDatabase("mydb");
-
+	
 	@Override
 	public ResponseEntity<?> addNewEmpService(Employee e, String username) {
 		
@@ -46,13 +47,13 @@ public class EmpServiceImpl implements EmpService{
 		if (myDoc2 == null) collection.insertOne(authenticationProfileDTO);
 		else collection.updateOne(eq("username",username), new Document("$set", new Document("password", hashedPassword).append("role", e.getEmployee_role())));
 		
-		return new ResponseEntity<>("Successfully added new employee.", HttpStatus.OK);
+		return new ResponseEntity<>(HttpStatus.OK);
 	}
 
 	@Override
-	public ResponseEntity<?> modifyEmpService(Employee e, String username) {
+	public ResponseEntity<?> modifyEmpService(Employee e) {
 		MongoCollection<Document> collection = database.getCollection("employee");
-		Document myDoc = collection.find(eq("username", username)).first();
+		Document myDoc = collection.find(eq("username", e.getUsername())).first();
 		if (myDoc == null)
 			return new ResponseEntity<>("The user does not exist. ", HttpStatus.BAD_REQUEST);
 		
@@ -67,10 +68,10 @@ public class EmpServiceImpl implements EmpService{
 			String hashedPassword = passwordEncoder.encode(e.getEmployee_password());
 			update.append("employee_password", hashedPassword);
 			MongoCollection<Document> coll_authentication = database.getCollection("authenticationProfile");
-			coll_authentication.updateOne(eq("username", username), new Document("$set", new Document("password", hashedPassword)));
+			coll_authentication.updateOne(eq("username", e.getUsername()), new Document("$set", new Document("password", hashedPassword)));
 		}
-		collection.updateOne(eq("username", username), new Document("$set", update));
-		return new ResponseEntity<>("Successfully modified.", HttpStatus.OK);
+		collection.updateOne(eq("username", e.getUsername()), new Document("$set", update));
+		return new ResponseEntity<>(HttpStatus.OK);
 	}
 
 	@Override
@@ -83,7 +84,7 @@ public class EmpServiceImpl implements EmpService{
 		
 		collection = database.getCollection("authenticationProfile");
 		collection.deleteMany(eq("username", username));
-		return new ResponseEntity<>("Successfully deleted.", HttpStatus.OK);
+		return new ResponseEntity<>(HttpStatus.OK);
 	}
 
 	@Override
