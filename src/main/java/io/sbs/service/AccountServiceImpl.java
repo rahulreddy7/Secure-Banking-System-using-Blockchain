@@ -272,7 +272,7 @@ public class AccountServiceImpl implements AccountService {
 			obj.setSelf(transferPostDTO.isSelf());
 			details.add(obj);
 			workDTO.setDetails(details);
-			workDTO.setRole(UserType.Tier1);
+			workDTO.setRole(UserType.Tier2);
 			workDTO.setState(StringConstants.WORKFLOW_PENDING);
 			mongoTemplate.save(workDTO, "workflow");
 		}
