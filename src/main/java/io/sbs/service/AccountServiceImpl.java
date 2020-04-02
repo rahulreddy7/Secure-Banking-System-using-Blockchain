@@ -244,8 +244,11 @@ public class AccountServiceImpl implements AccountService {
 		}
 
 		LinkedHashMap map = (LinkedHashMap) workflowDTO.getDetails().get(0);
-		Update update = new Update();
-		UpdateResult accnObj = null;
+		Update update1 = new Update();
+		Update update2 = new Update();
+		UpdateResult accnObj1 = null;
+		UpdateResult accnObj2 = null;
+		
 		if (map.get("fromAccNo").toString() != null) {
 			Account account = mongoTemplate.findOne(
 					Query.query(Criteria.where("account_number").is(
@@ -253,11 +256,9 @@ public class AccountServiceImpl implements AccountService {
 
 			double new_balance = account.getAcc_balance()
 					- (double) map.get("amount");
-			update.set("acc_balance", new_balance);
-			accnObj = mongoTemplate.updateFirst(
-					Query.query(Criteria.where("account_number").is(
-							map.get("fromAccNo").toString())), update,
-					Account.class, "account");
+			if(new_balance < 0)
+				throw new BusinessException("Insufficent Balance");
+			update1.set("acc_balance", new_balance);
 		}
 		if (map.get("toBeneficiary").toString() != null) {
 			Account account = mongoTemplate.findOne(
@@ -267,13 +268,18 @@ public class AccountServiceImpl implements AccountService {
 
 			double new_balance = account.getAcc_balance()
 					+ (double) map.get("amount");
-			update.set("acc_balance", new_balance);
-			accnObj = mongoTemplate.updateFirst(
+			update2.set("acc_balance", new_balance);
+			accnObj1 = mongoTemplate.updateFirst(
 					Query.query(Criteria.where("account_number").is(
-							map.get("toBeneficiary").toString())), update,
+							map.get("fromAccNo").toString())), update1,
+					Account.class, "account");
+			
+			accnObj2 = mongoTemplate.updateFirst(
+					Query.query(Criteria.where("account_number").is(
+							map.get("toBeneficiary").toString())), update2,
 					Account.class, "account");
 		}
-		if (accnObj == null) {
+		if (accnObj1 == null || accnObj2 == null) {
 			throw new BusinessException("cannot be updated！");
 		}
 
