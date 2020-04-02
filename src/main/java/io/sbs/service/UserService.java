@@ -7,6 +7,7 @@ import org.springframework.http.ResponseEntity;
 import io.sbs.constant.UserType;
 import io.sbs.dto.AppointmentDTO;
 import io.sbs.dto.CustomDTO;
+import io.sbs.dto.CustomWorkflowDTO;
 import io.sbs.dto.UserDTO;
 import io.sbs.dto.WorkflowDTO;
 import io.sbs.model.Account;
@@ -56,6 +57,6 @@ public interface UserService {
 	
 	public List<WorkflowDTO> getAllWorkflows(String username);
 
-	public WorkflowDTO findWorkflowObj(WorkflowDTO workflow_id);
+	public WorkflowDTO findWorkflowObj(CustomWorkflowDTO workflow);
 
 }

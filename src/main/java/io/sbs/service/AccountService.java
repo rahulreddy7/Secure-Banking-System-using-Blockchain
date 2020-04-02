@@ -13,4 +13,6 @@ public interface AccountService {
 	public WorkflowDTO approveNonCriticalTransfer(WorkflowDTO workflowDTO);
 
 	public void declineTransfer(WorkflowDTO workflowDTO);
+	
+	public boolean checkAndMatchOTP(String username, String otp);
 }

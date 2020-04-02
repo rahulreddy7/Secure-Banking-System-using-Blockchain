@@ -23,6 +23,7 @@ import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.mongodb.client.MongoClient;
@@ -104,20 +105,24 @@ public class AccountServiceImpl implements AccountService {
 			break;
 		case "account":
 			to_account = collection_accnt.find(
-					eq("account_number", PRIMARY_ACCNT)).first();
+					eq("account_number", transferPostDTO.gettoBeneficiary()))
+					.first();
 		}
 
 		String from_accnt = transferPostDTO.getFrom_accnt();
-		Document from_accnt_doc = collection_accnt.find(eq("_id", from_accnt))
-				.first();
+		Document from_accnt_doc = collection_accnt.find(
+				eq("account_number", from_accnt)).first();
+		Document from_user_doc = collection_user.find(
+				eq("username", from_accnt_doc.get("username"))).first();
 		String type = null;
 		WorkflowDTO workDTO = null;
 
 		if (transferPostDTO.getAmount() > 1000.0) {
 			EmailService es = new EmailService();
+			// create TransactionOTP details flow here in email service
 			String subject = "One Time Password (OTP) for Critical Transfer";
-			if (!es.send_email(from_accnt_doc.get("username").toString(),
-					from_accnt_doc.get("email").toString(), subject)) {
+			if (!es.send_criticaltransfer_email(from_user_doc.get("username")
+					.toString(), from_user_doc.get("email").toString(), subject)) {
 				throw new BusinessException("Error in sending the email！");
 			}
 			workDTO = saveWorkflow(transferPostDTO, toBeneficiary, from_accnt,
@@ -146,7 +151,7 @@ public class AccountServiceImpl implements AccountService {
 		details.add(obj);
 		workDTO.setDetails(details);
 		workDTO.setRole(role);
-		workDTO.setType(StringConstants.WORKFLOW_PENDING);
+		workDTO.setState(StringConstants.WORKFLOW_PENDING);
 		return workDTO;
 	}
 
@@ -203,6 +208,8 @@ public class AccountServiceImpl implements AccountService {
 			String transferType, String transactionType) {
 		if (transferType.equals(StringConstants.WORKFLOW_CRITICAL_TRANSFER)) {
 			// Do something about OTP
+			// Validate the otp
+
 		}
 
 		LinkedHashMap map = (LinkedHashMap) workflowDTO.getDetails().get(0);
@@ -276,5 +283,25 @@ public class AccountServiceImpl implements AccountService {
 				workflowDTO.getWorkflow_id()));
 		WorkflowDTO workflow = mongoTemplate.findOne(query2, WorkflowDTO.class);
 		mongoTemplate.remove(workflow);
+	}
+
+	@Override
+	public boolean checkAndMatchOTP(String username, String otp) {
+		// TODO Auto-generated method stub
+		MongoCollection<Document> collection = database
+				.getCollection("criticalTransferOTP");
+		Document myDoc = collection.find(eq("username", username)).first();
+		BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+		//otp = passwordEncoder.encode(otp);
+		
+		String otp_db = myDoc.get("otp").toString();
+		//passwordEncoder.matches(otp, otp_db);
+		if (passwordEncoder.matches(otp, otp_db)) {
+			// if (otp_db.equals(otp)) {
+			collection.updateOne(eq("username", username), new Document("$set",
+					new Document("verified", true)));
+			return true;
+		}
+		return false;
 	}
 }
