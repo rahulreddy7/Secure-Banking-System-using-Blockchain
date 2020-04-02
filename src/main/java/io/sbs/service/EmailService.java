@@ -1,11 +1,19 @@
 package io.sbs.service;
 
 import io.sbs.constant.StringConstants;
+import io.sbs.security.EncryptDecrypt;
 
+import java.io.UnsupportedEncodingException;
+import java.security.InvalidAlgorithmParameterException;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
 import java.util.Date;
 import java.util.Properties;
 import java.util.Random;
 
+import javax.crypto.BadPaddingException;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.NoSuchPaddingException;
 import javax.mail.Message;
 import javax.mail.MessagingException;
 import javax.mail.NoSuchProviderException;
@@ -146,13 +154,35 @@ public class EmailService {
 	private void saveToDB(String userName, String to_emailID,
 			String otp_string, String OTP_schema) {
 		MongoCollection<Document> collection = null;
+		
 		if (OTP_schema.equals(StringConstants.LOGIN_OTP))
+		{
 			collection = database.getCollection("loginOTP");
+			BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+			otp_string = passwordEncoder.encode(otp_string);
+		}
 		if (OTP_schema.equals(StringConstants.CRITICAL_TRANSFER_OTP))
+		{
 			collection = database.getCollection("criticalTransferOTP");
+			try {
+				EncryptDecrypt e = new EncryptDecrypt();
+				try {
+					otp_string = e.encrypt(otp_string);
+				} catch (InvalidKeyException
+						| InvalidAlgorithmParameterException
+						| BadPaddingException | IllegalBlockSizeException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+			} catch (UnsupportedEncodingException | NoSuchPaddingException
+					| NoSuchAlgorithmException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		
 		Bson filter = Filters.eq("username", userName);
-		BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
-		otp_string = passwordEncoder.encode(otp_string);
+		
 		Bson update = new Document("$set", new Document()
 				.append("username", userName).append("email", to_emailID)
 				.append("otp", otp_string).append("verified", false)

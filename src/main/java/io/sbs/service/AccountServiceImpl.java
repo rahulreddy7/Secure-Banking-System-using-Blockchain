@@ -9,12 +9,21 @@ import io.sbs.exception.BusinessException;
 import io.sbs.model.Account;
 import io.sbs.model.Transaction;
 import io.sbs.repository.AccountRepository;
+import io.sbs.security.EncryptDecrypt;
 
+import java.io.UnsupportedEncodingException;
+import java.security.InvalidAlgorithmParameterException;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.List;
+
+import javax.crypto.BadPaddingException;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.NoSuchPaddingException;
 
 import org.bson.Document;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -99,9 +108,11 @@ public class AccountServiceImpl implements AccountService {
 				user = collection_user.find(eq("email", toBeneficiary)).first();
 			}
 
-			to_account = collection_accnt.find(
-					Filters.and(eq("acc_type", PRIMARY_ACCNT),
-							eq("username", user.get("username")))).first();
+			if (user != null) {
+				to_account = collection_accnt.find(
+						Filters.and(eq("acc_type", PRIMARY_ACCNT),
+								eq("username", user.get("username")))).first();
+			}
 			break;
 		case "account":
 			to_account = collection_accnt.find(
@@ -109,31 +120,38 @@ public class AccountServiceImpl implements AccountService {
 					.first();
 		}
 
-		String from_accnt = transferPostDTO.getFrom_accnt();
-		Document from_accnt_doc = collection_accnt.find(
-				eq("account_number", from_accnt)).first();
-		Document from_user_doc = collection_user.find(
-				eq("username", from_accnt_doc.get("username"))).first();
-		String type = null;
-		WorkflowDTO workDTO = null;
+		if (to_account != null) {
+			String from_accnt = transferPostDTO.getFrom_accnt();
+			Document from_accnt_doc = collection_accnt.find(
+					eq("account_number", from_accnt)).first();
+			Document from_user_doc = collection_user.find(
+					eq("username", from_accnt_doc.get("username"))).first();
+			String type = null;
+			WorkflowDTO workDTO = null;
 
-		if (transferPostDTO.getAmount() > 1000.0) {
-			EmailService es = new EmailService();
-			// create TransactionOTP details flow here in email service
-			String subject = "One Time Password (OTP) for Critical Transfer";
-			if (!es.send_criticaltransfer_email(from_user_doc.get("username")
-					.toString(), from_user_doc.get("email").toString(), subject)) {
-				throw new BusinessException("Error in sending the email！");
+			if (transferPostDTO.getAmount() > 1000.0) {
+				EmailService es = new EmailService();
+				// create TransactionOTP details flow here in email service
+				String subject = "One Time Password (OTP) for Critical Transfer";
+				if (!es.send_criticaltransfer_email(
+						from_user_doc.get("username").toString(), from_user_doc
+								.get("email").toString(), subject)) {
+					throw new BusinessException("Error in sending the email！");
+				}
+				workDTO = saveWorkflow(transferPostDTO,
+						to_account.get("account_number").toString(),
+						from_accnt, StringConstants.WORKFLOW_CRITICAL_TRANSFER,
+						UserType.Tier2);
+			} else {
+				workDTO = saveWorkflow(transferPostDTO,
+						to_account.get("account_number").toString(),
+						from_accnt,
+						StringConstants.WORKFLOW_NON_CRITICAL_TRANSFER,
+						UserType.Tier1);
 			}
-			workDTO = saveWorkflow(transferPostDTO, toBeneficiary, from_accnt,
-					StringConstants.WORKFLOW_CRITICAL_TRANSFER, UserType.Tier2);
-		} else {
-			workDTO = saveWorkflow(transferPostDTO, toBeneficiary, from_accnt,
-					StringConstants.WORKFLOW_NON_CRITICAL_TRANSFER,
-					UserType.Tier1);
-		}
 
-		mongoTemplate.save(workDTO, "workflow");
+			mongoTemplate.save(workDTO, "workflow");
+		}
 	}
 
 	private WorkflowDTO saveWorkflow(TransferPostDTO transferPostDTO,
@@ -218,7 +236,7 @@ public class AccountServiceImpl implements AccountService {
 		if (map.get("fromAccNo").toString() != null) {
 			Account account = mongoTemplate.findOne(
 					Query.query(Criteria.where("account_number").is(
-							map.get("fromAccnNo"))), Account.class, "account");
+							map.get("fromAccNo"))), Account.class, "account");
 
 			double new_balance = account.getAcc_balance()
 					- (double) map.get("amount");
@@ -292,12 +310,24 @@ public class AccountServiceImpl implements AccountService {
 				.getCollection("criticalTransferOTP");
 		Document myDoc = collection.find(eq("username", username)).first();
 		BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
-		//otp = passwordEncoder.encode(otp);
-		
+		// otp = passwordEncoder.encode(otp)
 		String otp_db = myDoc.get("otp").toString();
-		//passwordEncoder.matches(otp, otp_db);
-		if (passwordEncoder.matches(otp, otp_db)) {
-			// if (otp_db.equals(otp)) {
+		EncryptDecrypt e;
+		String otp_decoded = null;
+		try {
+			e = new EncryptDecrypt();
+			otp_decoded = e.decrypt(otp_db);
+		} catch (UnsupportedEncodingException | NoSuchPaddingException
+				| NoSuchAlgorithmException | InvalidKeyException
+				| InvalidAlgorithmParameterException | BadPaddingException
+				| IllegalBlockSizeException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+
+		// passwordEncoder.matches(otp, otp_db);
+		// if (passwordEncoder.matches(otp, otp_db)) {
+		if (otp_decoded.equals(otp)) {
 			collection.updateOne(eq("username", username), new Document("$set",
 					new Document("verified", true)));
 			return true;
