@@ -74,8 +74,8 @@ public class AccountController {
 						StringConstants.WORKFLOW_NON_CRITICAL_TRANSFER) && workflowDTO
 						.getRole() == UserType.Tier1))
 			workflowObj = accountService.approveTransfer(workflowDTO);
+		workflowDTO.setState(StringConstants.WORKFLOW_APPROVED);
 		workflowObj = userService.updateStateOfWorkflow(workflowDTO);
-		workflowObj.setState(StringConstants.WORKFLOW_APPROVED);
 		return ResultVO.createSuccess(workflowObj);
 	}
 

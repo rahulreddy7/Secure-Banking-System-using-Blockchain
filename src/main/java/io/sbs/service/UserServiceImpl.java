@@ -500,7 +500,7 @@ public class UserServiceImpl implements UserService {
 		UserDTO userDTO = mongoTemplate.findOne(new Query(Criteria.where("username").is(username)),UserDTO.class,"authenticationProfile");
 		System.out.println(username + " sad ");
 		Criteria criteria = new Criteria();
-		criteria = criteria.and("role").is(userDTO.getRole().toString());
+		criteria = criteria.and("role").is(userDTO.getRole());
 		criteria = criteria.and("state").is(StringConstants.WORKFLOW_PENDING);
 		
 		List<WorkflowDTO> workflows = mongoTemplate.find(new Query(criteria),WorkflowDTO.class,"workflow");
