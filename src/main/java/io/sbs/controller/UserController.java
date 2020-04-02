@@ -76,7 +76,7 @@ public class UserController {
 
 	@RequestMapping(value = "/homePageDetails", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<?> getAccountDetails(HttpServletRequest request) {
-		//try {
+		try {
 		String token = request.getHeader(SecurityConstants.HEADER_STRING);
 		String username = JWT
 				.require(
@@ -86,9 +86,9 @@ public class UserController {
 					.getSubject();
 		return userService.getUserAccountDetails(username);
 
-//		} catch (Exception e) {
-//			return new ResponseEntity<>(e.toString(), HttpStatus.BAD_REQUEST);
-//		}
+		} catch (Exception e) {
+			return new ResponseEntity<>(e.toString(), HttpStatus.BAD_REQUEST);
+		}
 	}
 
 	@RequestMapping(value = "/getUserInfo", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
