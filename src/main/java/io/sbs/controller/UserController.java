@@ -86,23 +86,32 @@ public class UserController {
 	}
 
 	@RequestMapping(value = "/getUserInfo", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-	public ResponseEntity<?> getUserDetails(@RequestBody User user) {
+	public ResponseEntity<?> getUserDetails(HttpServletRequest request, @RequestBody User user) {
 
 		try {
 			logger.info("In /getUserInfo API controller.");
-			
+			String token = request.getHeader(SecurityConstants.HEADER_STRING);
+			String username_token = JWT
+					.require(
+							Algorithm.HMAC512(SecurityConstants.SECRET
+									.getBytes())).build()
+					.verify(token.replace(SecurityConstants.TOKEN_PREFIX, ""))
+					.getSubject();
+
+			if (user.getUsername() == null)
+				return new ResponseEntity<>("No username found. ",HttpStatus.BAD_REQUEST);
+
 			String role = null;
-			if (userService.getRoleGeneric(user.getUsername()) != null)
-				role = userService.getRoleGeneric(user.getUsername()).toString();
+			if (userService.getRoleGeneric(username_token) != null)
+				role = userService.getRoleGeneric(username_token).toString();
 
 			if (role == null)
 				return new ResponseEntity<>("No role found.",HttpStatus.BAD_REQUEST);
 			
-			if (role != UserType.Tier1.toString() || role != UserType.Tier2.toString())
+			if (role == UserType.Tier1.toString() || role == UserType.Tier2.toString())
+				return new ResponseEntity<>(userService.getUserInfo(user.getUsername()), HttpStatus.OK);
+			else	
 				return new ResponseEntity<>("Insufficient access. ",HttpStatus.UNAUTHORIZED);
-
-			return new ResponseEntity<>(userService.getUserInfo(user
-					.getUsername()), HttpStatus.OK);
 
 		} catch (Exception e) {
 			return new ResponseEntity<>(e.toString(), HttpStatus.BAD_REQUEST);
