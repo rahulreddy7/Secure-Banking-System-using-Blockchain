@@ -2,10 +2,8 @@ package io.sbs.controller;
 
 import io.sbs.constant.StringConstants;
 import io.sbs.constant.UserType;
-import io.sbs.dto.CustomWorkflowDTO;
 import io.sbs.dto.TransferPostDTO;
 import io.sbs.dto.WorkflowDTO;
-import io.sbs.security.SecurityConstants;
 import io.sbs.service.AccountService;
 import io.sbs.service.UserService;
 import io.sbs.vo.ResultVO;
@@ -17,9 +15,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
-
-import com.auth0.jwt.JWT;
-import com.auth0.jwt.algorithms.Algorithm;
 
 @RestController
 @RequestMapping(value = "/acc")
@@ -37,32 +32,14 @@ public class AccountController {
 	}
 
 	@RequestMapping(value = "/transfer_approve", method = RequestMethod.POST)
-	public ResultVO transfer_approve(HttpServletRequest request,
-			@RequestBody CustomWorkflowDTO workflow) {
+	public ResultVO transfer_approve(@RequestBody WorkflowDTO workflow) {
 		WorkflowDTO workflowObj = null;
 		WorkflowDTO workflowDTO = userService.findWorkflowObj(workflow);
 		if (workflowDTO.getType().equals(
 				StringConstants.WORKFLOW_CRITICAL_TRANSFER)
 				&& workflowDTO.getRole() == UserType.Tier2) {
 
-			String token = request.getHeader(SecurityConstants.HEADER_STRING);
-			String username = JWT
-					.require(
-							Algorithm.HMAC512(SecurityConstants.SECRET
-									.getBytes())).build()
-					.verify(token.replace(SecurityConstants.TOKEN_PREFIX, ""))
-					.getSubject();
-			boolean otp_match = accountService.checkAndMatchOTP(username,
-					workflow.getOtp());
-			if (otp_match)
-				workflowObj = accountService
-						.approveCriticalTransfer(workflowDTO);
-			else {
-				// return failure with message that OTP is not valid
-				return ResultVO
-						.createError("OTP is not valid. Please try again");
-			}
-
+			workflowObj = accountService.approveCriticalTransfer(workflowDTO);
 		} else if (workflowDTO.getType().equals(
 				StringConstants.WORKFLOW_NON_CRITICAL_TRANSFER)
 				&& workflowDTO.getRole() == UserType.Tier1) {
@@ -70,13 +47,12 @@ public class AccountController {
 					.approveNonCriticalTransfer(workflowDTO);
 		}
 		workflowObj = userService.updateStateOfWorkflow(workflowDTO);
-		workflowObj.setState(StringConstants.WORKFLOW_APPROVED);
 		return ResultVO.createSuccess(workflowObj);
 
 	}
 
 	@RequestMapping(value = "/transfer_decline", method = RequestMethod.POST)
-	public ResultVO transfer_decline(@RequestBody CustomWorkflowDTO workflow) {
+	public ResultVO transfer_decline(@RequestBody WorkflowDTO workflow) {
 		WorkflowDTO workflowObj = new WorkflowDTO();
 		WorkflowDTO workflowDTO = userService.findWorkflowObj(workflow);
 		if ((workflowDTO.getType().equals(
@@ -85,8 +61,17 @@ public class AccountController {
 				|| (workflowDTO.getType().equals(
 						StringConstants.WORKFLOW_NON_CRITICAL_TRANSFER) && workflowDTO
 						.getRole() == UserType.Tier1)) {
+
+			// workflowObj =
+			// accountService.approveCriticalTransfer(workflowDTO);
 			// delete the workflow object from the mongo
-			userService.deleteWorkflowObj(workflowDTO);
+			accountService.declineTransfer(workflowDTO);
+			// } else if (workflowDTO.getType().equals(
+			// StringConstants.WORKFLOW_NON_CRITICAL_TRANSFER)
+			// && workflowDTO.getRole() == UserType.Tier1) {
+			// workflowObj = accountService
+			// .approveNonCriticalTransfer(workflowDTO);
+			// }
 		}
 		workflowDTO.setState(StringConstants.WORKFLOW_DECLINED);
 		workflowObj = userService.updateStateOfWorkflow(workflowDTO);
