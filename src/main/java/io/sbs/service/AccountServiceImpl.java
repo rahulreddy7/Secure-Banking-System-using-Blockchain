@@ -9,12 +9,21 @@ import io.sbs.exception.BusinessException;
 import io.sbs.model.Account;
 import io.sbs.model.Transaction;
 import io.sbs.repository.AccountRepository;
+import io.sbs.security.EncryptDecrypt;
 
+import java.io.UnsupportedEncodingException;
+import java.security.InvalidAlgorithmParameterException;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.List;
+
+import javax.crypto.BadPaddingException;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.NoSuchPaddingException;
 
 import org.bson.Document;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,6 +32,7 @@ import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.mongodb.client.MongoClient;
@@ -84,6 +94,9 @@ public class AccountServiceImpl implements AccountService {
 		Document user = null;
 
 		Document to_account = null;
+		String from_accnt = transferPostDTO.getFrom_accnt();
+		Document from_accnt_doc = collection_accnt.find(
+				eq("account_number", from_accnt)).first();
 
 		switch (mode) {
 		case "phone":
@@ -98,37 +111,59 @@ public class AccountServiceImpl implements AccountService {
 				user = collection_user.find(eq("email", toBeneficiary)).first();
 			}
 
-			to_account = collection_accnt.find(
-					Filters.and(eq("acc_type", PRIMARY_ACCNT),
-							eq("username", user.get("username")))).first();
+			if (user != null) {
+				to_account = collection_accnt.find(
+						Filters.and(eq("acc_type", PRIMARY_ACCNT),
+								eq("username", user.get("username")))).first();
+			}
 			break;
 		case "account":
 			to_account = collection_accnt.find(
-					eq("account_number", PRIMARY_ACCNT)).first();
-		}
-
-		String from_accnt = transferPostDTO.getFrom_accnt();
-		Document from_accnt_doc = collection_accnt.find(eq("_id", from_accnt))
-				.first();
-		String type = null;
-		WorkflowDTO workDTO = null;
-
-		if (transferPostDTO.getAmount() > 1000.0) {
-			EmailService es = new EmailService();
-			String subject = "One Time Password (OTP) for Critical Transfer";
-			if (!es.send_email(from_accnt_doc.get("username").toString(),
-					from_accnt_doc.get("email").toString(), subject)) {
-				throw new BusinessException("Error in sending the email！");
+					eq("account_number", transferPostDTO.gettoBeneficiary()))
+					.first();
+			if (transferPostDTO.isSelf()) {
+				// validate the both the accounts belong to same user
+				if (!to_account.get("username").toString()
+						.equals(from_accnt_doc.get("username").toString())) {
+					throw new BusinessException("Beneficiary account must belong to same user");
+				}
 			}
-			workDTO = saveWorkflow(transferPostDTO, toBeneficiary, from_accnt,
-					StringConstants.WORKFLOW_CRITICAL_TRANSFER, UserType.Tier2);
-		} else {
-			workDTO = saveWorkflow(transferPostDTO, toBeneficiary, from_accnt,
-					StringConstants.WORKFLOW_NON_CRITICAL_TRANSFER,
-					UserType.Tier1);
+
+			break;
 		}
 
-		mongoTemplate.save(workDTO, "workflow");
+		if (to_account != null) {
+			// String from_accnt = transferPostDTO.getFrom_accnt();
+			// Document from_accnt_doc = collection_accnt.find(
+			// eq("account_number", from_accnt)).first();
+			Document from_user_doc = collection_user.find(
+					eq("username", from_accnt_doc.get("username"))).first();
+			String type = null;
+			WorkflowDTO workDTO = null;
+
+			if (transferPostDTO.getAmount() > 1000.0) {
+				EmailService es = new EmailService();
+				// create TransactionOTP details flow here in email service
+				String subject = "One Time Password (OTP) for Critical Transfer";
+				if (!es.send_criticaltransfer_email(
+						from_user_doc.get("username").toString(), from_user_doc
+								.get("email").toString(), subject)) {
+					throw new BusinessException("Error in sending the email！");
+				}
+				workDTO = saveWorkflow(transferPostDTO,
+						to_account.get("account_number").toString(),
+						from_accnt, StringConstants.WORKFLOW_CRITICAL_TRANSFER,
+						UserType.Tier2);
+			} else {
+				workDTO = saveWorkflow(transferPostDTO,
+						to_account.get("account_number").toString(),
+						from_accnt,
+						StringConstants.WORKFLOW_NON_CRITICAL_TRANSFER,
+						UserType.Tier1);
+			}
+
+			mongoTemplate.save(workDTO, "workflow");
+		}
 	}
 
 	private WorkflowDTO saveWorkflow(TransferPostDTO transferPostDTO,
@@ -142,10 +177,11 @@ public class AccountServiceImpl implements AccountService {
 		obj.settoBeneficiary(toBeneficiary);
 		obj.setAmount(transferPostDTO.getAmount());
 		obj.setDescription(transferPostDTO.getDescription());
+		obj.setSelf(transferPostDTO.isSelf());
 		details.add(obj);
 		workDTO.setDetails(details);
 		workDTO.setRole(role);
-		workDTO.setType(StringConstants.WORKFLOW_PENDING);
+		workDTO.setState(StringConstants.WORKFLOW_PENDING);
 		return workDTO;
 	}
 
@@ -202,23 +238,26 @@ public class AccountServiceImpl implements AccountService {
 			String transferType, String transactionType) {
 		if (transferType.equals(StringConstants.WORKFLOW_CRITICAL_TRANSFER)) {
 			// Do something about OTP
+			// Validate the otp
+
 		}
 
 		LinkedHashMap map = (LinkedHashMap) workflowDTO.getDetails().get(0);
-		Update update = new Update();
-		UpdateResult accnObj = null;
+		Update update1 = new Update();
+		Update update2 = new Update();
+		UpdateResult accnObj1 = null;
+		UpdateResult accnObj2 = null;
+
 		if (map.get("fromAccNo").toString() != null) {
 			Account account = mongoTemplate.findOne(
 					Query.query(Criteria.where("account_number").is(
-							map.get("fromAccnNo"))), Account.class, "account");
+							map.get("fromAccNo"))), Account.class, "account");
 
 			double new_balance = account.getAcc_balance()
 					- (double) map.get("amount");
-			update.set("acc_balance", new_balance);
-			accnObj = mongoTemplate.updateFirst(
-					Query.query(Criteria.where("account_number").is(
-							map.get("fromAccNo").toString())), update,
-					Account.class, "account");
+			if (new_balance < 0)
+				throw new BusinessException("Insufficent Balance");
+			update1.set("acc_balance", new_balance);
 		}
 		if (map.get("toBeneficiary").toString() != null) {
 			Account account = mongoTemplate.findOne(
@@ -228,20 +267,25 @@ public class AccountServiceImpl implements AccountService {
 
 			double new_balance = account.getAcc_balance()
 					+ (double) map.get("amount");
-			update.set("acc_balance", new_balance);
-			accnObj = mongoTemplate.updateFirst(
+			update2.set("acc_balance", new_balance);
+			accnObj1 = mongoTemplate.updateFirst(
 					Query.query(Criteria.where("account_number").is(
-							map.get("toBeneficiary").toString())), update,
+							map.get("fromAccNo").toString())), update1,
+					Account.class, "account");
+
+			accnObj2 = mongoTemplate.updateFirst(
+					Query.query(Criteria.where("account_number").is(
+							map.get("toBeneficiary").toString())), update2,
 					Account.class, "account");
 		}
-		if (accnObj == null) {
+		if (accnObj1 == null || accnObj2 == null) {
 			throw new BusinessException("cannot be updated！");
 		}
 
 		// Save Transaction in mongo and hyperledger
 		Transaction transaction = saveTransaction(map, transactionType);
 		mongoTemplate.save(transaction, "transaction");
-		workflowDTO.setType(StringConstants.WORKFLOW_APPROVED);
+		workflowDTO.setType(transferType);
 
 		// TODO mongoTemplate.save(workflowDTO, "workflow");
 		return workflowDTO;
@@ -271,8 +315,41 @@ public class AccountServiceImpl implements AccountService {
 	public void declineTransfer(WorkflowDTO workflowDTO) {
 		String workflowId = workflowDTO.getWorkflow_id();
 		Query query2 = new Query();
-		query2.addCriteria(Criteria.where("_id").is(workflowDTO.getWorkflow_id()));
+		query2.addCriteria(Criteria.where("_id").is(
+				workflowDTO.getWorkflow_id()));
 		WorkflowDTO workflow = mongoTemplate.findOne(query2, WorkflowDTO.class);
 		mongoTemplate.remove(workflow);
+	}
+
+	@Override
+	public boolean checkAndMatchOTP(String username, String otp) {
+		// TODO Auto-generated method stub
+		MongoCollection<Document> collection = database
+				.getCollection("criticalTransferOTP");
+		Document myDoc = collection.find(eq("username", username)).first();
+		BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+		// otp = passwordEncoder.encode(otp)
+		String otp_db = myDoc.get("otp").toString();
+		EncryptDecrypt e;
+		String otp_decoded = null;
+		try {
+			e = new EncryptDecrypt();
+			otp_decoded = e.decrypt(otp_db);
+		} catch (UnsupportedEncodingException | NoSuchPaddingException
+				| NoSuchAlgorithmException | InvalidKeyException
+				| InvalidAlgorithmParameterException | BadPaddingException
+				| IllegalBlockSizeException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+
+		// passwordEncoder.matches(otp, otp_db);
+		// if (passwordEncoder.matches(otp, otp_db)) {
+		if (otp_decoded.equals(otp)) {
+			collection.updateOne(eq("username", username), new Document("$set",
+					new Document("verified", true)));
+			return true;
+		}
+		return false;
 	}
 }
