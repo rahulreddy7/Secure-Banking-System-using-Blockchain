@@ -3,6 +3,8 @@ package io.sbs.controller;
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -31,10 +33,13 @@ public class EmpController {
 	
 	@Autowired
 	private UserService userService;
+	
+	private Logger logger = LogManager.getLogger();
 
 	@PostMapping(path= "/viewEmp", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<?> viewEmp(HttpServletRequest request, @RequestBody Employee employee){
 		try {
+			logger.info("In /viewEmp API controller.");
 			String username;
 			if (employee.getUsername() != null) 
 				username = employee.getUsername();
@@ -58,6 +63,7 @@ public class EmpController {
 	@PostMapping(path= "/addEmp", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<?> addEmp(HttpServletRequest request, @Valid @RequestBody Employee employee){
 		try {
+			logger.info("In /addEmp API controller.");
 			String token = request.getHeader(SecurityConstants.HEADER_STRING);
 			String username = JWT
 					.require(
@@ -89,6 +95,7 @@ public class EmpController {
 	@PostMapping(path= "/modifyEmp", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<?> modifyEmp(HttpServletRequest request, @RequestBody Employee employee){
 		try {
+			logger.info("In /modifyEmp API controller.");
 			String token = request.getHeader(SecurityConstants.HEADER_STRING);
 	        String  username = JWT.require(Algorithm.HMAC512(SecurityConstants.SECRET.getBytes()))
 	                    .build()
@@ -119,6 +126,7 @@ public class EmpController {
 	@PostMapping(path= "/deleteEmp", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<?> deleteEmp(HttpServletRequest request, @RequestBody Employee employee){
 		try {
+			logger.info("In /deleteEmp API controller.");
 			String token = request.getHeader(SecurityConstants.HEADER_STRING);
 	        String  username = JWT.require(Algorithm.HMAC512(SecurityConstants.SECRET.getBytes()))
 	                    .build()

@@ -2,8 +2,9 @@ package io.sbs.service;
 
 import static com.mongodb.client.model.Filters.eq;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.bson.Document;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -22,9 +23,11 @@ public class EmpServiceImpl implements EmpService{
 	MongoClient mongoClient = MongoClients.create("mongodb://admin:myadminpassword@18.222.64.16:27017");
 	MongoDatabase database = mongoClient.getDatabase("mydb");
 	
+	private Logger logger = LogManager.getLogger();
+	
 	@Override
 	public ResponseEntity<?> addNewEmpService(Employee e, String username) {
-		
+		logger.info("In addNewEmpService API service.");
 		MongoCollection<Document> collection = database.getCollection("employee");
 		Document myDoc = collection.find(eq("username", username)).first();
 		if (myDoc != null)
@@ -52,6 +55,7 @@ public class EmpServiceImpl implements EmpService{
 
 	@Override
 	public ResponseEntity<?> modifyEmpService(Employee e) {
+		logger.info("In modifyEmpService API service.");
 		MongoCollection<Document> collection = database.getCollection("employee");
 		Document myDoc = collection.find(eq("username", e.getUsername())).first();
 		if (myDoc == null)
@@ -76,6 +80,7 @@ public class EmpServiceImpl implements EmpService{
 
 	@Override
 	public ResponseEntity<?> deleteEmpService(Employee e, String username) {
+		logger.info("In deleteEmpService API service.");
 		MongoCollection<Document> collection = database.getCollection("employee");
 		Document myDoc = collection.find(eq("username", username)).first();
 		if (myDoc == null)
@@ -89,6 +94,7 @@ public class EmpServiceImpl implements EmpService{
 
 	@Override
 	public ResponseEntity<?> viewEmpService(String username) {
+		logger.info("In viewEmpService API service.");
 		MongoCollection<Document> collection = database.getCollection("employee");
 		Document myDoc = collection.find(eq("username", username)).first();
 		if (myDoc == null)

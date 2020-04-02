@@ -21,6 +21,8 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Random;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.bson.Document;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
@@ -53,9 +55,12 @@ public class UserServiceImpl implements UserService {
 	private Environment env;
 	private static ApplicationContext applicationContext;
 	
+	private Logger logger = LogManager.getLogger();
+	
 	@Override
 	public ResponseEntity<?> getUserAccountDetails(String username) {
-
+		
+		logger.info("In getUserAccountDetails API service.");
 	    MongoCollection<Document> collection = database.getCollection("user");
 	    Document myDoc = collection.find(eq("username", username)).first();
 	    
@@ -86,6 +91,7 @@ public class UserServiceImpl implements UserService {
 
 	@Override
 	public User getUserInfo(String username) {
+		logger.info("In getUserInfo API service.");
 		MongoCollection<Document> collection = database.getCollection("user");
 		Document myDoc = collection.find(eq("username", username)).first();
 		User user = new User();
@@ -99,6 +105,8 @@ public class UserServiceImpl implements UserService {
 	// save workflow Object in the new user
 	@Override
 	public void register(CustomDTO customDTO) {
+		logger.info("In register API service.");
+
 		UserDTO dto = mongoTemplate.findOne(Query.query(Criteria.where("username").is(customDTO.getUsername())), UserDTO.class, "user");
 		if (dto != null) {
 			throw new ValidationException("the user already exists");
@@ -129,6 +137,7 @@ public class UserServiceImpl implements UserService {
 	
 	@Override
 	public ResponseEntity<?> login(UserDTO userDTO) {
+		logger.info("In login API service.");
 		BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 		UserDTO dto = mongoTemplate.findOne(Query.query(Criteria.where("username").is(userDTO.getUsername())), UserDTO.class, "authenticationProfile");
 		if (dto == null) {
@@ -167,7 +176,7 @@ public class UserServiceImpl implements UserService {
 	}
 	@Override
 	public UserDTO updateUserInfo( UserDTO user) {
-
+		logger.info("In updateUserInfo API service.");
 		WorkflowDTO workDTO=new WorkflowDTO();
 		workDTO.setType(env.getProperty("type.updateUserInfo"));
 //		UserType usertype=userDTO.getRole();
@@ -187,6 +196,7 @@ public class UserServiceImpl implements UserService {
 
 	@Override
 	public WorkflowDTO updateDetails( WorkflowDTO workflowDTO) {
+		logger.info("In updateDetails API service.");
 		LinkedHashMap map = (LinkedHashMap) workflowDTO.getDetails().get(0);
 		Update update = new Update();
 		if(map.get("address")!=null) {
@@ -209,6 +219,7 @@ public class UserServiceImpl implements UserService {
 
 	@Override
 	public boolean checkAndMatchOTP(String username, String otp) {
+		logger.info("In checkAndMatchOTP API service.");
 		MongoCollection<Document> collection = database.getCollection("loginOTP");
 		Document myDoc = collection.find(eq("username", username)).first();
 		String otp_db = myDoc.get("otp").toString();
@@ -221,7 +232,7 @@ public class UserServiceImpl implements UserService {
 
 	@Override
 	public boolean forgotPasswordOTP(String username) {
-		
+		logger.info("In forgotPasswordOTP API service.");
 		MongoCollection<Document> collection = database.getCollection("user");
 		Document myDoc = collection.find(eq("username", username)).first();
 		String email = myDoc.get("email").toString();
@@ -239,6 +250,7 @@ public class UserServiceImpl implements UserService {
 //		if (dto != null) {
 //			throw new ValidationException("the user already exists");
 //		}
+		logger.info("In createUser API service.");
 		LinkedHashMap map = (LinkedHashMap) workflowDTO.getDetails().get(0);
 		AccountDTO accountDTO = new AccountDTO();
 		UserDTO userDTO = new UserDTO();
@@ -294,7 +306,7 @@ public class UserServiceImpl implements UserService {
 		
 
 	public ResponseEntity<?> resetPass(String username, String currpassword, String newpassword) {
-
+		logger.info("In resetPass API service.");
 		BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 		UserDTO dto = mongoTemplate.findOne(Query.query(Criteria.where("username").is(username)), UserDTO.class, "authenticationProfile");
 		if (dto == null) {
@@ -313,6 +325,7 @@ public class UserServiceImpl implements UserService {
 
 	@Override
 	public ResponseEntity<?> addAccToWorkflow(String username, Account acc) {
+		logger.info("In addAccToWorkflow API service.");
 		EmailService es = new EmailService();
 		String acc_num = new String(es.generate_random(10));
 
@@ -341,6 +354,7 @@ public class UserServiceImpl implements UserService {
 	
 	@Override
 	public WorkflowDTO createNewAcc(WorkflowDTO workflowDTO) {
+		logger.info("In createNewAcc API service.");
 		LinkedHashMap map = (LinkedHashMap) workflowDTO.getDetails().get(0);
 		mongoTemplate.save(workflowDTO.getDetails().get(0), "account");
 		return workflowDTO;
@@ -349,6 +363,7 @@ public class UserServiceImpl implements UserService {
 
 	@Override
 	public ResponseEntity<?> generateChequeService(Account acc) {
+		logger.info("In generateChequeService API service.");
 		MongoCollection<Document> acc_collection = database.getCollection("account");
 		Document myDoc = acc_collection.find(eq("account_number", acc.getAccount_number())).first();
 		if (myDoc == null)
@@ -375,7 +390,7 @@ public class UserServiceImpl implements UserService {
 
 	@Override
 	public ResponseEntity<?> creditAmountService(Account acc) {
-
+		logger.info("In creditAmountService API service.");
 		MongoCollection<Document> collection = database.getCollection("account");
 		Document myDoc = collection.find(eq("account_number", acc.getAccount_number())).first();
 		if (myDoc == null)
@@ -390,6 +405,7 @@ public class UserServiceImpl implements UserService {
 
 	@Override
 	public AppointmentDTO createAppointment(AppointmentDTO appointmentDTO) {
+		logger.info("In createAppointment API service.");
 		WorkflowDTO workDTO=new WorkflowDTO();
 		workDTO.setType(env.getProperty("type.createAppointment"));
 //		UserType usertype=userDTO.getRole();
@@ -409,8 +425,7 @@ public class UserServiceImpl implements UserService {
 	
 	@Override
 	public WorkflowDTO createAppointments(WorkflowDTO workflowDTO) {
-//		// TODO Auto-generated method stub
-		
+		logger.info("In createAppointments API service.");
 		LinkedHashMap map = (LinkedHashMap) workflowDTO.getDetails().get(0);
 		UserDTO dto = mongoTemplate.findOne(Query.query(Criteria.where("username").is(map.get("username").toString())), UserDTO.class, "user");
 		
@@ -428,6 +443,7 @@ public class UserServiceImpl implements UserService {
 	}
 	@Override
 	public WorkflowDTO updateStateOfWorkflow(WorkflowDTO workflowDTO) {
+		logger.info("In updateStateOfWorkflow API service.");
 		Update update = new Update();
 		update.set("state", workflowDTO.getState());
 		UpdateResult userObj = mongoTemplate.updateFirst(Query.query(Criteria.where("workflow_id").is(workflowDTO.getWorkflow_id())), update, WorkflowDTO.class, "workflow");
@@ -436,6 +452,7 @@ public class UserServiceImpl implements UserService {
 
 	@Override
 	public UserType getUserRole(String username) {
+		logger.info("In getUserRole API service.");
 		MongoCollection<Document> collection = database.getCollection("user");
 		Document myDoc = collection.find(eq("username", username)).first();
 		if (myDoc == null)
@@ -451,6 +468,7 @@ public class UserServiceImpl implements UserService {
 
 	@Override
 	public UserType getRoleGeneric(String username) {
+		logger.info("In getRoleGeneric API service.");
 		MongoCollection<Document> collection = database.getCollection("authenticationProfile");
 		Document myDoc = collection.find(eq("username", username)).first();
 		if (myDoc == null)
@@ -469,6 +487,7 @@ public class UserServiceImpl implements UserService {
 	}
 
   public WorkflowDTO deleteWorkflowObj(WorkflowDTO workflowDTO) {
+	  	logger.info("In deleteWorkflowObj API service.");
 		MongoCollection<Document> collection = database.getCollection("workflow");
 		collection.deleteOne(eq("workflow_id", workflowDTO.getWorkflow_id()));
 		return null;
@@ -476,6 +495,7 @@ public class UserServiceImpl implements UserService {
 
 	@Override
 	public List<WorkflowDTO> getAllWorkflows(String username) {
+		logger.info("In getAllWorkflows API service.");
 		UserDTO userDTO = mongoTemplate.findOne(new Query(Criteria.where("username").is(username)),UserDTO.class,"authenticationProfile");
 		System.out.println(username + " sad ");
 		Criteria criteria = new Criteria();
@@ -487,6 +507,7 @@ public class UserServiceImpl implements UserService {
 	}
 	
 	public WorkflowDTO findWorkflowObj(WorkflowDTO workflow) {
+		logger.info("In findWorkflowObj API service.");
 		WorkflowDTO dto = mongoTemplate.findOne(Query.query(Criteria.where("workflow_id").is(workflow.getWorkflow_id())), WorkflowDTO.class, "workflow");
 		if (dto == null) {
 			throw new BusinessException("Workflow not found!");
@@ -496,7 +517,7 @@ public class UserServiceImpl implements UserService {
 
 	@Override
 	public ResponseEntity<?> deleteAccService(Account acc) {
-		
+		logger.info("In deleteAccService API service.");
 		MongoCollection<Document> collection = database.getCollection("account");
 		Document myDoc = collection.find(eq("account_number", acc.getAccount_number())).first();
 		if (myDoc == null)

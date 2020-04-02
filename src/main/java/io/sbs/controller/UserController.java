@@ -70,6 +70,7 @@ public class UserController {
 	@RequestMapping(value = "/homePageDetails", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<?> getAccountDetails(HttpServletRequest request) {
 		try {
+			logger.info("In /homePageDetails API controller.");
 			String token = request.getHeader(SecurityConstants.HEADER_STRING);
 			String username = JWT
 					.require(
@@ -88,6 +89,7 @@ public class UserController {
 	public ResponseEntity<?> getUserDetails(@RequestBody User user) {
 
 		try {
+			logger.info("In /getUserInfo API controller.");
 			
 			String role = null;
 			if (userService.getRoleGeneric(user.getUsername()) != null)
@@ -110,6 +112,7 @@ public class UserController {
 	@RequestMapping(value = "/getUserInfoToken", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<?> getUserDetailsToken(HttpServletRequest request) {
 		try {
+			logger.info("In /getUserInfoToken API controller.");
 			String token = request.getHeader(SecurityConstants.HEADER_STRING);
 			String username = JWT
 					.require(
@@ -131,12 +134,14 @@ public class UserController {
 	@PostMapping("register")
 	@ResponseStatus(HttpStatus.CREATED)
 	public ResultVO register(@RequestBody CustomDTO customDTO) {
+		logger.info("In /register API controller.");
 		userService.register(customDTO);
 		return ResultVO.createSuccess(customDTO);
 	}
 
 	@PostMapping("login")
 	public ResponseEntity<?> login(@RequestBody UserDTO userDTO) {
+		logger.info("In /login API controller.");
 		return userService.login(userDTO);
 	}
 
@@ -147,6 +152,7 @@ public class UserController {
 	@RequestMapping(value = "/updateDetails", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
 	public ResultVO updateDetails(HttpServletRequest request, @RequestBody UserDTO userDTO) {
 		
+		logger.info("In /updateDetails API controller.");
 		String token = request.getHeader(SecurityConstants.HEADER_STRING);
 		String username = JWT
 				.require(
@@ -161,6 +167,7 @@ public class UserController {
 
 	@RequestMapping(value = "/appt", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
 	public ResultVO appt(HttpServletRequest request, @RequestBody AppointmentDTO appointmentDTO) {
+		logger.info("In /appt API controller.");
 		String token = request.getHeader(SecurityConstants.HEADER_STRING);
 		String username = JWT
 				.require(
@@ -175,6 +182,7 @@ public class UserController {
 
 	@PostMapping("approve")
 	public ResultVO approve(@RequestBody WorkflowDTO workflow) {
+		logger.info("In /approve API controller.");
 		WorkflowDTO workflowDTO = userService.findWorkflowObj(workflow);
 		workflowDTO.setState("Approved");
 		WorkflowDTO workflowObj = new WorkflowDTO();
@@ -194,8 +202,10 @@ public class UserController {
 		workflowObj=userService.updateStateOfWorkflow(workflowDTO);
 		return ResultVO.createSuccess(workflowObj);
 	}
+
 	@PostMapping("decline")
 	public void decline(@RequestBody WorkflowDTO workflowDTO) {
+		logger.info("In /decline API controller.");
 		WorkflowDTO workflowObj = new WorkflowDTO();
 		workflowObj=userService.deleteWorkflowObj(workflowDTO);
 	}
@@ -204,6 +214,7 @@ public class UserController {
 	public ResponseEntity<?> checkOTP(HttpServletRequest request,
 			@RequestBody LoginOTP login_otp) {
 		try {
+			logger.info("In /otp_check API controller.");
 			String token = request.getHeader(SecurityConstants.HEADER_STRING);
 			String username = JWT
 					.require(
@@ -230,6 +241,7 @@ public class UserController {
 	@RequestMapping(value = "/forgotPass", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<?> sendOTPEmail(HttpServletRequest request) {
 		try {
+			logger.info("In /forgotPass API controller.");
 			String token = request.getHeader(SecurityConstants.HEADER_STRING);
 			String username = JWT
 					.require(
@@ -253,6 +265,7 @@ public class UserController {
 	@RequestMapping(value = "/resetPass", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<?> resetPassword(@RequestBody UserDTO user) {
 		try {
+			logger.info("In /resetPass API controller.");
 			String username;
 			if (user.getUsername() != null) 
 				username = user.getUsername();
@@ -268,6 +281,7 @@ public class UserController {
 	@GetMapping("logout")
 	public ResultVO logout(HttpServletRequest request) {
 
+		logger.info("In /logout API controller.");
         DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
         Date date = new Date();
         logger.info("user logout time={}s", dateFormat.format(date).toString());
@@ -285,6 +299,7 @@ public class UserController {
 	public ResponseEntity<?> addAcc(HttpServletRequest request,
 			@Valid @RequestBody Account acc) {
 		try {
+			logger.info("In /addAcc API controller.");
 			String token = request.getHeader(SecurityConstants.HEADER_STRING);
 			String username = JWT
 					.require(
@@ -302,6 +317,7 @@ public class UserController {
 	@RequestMapping(value = "/generateCheque", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<?> generateCheque(HttpServletRequest request, @RequestBody Account acc) {
 		try {
+			logger.info("In /generateCheque API controller.");
 			String token = request.getHeader(SecurityConstants.HEADER_STRING);
 			String username = JWT
 					.require(
@@ -336,7 +352,7 @@ public class UserController {
 	public ResponseEntity<?> debitAmt(HttpServletRequest request, @RequestBody Account acc) {
 		try {
 			
-			logger.info("In /debitAmount API controller.");
+			logger.info("In /creditAmount API controller.");
 			
 			String token = request.getHeader(SecurityConstants.HEADER_STRING);
 			String username = JWT
@@ -393,6 +409,7 @@ public class UserController {
     
     @RequestMapping(value="/workflows",method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE)
     public List<WorkflowDTO> getAllWorkflows(HttpServletRequest request){
+    	logger.info("In /workflows API controller.");
     	String token = request.getHeader(SecurityConstants.HEADER_STRING);
 		String username = JWT
 				.require(
@@ -408,6 +425,7 @@ public class UserController {
     @PostMapping(path= "/deleteAcc", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<?> deleteEmp(HttpServletRequest request, @RequestBody Account acc){
 		try {
+			logger.info("In /deleteAcc API controller.");
 			String token = request.getHeader(SecurityConstants.HEADER_STRING);
 	        String  username = JWT.require(Algorithm.HMAC512(SecurityConstants.SECRET.getBytes()))
 	                    .build()
