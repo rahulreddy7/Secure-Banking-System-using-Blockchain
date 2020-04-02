@@ -1,5 +1,20 @@
 package io.sbs.controller;
 
+import io.sbs.constant.StringConstants;
+import io.sbs.constant.UserType;
+import io.sbs.dto.AppointmentDTO;
+import io.sbs.dto.CustomDTO;
+import io.sbs.dto.CustomWorkflowDTO;
+import io.sbs.dto.UserDTO;
+import io.sbs.dto.WorkflowDTO;
+import io.sbs.model.Account;
+import io.sbs.model.LoginOTP;
+import io.sbs.model.User;
+import io.sbs.security.SecurityConstants;
+import io.sbs.service.AppointmentService;
+import io.sbs.service.UserService;
+import io.sbs.vo.ResultVO;
+
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -32,20 +47,6 @@ import org.springframework.web.bind.annotation.RestController;
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.JWTVerificationException;
-
-import io.sbs.constant.StringConstants;
-import io.sbs.constant.UserType;
-import io.sbs.dto.AppointmentDTO;
-import io.sbs.dto.CustomDTO;
-import io.sbs.dto.UserDTO;
-import io.sbs.dto.WorkflowDTO;
-import io.sbs.model.Account;
-import io.sbs.model.LoginOTP;
-import io.sbs.model.User;
-import io.sbs.security.SecurityConstants;
-import io.sbs.service.AppointmentService;
-import io.sbs.service.UserService;
-import io.sbs.vo.ResultVO;
 
 @RestController
 @RequestMapping(value = "/users")
@@ -190,7 +191,7 @@ public class UserController {
 	}
 
 	@PostMapping("approve")
-	public ResultVO approve(@RequestBody WorkflowDTO workflow) {
+	public ResultVO approve(@RequestBody CustomWorkflowDTO workflow) {
 		logger.info("In /approve API controller.");
 		WorkflowDTO workflowDTO = userService.findWorkflowObj(workflow);
 		workflowDTO.setState("Approved");

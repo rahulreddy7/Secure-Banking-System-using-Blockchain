@@ -8,7 +8,7 @@ public class TransferPostDTO {
 	private String description;
 	private double amount;
 	private boolean self;
-	
+
 	public boolean isSelf() {
 		return self;
 	}
@@ -19,7 +19,6 @@ public class TransferPostDTO {
 
 	private long phoneNumber;
 	private String email;
-	
 
 	public long getPhoneNumber() {
 		return phoneNumber;
@@ -75,6 +74,14 @@ public class TransferPostDTO {
 
 	public void setAmount(double amount) {
 		this.amount = amount;
+	}
+
+	public String getFromAccNo() {
+		return fromAccNo;
+	}
+
+	public void setFromAccNo(String fromAccNo) {
+		this.fromAccNo = fromAccNo;
 	}
 
 }

@@ -1,6 +1,6 @@
 package io.sbs.dto;
 
-public class TransferWorkflowDTO {
+public class TransferOTPPostDTO {
 
 	private String mode;
 	private String fromAccNo;
@@ -8,7 +8,16 @@ public class TransferWorkflowDTO {
 	private String description;
 	private double amount;
 	private boolean self;
-	
+	private String otp;
+
+	public String getOtp() {
+		return otp;
+	}
+
+	public void setOtp(String otp) {
+		this.otp = otp;
+	}
+
 	public boolean isSelf() {
 		return self;
 	}
@@ -19,7 +28,6 @@ public class TransferWorkflowDTO {
 
 	private long phoneNumber;
 	private String email;
-	
 
 	public long getPhoneNumber() {
 		return phoneNumber;
@@ -75,6 +83,14 @@ public class TransferWorkflowDTO {
 
 	public void setAmount(double amount) {
 		this.amount = amount;
+	}
+
+	public String getFromAccNo() {
+		return fromAccNo;
+	}
+
+	public void setFromAccNo(String fromAccNo) {
+		this.fromAccNo = fromAccNo;
 	}
 
 }
