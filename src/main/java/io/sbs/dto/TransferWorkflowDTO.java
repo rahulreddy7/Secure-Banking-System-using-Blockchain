@@ -1,6 +1,6 @@
 package io.sbs.dto;
 
-public class TransferPostDTO {
+public class TransferWorkflowDTO {
 
 	private String mode;
 	private String fromAccNo;

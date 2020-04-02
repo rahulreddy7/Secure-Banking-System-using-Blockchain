@@ -4,7 +4,6 @@ import io.sbs.constant.StringConstants;
 import io.sbs.constant.UserType;
 import io.sbs.dto.AppointmentDTO;
 import io.sbs.dto.CustomDTO;
-import io.sbs.dto.CustomWorkflowDTO;
 import io.sbs.dto.UserDTO;
 import io.sbs.dto.WorkflowDTO;
 import io.sbs.model.Account;
@@ -14,13 +13,17 @@ import io.sbs.security.SecurityConstants;
 import io.sbs.service.AppointmentService;
 import io.sbs.service.UserService;
 import io.sbs.vo.ResultVO;
+
 import io.sbs.exception.RecordNotFoundException;
 import io.sbs.service.UserServiceImpl;
+
 import static com.auth0.jwt.algorithms.Algorithm.HMAC512;
+
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -77,14 +80,14 @@ public class UserController {
 	@RequestMapping(value = "/homePageDetails", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<?> getAccountDetails(HttpServletRequest request) {
 		try {
-		String token = request.getHeader(SecurityConstants.HEADER_STRING);
-		String username = JWT
-				.require(
+			String token = request.getHeader(SecurityConstants.HEADER_STRING);
+			String username = JWT
+					.require(
 							Algorithm.HMAC512(SecurityConstants.SECRET
 									.getBytes())).build()
 					.verify(token.replace(SecurityConstants.TOKEN_PREFIX, ""))
 					.getSubject();
-		return userService.getUserAccountDetails(username);
+			return userService.getUserAccountDetails(username);
 
 		} catch (Exception e) {
 			return new ResponseEntity<>(e.toString(), HttpStatus.BAD_REQUEST);
@@ -181,7 +184,7 @@ public class UserController {
 	}
 
 	@PostMapping("approve")
-	public ResultVO approve(@RequestBody CustomWorkflowDTO workflow) {
+	public ResultVO approve(@RequestBody WorkflowDTO workflow) {
 		WorkflowDTO workflowDTO = userService.findWorkflowObj(workflow);
 		workflowDTO.setState("Approved");
 		WorkflowDTO workflowObj = new WorkflowDTO();
