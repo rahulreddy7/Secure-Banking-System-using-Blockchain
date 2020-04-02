@@ -3,11 +3,14 @@ package io.sbs.security;
 import static com.auth0.jwt.algorithms.Algorithm.HMAC512;
 import static com.mongodb.client.model.Filters.eq;
 
+import io.sbs.dto.UserDTO;
 import io.sbs.model.ApplicationUser;
 import io.sbs.model.LoginOTP;
 import io.sbs.service.UserService;
 
 import java.io.IOException;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 
@@ -16,6 +19,8 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.bson.Document;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -92,6 +97,11 @@ private AuthenticationManager authenticationManager;
 @Autowired
 private UserService userService;
 
+ThreadLocal<Long> startTime = new ThreadLocal<>();
+private Logger logger = LogManager.getLogger();
+DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+Date date = new Date();
+
 public JWTAuthenticationFilter(AuthenticationManager authenticationManager) {
 super();
 setFilterProcessesUrl("/users/otp_check");
@@ -104,10 +114,16 @@ public Authentication attemptAuthentication(HttpServletRequest req,
 try {
 	LoginOTP creds = new ObjectMapper().readValue(req.getInputStream(),
 			LoginOTP.class);
-	return authenticationManager
+	Authentication auth=
+	authenticationManager
 			.authenticate(new UsernamePasswordAuthenticationToken(creds
 					.getUsername(), creds.getOtp(),
 					new ArrayList<>()));
+	startTime.set(System.currentTimeMillis());
+	logger.info("user login time={}s", dateFormat.format(date).toString());
+	logger.info("user name={}", creds.getUsername().toString());
+	logger.info("user login use time={}s", System.currentTimeMillis()-startTime.get());
+	return auth;
 } catch (IOException e) {
 	throw new RuntimeException(e);
 }
@@ -130,7 +146,6 @@ String username = JWT.require(
 				.getBytes())).build().verify(token.replace(SecurityConstants.TOKEN_PREFIX, "")).getSubject();
 res.addHeader(SecurityConstants.HEADER_STRING,
 		SecurityConstants.TOKEN_PREFIX + token);
-
 String role = getUserRole(username);
 if (role != null)
 	res.addHeader("role", role);
