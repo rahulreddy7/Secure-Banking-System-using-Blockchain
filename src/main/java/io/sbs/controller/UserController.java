@@ -194,22 +194,29 @@ public class UserController {
 	public ResultVO approve(@RequestBody CustomWorkflowDTO workflow) {
 		logger.info("In /approve API controller.");
 		WorkflowDTO workflowDTO = userService.findWorkflowObj(workflow);
-		workflowDTO.setState("Approved");
+		
 		WorkflowDTO workflowObj = new WorkflowDTO();
 		if (workflowDTO.getType().equals("New_User")) {
+			workflowDTO.setState("Approved");
 			workflowObj = userService.createUser(workflowDTO);
+			workflowObj=userService.updateStateOfWorkflow(workflowDTO);
 		} else if (workflowDTO.getType().equals("update_details")
 				&& workflowDTO.getRole() == UserType.Tier2) {
+			workflowDTO.setState("Approved");
 			workflowObj = userService.updateDetails(workflowDTO);
+			workflowObj=userService.updateStateOfWorkflow(workflowDTO);
 		} else if (workflowDTO.getType().equals(StringConstants.WORKFLOW_NEW_ACC)) {
+			workflowDTO.setState("Approved");
 			workflowObj = userService.createNewAcc(workflowDTO);
+			workflowObj=userService.updateStateOfWorkflow(workflowDTO);
 		}
 		else if (workflowDTO.getType().equals("appt")
 				&& workflowDTO.getRole() == UserType.Tier1) {
-			// workflowObj = appointmentService.createAppointments(workflowDTO);
+			workflowDTO.setState("Approved");
 			workflowObj = userService.createAppointments(workflowDTO);
+			workflowObj=userService.updateStateOfWorkflow(workflowDTO);
 		}
-		workflowObj=userService.updateStateOfWorkflow(workflowDTO);
+		
 		return ResultVO.createSuccess(workflowObj);
 	}
 
