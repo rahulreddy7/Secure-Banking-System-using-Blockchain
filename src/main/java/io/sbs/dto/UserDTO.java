@@ -25,6 +25,32 @@ public class UserDTO implements Serializable {
     private String created_at;
     private String updated_at;
     private String phone;
+    private int attempts;
+    private String isLocked;
+    private Date lastModified;
+    public String getIsLocked() {
+		return isLocked;
+	}
+
+	public void setIsLocked(String isLocked) {
+		this.isLocked = isLocked;
+	}
+
+	public int getAttempts() {
+		return attempts;
+	}
+
+	public void setAttempts(int attempts) {
+		this.attempts = attempts;
+	}
+
+	public Date getLastModified() {
+		return lastModified;
+	}
+
+	public void setLastModified(Date lastModified) {
+		this.lastModified = lastModified;
+	}
 	public String getPhone() {
 		return phone;
 	}
