@@ -20,6 +20,7 @@ import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Random;
+import java.util.concurrent.TimeUnit;
 
 import org.bson.Document;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,6 +46,9 @@ public class UserServiceImpl implements UserService {
 	
 	final MongoClient mongoClient = MongoClients.create("mongodb://admin:myadminpassword@18.222.64.16:27017");
 	final MongoDatabase database = mongoClient.getDatabase("mydb");
+	
+	final private int Max_Attempts=3;
+	final private int Lock_Timeout=30;
 
 	@Autowired
 	private MongoTemplate mongoTemplate;
@@ -131,14 +135,43 @@ public class UserServiceImpl implements UserService {
 	public ResponseEntity<?> login(UserDTO userDTO) {
 		BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 		UserDTO dto = mongoTemplate.findOne(Query.query(Criteria.where("username").is(userDTO.getUsername())), UserDTO.class, "authenticationProfile");
+		Query query=Query.query(Criteria.where("username").is(userDTO.getUsername()));
+		Update update1=new Update();
 		if (dto == null) {
 			throw new BusinessException("the account doesn't exist！");
 		}
 
 		if (!passwordEncoder.matches(userDTO.getPassword(), dto.getPassword())) {
-			throw new BusinessException("password is wrong！");
+			if(dto.getAttempts()<Max_Attempts) {
+				int count=dto.getAttempts()+1;
+				update1.set("attempts",count);
+				update1.set("lastModified", new Date());
+				mongoTemplate.findAndModify(query, update1, UserDTO.class,"authenticationProfile");
+				throw new BusinessException("password is wrong! "+(Max_Attempts-dto.getAttempts())+" more attempts left");
+			}else {
+				update1.set("isLocked","true");
+				update1.set("lastModified", new Date());
+				mongoTemplate.findAndModify(query, update1, UserDTO.class,"authenticationProfile");
+				throw new BusinessException("Account is locked for "+Lock_Timeout+" mins");
+			}
+			
 		}
-		
+		if(dto.getIsLocked()!=null && dto.getIsLocked().equals("true")) {
+			long duration=new Date().getTime()-dto.getLastModified().getTime();
+			long diffInMinutes = TimeUnit.MILLISECONDS.toMinutes(duration);
+			if(diffInMinutes>Lock_Timeout) {
+				update1.set("isLocked", "false");
+				update1.set("attempts",0);
+				update1.set("lastModified",new Date());
+				mongoTemplate.findAndModify(query, update1, UserDTO.class,"authenticationProfile");
+			}else {
+				throw new BusinessException("Account is locked for another " +(Lock_Timeout-diffInMinutes)+" mins");
+			}
+		}else {
+			update1.set("attempts",0);
+			update1.set("lastModified",new Date());
+			mongoTemplate.findAndModify(query, update1, UserDTO.class,"authenticationProfile");
+		}
 		String role = dto.getRole().toString();
 		if (role.equalsIgnoreCase("Customer")) {
 			UserDTO dto2 = mongoTemplate.findOne(Query.query(Criteria.where("username").is(userDTO.getUsername())), UserDTO.class, "user");
