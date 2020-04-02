@@ -16,9 +16,11 @@ import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.JWTVerificationException;
 
+import io.sbs.constant.UserType;
 import io.sbs.model.Employee;
 import io.sbs.security.SecurityConstants;
 import io.sbs.service.EmpService;
+import io.sbs.service.UserService;
 
 @RestController
 @RequestMapping(value = "/emp")
@@ -27,6 +29,9 @@ public class EmpController {
 	@Autowired
 	private EmpService empService;
 	
+	@Autowired
+	private UserService userService;
+
 	@PostMapping(path= "/viewEmp", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<?> viewEmp(HttpServletRequest request, @RequestBody Employee employee){
 		try {
@@ -53,13 +58,31 @@ public class EmpController {
 	@PostMapping(path= "/addEmp", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<?> addEmp(HttpServletRequest request, @Valid @RequestBody Employee employee){
 		try {
+			String token = request.getHeader(SecurityConstants.HEADER_STRING);
+			String username = JWT
+					.require(
+							Algorithm.HMAC512(SecurityConstants.SECRET
+									.getBytes())).build()
+					.verify(token.replace(SecurityConstants.TOKEN_PREFIX, ""))
+					.getSubject();
+
+			String role = null;
+			if (userService.getRoleGeneric(username) != null)
+				role = userService.getRoleGeneric(username).toString();
+
+			if (role == null)
+				return new ResponseEntity<>("No role found.",HttpStatus.BAD_REQUEST);
+			
+			if (role != UserType.Admin.toString())
+				return new ResponseEntity<>("Insufficient access.",HttpStatus.UNAUTHORIZED);
+
 			return empService.addNewEmpService(employee, employee.getUsername());
 		} catch (JWTVerificationException e) {
 			e.printStackTrace();
-			return new ResponseEntity<>(e.toString(), HttpStatus.UNAUTHORIZED);
+			return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
 		} catch (Exception e) {
 			e.printStackTrace();
-			return new ResponseEntity<>(e.toString(), HttpStatus.BAD_REQUEST);
+			return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 		}
 	}
 	
@@ -71,13 +94,26 @@ public class EmpController {
 	                    .build()
 	                    .verify(token.replace(SecurityConstants.TOKEN_PREFIX, ""))
 	                    .getSubject();
-			return empService.modifyEmpService(employee, username);
+	        
+	        String role = null;
+			if (userService.getRoleGeneric(username) != null)
+				role = userService.getRoleGeneric(username).toString();
+
+			if (role == null)
+				return new ResponseEntity<>("No role found.",HttpStatus.BAD_REQUEST);
+			
+			if (role != UserType.Admin.toString())
+				return new ResponseEntity<>("Insufficient access. ",HttpStatus.UNAUTHORIZED);
+			
+			if (employee.getUsername() == null)
+				return new ResponseEntity<>("No username found.", HttpStatus.UNAUTHORIZED);
+			return empService.modifyEmpService(employee);
 		} catch (JWTVerificationException e) {
 			e.printStackTrace();
-			return new ResponseEntity<>(e.toString(), HttpStatus.UNAUTHORIZED);
+			return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
 		} catch (Exception e) {
 			e.printStackTrace();
-			return new ResponseEntity<>(e.toString(), HttpStatus.BAD_REQUEST);
+			return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 		}
 	}
 	@PostMapping(path= "/deleteEmp", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
@@ -88,14 +124,27 @@ public class EmpController {
 	                    .build()
 	                    .verify(token.replace(SecurityConstants.TOKEN_PREFIX, ""))
 	                    .getSubject();
-			if (employee.getUsername() != null) username = employee.getUsername();
-			return empService.deleteEmpService(employee, username);
+	        
+	        String role = null;
+			if (userService.getRoleGeneric(username) != null)
+				role = userService.getRoleGeneric(username).toString();
+
+			if (role == null)
+				return new ResponseEntity<>("No role found.",HttpStatus.BAD_REQUEST);
+			
+			if (role != UserType.Admin.toString())
+				return new ResponseEntity<>("Insufficient access. ",HttpStatus.UNAUTHORIZED);
+	        
+			if (employee.getUsername() != null)
+				return empService.deleteEmpService(employee, employee.getUsername());
+			else
+				return new ResponseEntity<>("No username found in body.", HttpStatus.UNAUTHORIZED);
 		} catch (JWTVerificationException e) {
 			e.printStackTrace();
-			return new ResponseEntity<>(e.toString(), HttpStatus.UNAUTHORIZED);
+			return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
 		} catch (Exception e) {
 			e.printStackTrace();
-			return new ResponseEntity<>(e.toString(), HttpStatus.BAD_REQUEST);
+			return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 		}
 	}
 }

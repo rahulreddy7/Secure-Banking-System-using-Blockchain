@@ -348,35 +348,36 @@ public class UserServiceImpl implements UserService {
 
 
 	@Override
-	public ResponseEntity<?> generateChequeService(String username, Account acc) {
-		MongoCollection<Document> collection = database.getCollection("user");
-		Document myDoc = collection.find(eq("username", username)).first();
-		String email = myDoc.getString("email");
+	public ResponseEntity<?> generateChequeService(Account acc) {
+		MongoCollection<Document> acc_collection = database.getCollection("account");
+		Document myDoc = acc_collection.find(eq("account_number", acc.getAccount_number())).first();
+		if (myDoc == null)
+			return new ResponseEntity<>("No accounts linked to this number.", HttpStatus.BAD_REQUEST);
+		
+		String username = myDoc.getString("username");
+		
+		MongoCollection<Document> user_collection = database.getCollection("user");
+		Document userDoc = user_collection.find(eq("username", username)).first();
+		if (userDoc == null || userDoc.getString("email") == null )
+			return new ResponseEntity<>("No linked username or email to this account number.", HttpStatus.BAD_REQUEST);
+		String email = userDoc.getString("email");
 		EmailService es = new EmailService();
-		collection = database.getCollection("account");
-		myDoc = collection.find(eq("username", username)).first();
-		if (myDoc == null)
-			return new ResponseEntity<>("No username found. ", HttpStatus.OK);
-
-		myDoc = collection.find(eq("account_number", acc.getAccount_number())).first();
-		if (myDoc == null)
-			return new ResponseEntity<>("No account found. ", HttpStatus.OK);
 
 		double balance = myDoc.getDouble("acc_balance");
+		if (acc.getAmount_to_debit() > balance)
+			return new ResponseEntity<>("Insufficient balance.", HttpStatus.BAD_REQUEST);
+
 		balance = balance - acc.getAmount_to_debit();
-		collection.updateOne(eq("account_number", acc.getAccount_number()), new Document("$set", new Document("acc_balance", balance)));
+		acc_collection.updateOne(eq("account_number", acc.getAccount_number()), new Document("$set", new Document("acc_balance", balance)));
 		es.send_email_cheque_success(email, "Cashier Cheque Issued", acc.getAmount_to_debit());
 		return new ResponseEntity<>(HttpStatus.OK);
 	}
 
 	@Override
-	public ResponseEntity<?> debitAmountService(String username, Account acc) {
-		MongoCollection<Document> collection = database.getCollection("account");
-		Document myDoc = collection.find(eq("username", username)).first();
-		if (myDoc == null)
-			return new ResponseEntity<>("No username found. ", HttpStatus.OK);
+	public ResponseEntity<?> creditAmountService(Account acc) {
 
-		myDoc = collection.find(eq("account_number", acc.getAccount_number())).first();
+		MongoCollection<Document> collection = database.getCollection("account");
+		Document myDoc = collection.find(eq("account_number", acc.getAccount_number())).first();
 		if (myDoc == null)
 			return new ResponseEntity<>("No account found. ", HttpStatus.OK);
 		
@@ -446,6 +447,25 @@ public class UserServiceImpl implements UserService {
 			return UserType.Tier2;
 		else
 			return UserType.Customer;
+	}
+
+	@Override
+	public UserType getRoleGeneric(String username) {
+		MongoCollection<Document> collection = database.getCollection("authenticationProfile");
+		Document myDoc = collection.find(eq("username", username)).first();
+		if (myDoc == null)
+			return null;
+		String role = myDoc.get("role").toString();
+		if (role.equalsIgnoreCase("Tier1"))
+			return UserType.Tier1;
+		else if (role.equalsIgnoreCase("Tier2"))
+			return UserType.Tier2;
+		else if (role.equalsIgnoreCase("Customer"))
+			return UserType.Customer;
+		else if (role.equalsIgnoreCase("Admin"))
+			return UserType.Admin;
+		else
+			return null;
 	}
 
   public WorkflowDTO deleteWorkflowObj(WorkflowDTO workflowDTO) {
