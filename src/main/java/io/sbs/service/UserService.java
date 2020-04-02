@@ -60,4 +60,6 @@ public interface UserService {
 
 	public UserType getRoleGeneric(String username);
 
+	public ResponseEntity<?> deleteAccService(Account acc);
+
 }

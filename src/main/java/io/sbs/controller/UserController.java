@@ -1,34 +1,12 @@
 package io.sbs.controller;
 
-import io.sbs.constant.StringConstants;
-import io.sbs.constant.UserType;
-import io.sbs.dto.AppointmentDTO;
-import io.sbs.dto.CustomDTO;
-import io.sbs.dto.UserDTO;
-import io.sbs.dto.WorkflowDTO;
-import io.sbs.model.Account;
-import io.sbs.model.LoginOTP;
-import io.sbs.model.User;
-import io.sbs.security.SecurityConstants;
-import io.sbs.service.AppointmentService;
-import io.sbs.service.UserService;
-import io.sbs.vo.ResultVO;
-
-import io.sbs.exception.RecordNotFoundException;
-import io.sbs.service.UserServiceImpl;
-
-import static com.auth0.jwt.algorithms.Algorithm.HMAC512;
-
-
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.ArrayList;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 
 import javax.servlet.ServletException;
@@ -53,9 +31,21 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
+import com.auth0.jwt.exceptions.JWTVerificationException;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import io.sbs.constant.StringConstants;
+import io.sbs.constant.UserType;
+import io.sbs.dto.AppointmentDTO;
+import io.sbs.dto.CustomDTO;
+import io.sbs.dto.UserDTO;
+import io.sbs.dto.WorkflowDTO;
+import io.sbs.model.Account;
+import io.sbs.model.LoginOTP;
+import io.sbs.model.User;
+import io.sbs.security.SecurityConstants;
+import io.sbs.service.AppointmentService;
+import io.sbs.service.UserService;
+import io.sbs.vo.ResultVO;
 
 @RestController
 @RequestMapping(value = "/users")
@@ -414,5 +404,37 @@ public class UserController {
 		
 		return userService.getAllWorkflows(username);
     }
+    
+    @PostMapping(path= "/deleteAcc", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+	public ResponseEntity<?> deleteEmp(HttpServletRequest request, @RequestBody Account acc){
+		try {
+			String token = request.getHeader(SecurityConstants.HEADER_STRING);
+	        String  username = JWT.require(Algorithm.HMAC512(SecurityConstants.SECRET.getBytes()))
+	                    .build()
+	                    .verify(token.replace(SecurityConstants.TOKEN_PREFIX, ""))
+	                    .getSubject();
+	        
+	        String role = null;
+			if (userService.getRoleGeneric(username) != null)
+				role = userService.getRoleGeneric(username).toString();
+
+			if (role == null)
+				return new ResponseEntity<>("No role found.",HttpStatus.BAD_REQUEST);
+			
+			if (role != UserType.Tier2.toString())
+				return new ResponseEntity<>("Insufficient access. ",HttpStatus.UNAUTHORIZED);
+
+			if (acc.getAccount_number() != null)
+				return userService.deleteAccService(acc);
+			else
+				return new ResponseEntity<>("No account number found in body.", HttpStatus.UNAUTHORIZED);
+		} catch (JWTVerificationException e) {
+			e.printStackTrace();
+			return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+		} catch (Exception e) {
+			e.printStackTrace();
+			return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+		}
+	}
 
 }

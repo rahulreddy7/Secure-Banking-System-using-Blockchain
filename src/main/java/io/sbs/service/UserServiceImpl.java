@@ -474,24 +474,42 @@ public class UserServiceImpl implements UserService {
 		return null;
 	}
 
-@Override
-public List<WorkflowDTO> getAllWorkflows(String username) {
-	UserDTO userDTO = mongoTemplate.findOne(new Query(Criteria.where("username").is(username)),UserDTO.class,"authenticationProfile");
-	System.out.println(username + " sad ");
-	Criteria criteria = new Criteria();
-	criteria = criteria.and("role").is(userDTO.getRole().toString());
-	criteria = criteria.and("state").is(StringConstants.WORKFLOW_PENDING);
-	
-	List<WorkflowDTO> workflows = mongoTemplate.find(new Query(criteria),WorkflowDTO.class,"workflow");
-	return workflows;
-}
-
-public WorkflowDTO findWorkflowObj(WorkflowDTO workflow) {
-	WorkflowDTO dto = mongoTemplate.findOne(Query.query(Criteria.where("workflow_id").is(workflow.getWorkflow_id())), WorkflowDTO.class, "workflow");
-	if (dto == null) {
-		throw new BusinessException("Workflow not found!");
+	@Override
+	public List<WorkflowDTO> getAllWorkflows(String username) {
+		UserDTO userDTO = mongoTemplate.findOne(new Query(Criteria.where("username").is(username)),UserDTO.class,"authenticationProfile");
+		System.out.println(username + " sad ");
+		Criteria criteria = new Criteria();
+		criteria = criteria.and("role").is(userDTO.getRole().toString());
+		criteria = criteria.and("state").is(StringConstants.WORKFLOW_PENDING);
+		
+		List<WorkflowDTO> workflows = mongoTemplate.find(new Query(criteria),WorkflowDTO.class,"workflow");
+		return workflows;
 	}
-	return dto;
-}
+	
+	public WorkflowDTO findWorkflowObj(WorkflowDTO workflow) {
+		WorkflowDTO dto = mongoTemplate.findOne(Query.query(Criteria.where("workflow_id").is(workflow.getWorkflow_id())), WorkflowDTO.class, "workflow");
+		if (dto == null) {
+			throw new BusinessException("Workflow not found!");
+		}
+		return dto;
+	}
+
+	@Override
+	public ResponseEntity<?> deleteAccService(Account acc) {
+		
+		MongoCollection<Document> collection = database.getCollection("account");
+		Document myDoc = collection.find(eq("account_number", acc.getAccount_number())).first();
+		if (myDoc == null)
+			return new ResponseEntity<>("No account found. ", HttpStatus.OK);
+
+		String username = myDoc.getString("username");
+
+		Long count = collection.countDocuments(eq("username", username));
+		if (count == 1)
+			return new ResponseEntity<>("Only one account linked with this user.",HttpStatus.BAD_REQUEST);
+		collection.deleteOne(eq("account_number", acc.getAccount_number()));
+		
+		return new ResponseEntity<>(HttpStatus.OK);
+	}
 
 }
