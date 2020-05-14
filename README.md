@@ -43,29 +43,3 @@ switched to db mydb
 
 
 
-Work distibution:<br />
-Branch- nchen19-patch-1 <br />
-Authors : Nanqiao Chen, Anay Paul<br />
-
-scp -i soft-sec.pem /Users/devansh/Desktop/sbs-microservice-0.0.1-SNAPSHOT.jar ubuntu@18.222.64.16:~/
- ps -ef | grep java
- sudo kill -9 5762
-nohup java -jar sbs-microservice-0.0.1-SNAPSHOT.jar > new_deploy.log 2>&1 &
-tail -f new_deploy.log
-
-
-
-tier1emp@protonmail.com<br />
-tier1pass<br />
-"username":"tier1",<br />
-"employee_password": "tier1pass"<br />
-<br />
-tier2emp@protonmail.com<br />
-tier2pass<br />
-"username":"tier2",<br />
-"employee_password": "tier2pass",<br />
-<br />
-adminemp@protonmail.com<br />
-adminpass<br />
-"username":"admin",<br />
-"employee_password": "adminpass"<br />
